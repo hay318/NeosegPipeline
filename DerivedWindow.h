@@ -13,53 +13,116 @@
 // My Specific Librairies
 #include "ui_Window.h"
 #include "Pipeline.h"
-
+#include "XmlWriter.h"
+#include "MainScriptThread.h"
 
 class DerivedWindow : public QMainWindow , public Ui_Window
 {
 	Q_OBJECT // Enable slots and signals 
 
    public:
+
+   // Constructor
    DerivedWindow();
+
+   // Set
+   void setPipeline(Pipeline* pipeline);
+   void setPipelineParameters(PipelineParameters* parameters);
+
+   // Initialization
+   void initializeParameters();
+   void initializeExecutables(); 
+
+   // Atlas Population
+   void checkAtlases();
+   void displayAtlases();
+   void checkSelectedAtlases();
+
+   // Parameter
+   void setParameters(); 
+   void setExecutables();
+
 
    public slots :
 
-   // Data //
-   void selectOuputDir();
-   void enterOutputDir();
+   // Output
+   void selectOuput();
+   void enterOutput();
+
+   // T1
    void selectT1();
    void enterT1();
+
+   // T2
    void selectT2();
    void enterT2();
-   void selectSkullStripping(int state);
-   void mask();
+
+   // Mask 
    void selectMask();
    void enterMask();
-   void selectOldAtlas();
-   void enterOldAtlas();
 
-   // Atlas //
-   void selectAtlas();
-   void checkAtlases();
-   void displayAtlasPopulation();
-   void changeAtlasesDir();
-   void selectAtlases(QListWidgetItem* item);
+   // DWI
+   void selectDWI();
+   void enterDWI();
 
+   // b0
+   void selectB0();
+   void enterB0();
 
+   // New or Existing Atlas
+   void selectNewOrExistingAtlas();
 
+   // New Atlas
+   void selectAtlasPopulationDirectory();
+   void enterAtlasPopulationDirectory();
+   void selectAtlas(QListWidgetItem* item);
+
+   // Existing Atlas
+   void selectExistingAtlas();
+   void enterExistingAtlas();
+
+   // Parameters
+   void selectParameters(); 
+   void enterParameters();
+   void saveParameters();  
+
+   // Executables
+   void selectExecutables(); 
+   void enterExecutables(); 
+   void saveExecutables(); 
+
+   // Run Pipeline
    void runPipeline();
 
+   // Exit Application 
+   void closeEvent(QCloseEvent *event);
 
    private :
+   
+   // Window
    Ui_Window ui;
+
+   // Pipeline 
    Pipeline* m_pipeline;
+
+   // Parameters
+   PipelineParameters* m_parameters;
+   AntsParameters* m_antsParameters; 
+   NeosegParameters* m_neosegParameters; 
+
+
    QString m_tests_path;
    QString m_data_path;
    QString m_atlasPopulation_path;
-   QString m_oldAtlases_path;
+   QString m_existingAtlases_path;
    QStringList m_goodAtlases;
    QStringList m_wrongAtlases;  
    QStringList m_selectedAtlases; 
+
+   bool m_parametersSet;
+   bool m_executablesSet;
+
+   MainScriptThread* m_thread; 
 };
 
 #endif

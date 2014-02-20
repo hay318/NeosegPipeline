@@ -1,237 +1,241 @@
 #include "DerivedWindow.h"
 
-DerivedWindow::DerivedWindow() : Ui_Window(), m_pipeline (NULL) 
+DerivedWindow::DerivedWindow() : Ui_Window()
 {
 	setupUi(this);
 
-   m_pipeline = new Pipeline();
+   m_atlasPopulation_path="/work/mcherel/project/atlasPopulation/atlases";
 
-   m_tests_path = "/home/cherel/neosegPipeline";
-   m_data_path = "/home/cherel/neosegPipeline/data";
-   m_atlasPopulation_path = "/work/mcherel/project/atlasPopulation/atlases";
-   m_oldAtlases_path = "/work/mcherel/project/neoseg/atlas";
+   m_parametersSet = false; 
+   m_executablesSet = false; 
 
-   //std::string output_Dir="/work/mcherel/project/neosegPipeline/test"
+   m_thread = new MainScriptThread(); 
 
    //Connections
 
    // OutputDir //
-   connect(browserOutputDir_button, SIGNAL(clicked()), this, SLOT(selectOuputDir()));
-   connect(outputDir_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterOutputDir()));
+   connect(output_button, SIGNAL(clicked()), this, SLOT(selectOuput()));
+   connect(output_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterOutput()));
 
    // T1 // 
-	connect(browserT1_button, SIGNAL(clicked()), this, SLOT(selectT1()));
+	connect(T1_button, SIGNAL(clicked()), this, SLOT(selectT1()));
    connect(T1_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterT1()));
 
    // T2 //
-	connect(browserT2_button, SIGNAL(clicked()), this, SLOT(selectT2()));
+	connect(T2_button, SIGNAL(clicked()), this, SLOT(selectT2()));
    connect(T2_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterT2()));
 
-   // Skull-Stripping //
-   connect(skullStripping_checkbox, SIGNAL(stateChanged(int)), this, SLOT(selectSkullStripping(int)));
-   connect(mask_radioButton, SIGNAL(clicked()), this, SLOT(mask()));
-   connect(noMask_radioButton, SIGNAL(clicked()), this, SLOT(mask()));   
-	connect(browserMask_button, SIGNAL(clicked()), this, SLOT(selectMask()));
+   // Mask //
+	connect(mask_button, SIGNAL(clicked()), this, SLOT(selectMask()));
    connect(mask_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterMask()));
 
-   // Atlas //
-   connect(newAtlas_radioButton, SIGNAL(clicked()), this, SLOT(selectAtlas()));
-   connect(oldAtlas_radioButton, SIGNAL(clicked()), this, SLOT(selectAtlas()));
+   // DWI //
+	connect(DWI_button, SIGNAL(clicked()), this, SLOT(selectDWI()));
+   connect(DWI_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterDWI()));
+
+   // T2 //
+	connect(b0_button, SIGNAL(clicked()), this, SLOT(selectB0()));
+   connect(b0_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterB0()));
+
+   // New Or Existing Atlas //
+   connect(newAtlas_radioButton, SIGNAL(clicked()), this, SLOT(selectNewOrExistingAtlas()));
+   connect(existingAtlas_radioButton, SIGNAL(clicked()), this, SLOT(selectNewOrExistingAtlas()));
 
    // New Atlas //
-   connect(browserAtlasesDir_button, SIGNAL(clicked()), this, SLOT(changeAtlasesDir())); 
-   connect(atlasPopulation_listWidget,SIGNAL(itemClicked(QListWidgetItem*)),this,SLOT(selectAtlases(QListWidgetItem*)));
+   connect(atlasPopulationDirectory_button, SIGNAL(clicked()), this, SLOT(selectAtlasPopulationDirectory())); 
+   connect(atlasPopulationDirectory_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterAtlasPopulationDirectory()));
+   connect(atlasPopulation_listWidget,SIGNAL(itemClicked(QListWidgetItem*)),this,SLOT(selectAtlas(QListWidgetItem*)));
 
    // Old Atlas // 
-   connect(browserOldAtlas_button, SIGNAL(clicked()), this, SLOT(selectOldAtlas()));
-   connect(oldAtlas_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterOldAtlas()));      
+   connect(existingAtlas_button, SIGNAL(clicked()), this, SLOT(selectExistingAtlas()));
+   connect(existingAtlas_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterExistingAtlas()));      
    
+   //Load Parameters Configuration
+   connect(loadParameters_button,  SIGNAL(clicked()), this, SLOT(selectParameters()));
+   connect(loadParameters_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterParameters()));
+
+   //Load Executables Configuration
+   connect(loadExecutables_button,  SIGNAL(clicked()), this, SLOT(selectExecutables()));
+   connect(loadExecutables_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterExecutables()));
+
+   // Save Parameters
+   connect(saveParameters_button, SIGNAL(clicked()), this, SLOT(saveParameters()));
+
+   // Save Executables
+   connect(saveExecutables_button, SIGNAL(clicked()), this, SLOT(saveExecutables()));
 
    // Run Pipeline //
    connect(runPipeline_button, SIGNAL(clicked()), this, SLOT(runPipeline()));
 
-
-   oldSeg_widget->hide();
    newAtlas_widget->hide();
-   oldAtlas_widget->hide();
+   existingAtlas_widget->hide();
+
    runPipeline_progressBar->hide(); 
    displayResults_button->setEnabled(false);
-
 
    //QApplication::sendPostedEvents(this, QEvent::LayoutRequest);  
    //tabs->adjustSize();
    this->adjustSize();
-
-   browserMask_button->hide();
-   mask_lineEdit->hide();
 }
 
-//// Ouput Dir ////
-void DerivedWindow::selectOuputDir()
+void DerivedWindow::setPipelineParameters(PipelineParameters* parameters)
+{  
+   m_parameters=parameters;
+   m_antsParameters=m_parameters->getAntsParameters(); 
+   m_neosegParameters=m_parameters->getNeosegParameters(); 
+   initializeParameters();
+}
+
+void DerivedWindow::setPipeline(Pipeline* pipeline) {m_pipeline=pipeline;}
+
+
+//***** Ouput *****//
+void DerivedWindow::selectOuput()
 {
-   QString outputDir = QFileDialog::getExistingDirectory (0, "Open Directory",m_tests_path , QFileDialog::ShowDirsOnly);
-   m_pipeline->setOutput (outputDir);
-   outputDir_lineEdit->setText(outputDir);
+   QString output = QFileDialog::getExistingDirectory (0, "Open Directory",m_tests_path , QFileDialog::ShowDirsOnly);
+   output_lineEdit->setText(output);
 
 }
-void DerivedWindow::enterOutputDir()
+void DerivedWindow::enterOutput()
 {
-   if(!(outputDir_lineEdit->text()).isEmpty()) 
+   QString output = output_lineEdit->text();
+
+   if(!output.isEmpty()) 
    {
-      QString output_path = outputDir_lineEdit->text();
-      QDir* outputDir = new QDir (output_path); 
-
-      if(!outputDir->exists())
+      if(!m_parameters->checkOutput(output))
       {
-         outputDir_lineEdit->clear();
-         QMessageBox::critical(this, "Output Directory", output_path + "\ndoes not exist, enter a new directory path");
-      }
-      else
-      {
-         m_pipeline->setOutput(output_path);
+         output_lineEdit->clear();
+         QMessageBox::critical(this, "Output Directory", output + "\ndoes not exist, enter a new directory path");
       }
    }
 }
 
 
-//*********** T1 ***********//
+//***** T1 *****//
 void DerivedWindow::selectT1()
 {
-	QString T1 = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
-   m_pipeline->setT1 (T1);
+	QString T1 = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
    T1_lineEdit->setText(T1);
 }
-
 void DerivedWindow::enterT1()
 {
-   if(!(T1_lineEdit->text()).isEmpty()) 
-   {
-      QString T1_path = T1_lineEdit->text();
-      QFile* T1 = new QFile (T1_path); 
-      
-      if(!T1->exists())
+   QString T1 = T1_lineEdit->text();
+
+   if(!T1.isEmpty()) 
+   {      
+      if(!m_parameters->checkT1(T1))
       {
          T1_lineEdit->clear();
-         QMessageBox::critical(this, "T1 File", T1_path + "\ndoes not exist, enter a new file path");
-      }
-      else
-      {
-         m_pipeline->setT1(T1_path);
+         QMessageBox::critical(this, "T1 File", T1 + "\ndoes not exist, enter a new file path");
       }
    }
 }
 
 
-//*********** T2 ***********//
+//***** T2 *****//
 void DerivedWindow::selectT2()
 {
-	QString T2 = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
-   m_pipeline->setT2 (T2);
+	QString T2 = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
    T2_lineEdit->setText(T2);
 }
-
 void DerivedWindow::enterT2()
 {
-   if(!(T2_lineEdit->text()).isEmpty()) 
-   {
-      QString T2_path = T2_lineEdit->text();
-      QFile* T2 = new QFile (T2_path); 
+   QString T2 = T2_lineEdit->text();
 
-      if(!T2->exists())
+   if(!T2.isEmpty()) 
+   {
+      if(!m_parameters->checkT2(T2))
       {
          T2_lineEdit->clear();
-         QMessageBox::critical(this, "T2 File", T2_path + "\ndoes not exist, enter a new file path");
-      }
-      else
-      {
-         m_pipeline->setT2(T2_path);
+         QMessageBox::critical(this, "T2 File", T2 + "\ndoes not exist, enter a new file path");
       }
    }
 }
 
 
 
-//*********** Skull-Stripping ***********//
-void DerivedWindow::selectSkullStripping(int state)
-{
-   if(skullStripping_checkbox->isChecked())
-   {      
-      oldSeg_widget->hide(); 
-      m_pipeline->setSkullStripping(true);
-   }
-   
-   else
-   {
-      oldSeg_widget->show(); 
-      m_pipeline->setSkullStripping(false);
-   }
-
-   QApplication::sendPostedEvents(this, QEvent::LayoutRequest); 
-   this->adjustSize();
-}
-
-void DerivedWindow::mask()
-{
-   if(mask_radioButton->isChecked())
-   {
-      mask_lineEdit->show();
-      browserMask_button->show();
-      m_pipeline->setMask(true);
-   } 
-
-   if(noMask_radioButton->isChecked())
-   {
-      mask_lineEdit->hide();
-      browserMask_button->hide();
-      m_pipeline->setMask(false);
-   } 
-
-}
-
+//***** Mask *****//
 void DerivedWindow::selectMask()
 {
-   QString mask = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
-   m_pipeline->setMask (mask);
+   QString mask = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
    mask_lineEdit->setText(mask);
 }
 void DerivedWindow::enterMask()
 {
-   QFile* mask = new QFile (mask_lineEdit->text()); 
+   QString mask = mask_lineEdit->text(); 
 
-   if(!(mask_lineEdit->text()).isEmpty()) 
+   if(!mask.isEmpty()) 
    {
-      if(!mask->exists())
+      if(!m_parameters->checkMask(mask))
       {
          mask_lineEdit->clear();
-         QMessageBox::critical(this, "Mask File", mask_lineEdit->text() + "\ndoes not exist, enter a new file path");
-      }
-      else
-      {
-         m_pipeline->setMask(mask_lineEdit->text());
+         QMessageBox::critical(this, "Mask File", mask + "\ndoes not exist, enter a new file path");
       }
    }
 }
 
-//*********** Atlas ***********//
-void DerivedWindow::selectAtlas()
+
+//***** DWI *****//
+void DerivedWindow::selectDWI()
+{
+   QString DWI = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
+   DWI_lineEdit->setText(DWI);
+}
+void DerivedWindow::enterDWI()
+{
+   QString DWI = DWI_lineEdit->text(); 
+
+   if(!DWI.isEmpty()) 
+   {
+      if(!m_parameters->checkDWI(DWI))
+      {
+         DWI_lineEdit->clear();
+         QMessageBox::critical(this, "DWI File", DWI + "\ndoes not exist, enter a new file path");
+      }
+   }
+}
+
+
+//***** b0*****//
+void DerivedWindow::selectB0()
+{
+   QString b0 = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
+   b0_lineEdit->setText(b0);
+}
+void DerivedWindow::enterB0()
+{
+   QString b0 = b0_lineEdit->text(); 
+
+   if(!b0.isEmpty()) 
+   {
+      if(!m_parameters->checkb0(b0))
+      {
+         b0_lineEdit->clear();
+         QMessageBox::critical(this, "b0 File", b0 + "\ndoes not exist, enter a new file path");
+      }
+   }
+}
+
+
+//***** New Atlas/Existing Atlas *****//
+void DerivedWindow::selectNewOrExistingAtlas()
 {
    if(newAtlas_radioButton->isChecked())
    {
-      //pipeline->setAtlas(newAtlas);
       newAtlas_widget->show();
-      oldAtlas_widget->hide();
+      existingAtlas_widget->hide();
 
-      atlasPopulation_lineEdit->setText(m_atlasPopulation_path); 
+      atlasPopulationDirectory_lineEdit->setText(m_atlasPopulation_path); 
       checkAtlases();
-      displayAtlasPopulation();
+      displayAtlases();
       m_selectedAtlases = m_goodAtlases;
+      checkSelectedAtlases();
    } 
 
-   if(oldAtlas_radioButton->isChecked())
+   if(existingAtlas_radioButton->isChecked())
    {
-      //pipeline->setAtlas(oldAtlas);
       newAtlas_widget->hide();
-      oldAtlas_widget->show();
+      existingAtlas_widget->show();
    } 
 
    //QApplication::sendPostedEvents(this, QEvent::LayoutRequest);  
@@ -239,7 +243,35 @@ void DerivedWindow::selectAtlas()
    //this->adjustSize();
 }
 
-//*********** New Atlas ***********//
+//***** Atlas Population Directory *****//
+void DerivedWindow::selectAtlasPopulationDirectory()
+{
+   QString atlasPopulationDirectory = QFileDialog::getExistingDirectory (0, "Open Directory", m_atlasPopulation_path, QFileDialog::ShowDirsOnly);
+   atlasPopulationDirectory_lineEdit->setText(atlasPopulationDirectory);
+   checkAtlases();
+   displayAtlases();
+   m_selectedAtlases = m_goodAtlases;
+   checkSelectedAtlases();
+}
+
+void DerivedWindow::enterAtlasPopulationDirectory()
+{
+   QString atlasPopulationDirectory = atlasPopulationDirectory_lineEdit->text();
+
+   if(!atlasPopulationDirectory.isEmpty()) 
+   {
+      if(!m_parameters->checkAtlasPopulationDirectory(atlasPopulationDirectory))
+      {
+         atlasPopulationDirectory_lineEdit->clear();
+         QMessageBox::critical(this, "Output Directory", atlasPopulationDirectory + "\ndoes not exist, enter a new directory path");
+      }
+   }
+   checkAtlases();
+   displayAtlases();
+   m_selectedAtlases = m_goodAtlases;
+}
+
+//***** Checking Atlases *****//
 void DerivedWindow::checkAtlases()
 {
    QDir* m_atlasPopulation_dir = new QDir(m_atlasPopulation_path);
@@ -253,27 +285,19 @@ void DerivedWindow::checkAtlases()
    {
       QString atlas_dir = m_atlasPopulation_path + "/" + *it;
       
-      if(m_pipeline->checkAtlasPopulation(atlas_dir)) {m_goodAtlases << *it;}
-      else {m_wrongAtlases << *it;}
+      if(m_parameters->checkAtlas(atlas_dir))
+      {
+         m_goodAtlases << *it;
+      }
+      else
+      {
+         m_wrongAtlases << *it;
+      }
    } 
 } 
 
-
-void DerivedWindow::selectAtlases(QListWidgetItem* item)
-{
-   if(item->checkState())
-   {
-      // Add the atlas to the m_selectedAtlases list
-      m_selectedAtlases << item->text();           
-   } 
-  else
-  {
-      // Remove the atlas from the m_selectedAtlases list
-      m_selectedAtlases.removeAt(m_selectedAtlases.indexOf(item->text())); 
-  }
-}
-
-void DerivedWindow::displayAtlasPopulation()
+//***** Display Atlases *****//
+void DerivedWindow::displayAtlases()
 {
    atlasPopulation_listWidget->clear();
 
@@ -282,7 +306,7 @@ void DerivedWindow::displayAtlasPopulation()
    {
         QListWidgetItem* item = new QListWidgetItem(*it, atlasPopulation_listWidget);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
-        item->setCheckState(Qt::Checked);
+        item->setCheckState(Qt::Unchecked);
    } 
 
    for (it = m_wrongAtlases.constBegin(); it != m_wrongAtlases.constEnd(); ++it) 
@@ -293,87 +317,401 @@ void DerivedWindow::displayAtlasPopulation()
    }
 }
 
-void DerivedWindow::changeAtlasesDir()
+
+void DerivedWindow::checkSelectedAtlases()
 {
-   m_atlasPopulation_path = QFileDialog::getExistingDirectory (0, "Open Directory",m_atlasPopulation_path , QFileDialog::ShowDirsOnly);
-   atlasPopulation_lineEdit->setText(m_atlasPopulation_path); 
-   checkAtlases();
-   displayAtlasPopulation();
-   m_selectedAtlases = m_goodAtlases;
+   QStringList::const_iterator it;
+   for (it = m_selectedAtlases.constBegin(); it != m_selectedAtlases.constEnd(); ++it) 
+   {
+         QList<QListWidgetItem *> items = atlasPopulation_listWidget->findItems(*it, Qt::MatchExactly);
+
+         QList<QListWidgetItem *>::iterator item; 
+         for(item=items.begin(); item!=items.end(); ++item)
+         {
+            (*item)->setCheckState(Qt::Checked);
+         }
+   }    
+
+
 }
 
-//// Old Atlas ////
-void DerivedWindow::selectOldAtlas()
+//***** Select/Unselect Atlas *****//
+void DerivedWindow::selectAtlas(QListWidgetItem* item)
 {
-   QString oldAtlas_path;
-
-   do
+   if(item->checkState())
    {
-      oldAtlas_path = QFileDialog::getExistingDirectory (0, "Open Directory",m_oldAtlases_path , QFileDialog::ShowDirsOnly);
-      oldAtlas_lineEdit->setText(oldAtlas_path);
-
-      if((m_pipeline->checkAtlas(oldAtlas_path)==false) && (!oldAtlas_path.isEmpty())){QMessageBox::critical(this, "Atlas Directory", oldAtlas_lineEdit->text() + "\nis not a valid atlas");}
-
-   } while((m_pipeline->checkAtlas(oldAtlas_path)==false) && (!oldAtlas_path.isEmpty()));
-
-   //m_pipeline->setOldAtlas (oldAtlas_path.toStdString());
-
+      m_selectedAtlases << item->text();           
+   } 
+  else
+  {
+      m_selectedAtlases.removeAt(m_selectedAtlases.indexOf(item->text())); 
+  }
 }
-void DerivedWindow::enterOldAtlas()
-{
-   QString oldAtlas_path = oldAtlas_lineEdit->text();
-   QDir* oldAtlas = new QDir (oldAtlas_path); 
 
-   if(!(oldAtlas_lineEdit->text()).isEmpty()) 
+
+//***** Existing Atlas *****//
+void DerivedWindow::selectExistingAtlas()
+{
+   QString existingAtlas = QFileDialog::getExistingDirectory (0, "Open Directory", m_existingAtlases_path, QFileDialog::ShowDirsOnly);
+
+   if(m_parameters->checkExistingAtlas(existingAtlas)==false)
    {
-      if(oldAtlas->exists())
+      QMessageBox::critical(this, "Atlas Directory", existingAtlas_lineEdit->text() + "\nis not a valid atlas");
+   }
+   else
+   {
+      existingAtlas_lineEdit->setText(existingAtlas);
+   }
+}
+void DerivedWindow::enterExistingAtlas()
+{
+   QString existingAtlas = existingAtlas_lineEdit->text();
+
+   if(!existingAtlas.isEmpty()) 
+   {
+      if (!m_parameters->checkExistingAtlas(existingAtlas))
       {
-         if (m_pipeline->checkAtlas(oldAtlas_path))
-         {
-            m_pipeline->setOldAtlas(outputDir_lineEdit->text());
-         } 
-         else
-         {
-            oldAtlas_lineEdit->clear();
-            QMessageBox::critical(this, "Atlas Directory", oldAtlas_path + "\nis not a valid atlas");
-         } 
-      }
-      else
+         existingAtlas_lineEdit->clear();
+         QMessageBox::critical(this, "Atlas Directory", existingAtlas + "\nis not a valid atlas");
+      } 
+   }
+}
+
+//***** Parameters Configuration File *****//
+void DerivedWindow::selectParameters()
+{
+	QString parameters=QFileDialog::getOpenFileName(this, "Open file", m_data_path,"XML (*.xml)");
+   loadParameters_lineEdit->setText(parameters);
+}
+void DerivedWindow::enterParameters()
+{
+   QString parameters=loadParameters_lineEdit->text();
+
+   if(!parameters.isEmpty()) 
+   {
+      if(!QFile(parameters).exists())
       {
-         oldAtlas_lineEdit->clear();
-         QMessageBox::critical(this, "Atlas Directory", oldAtlas_path + "\ndoes not exist, enter a new directory path");
+         loadParameters_lineEdit->clear();
+         QMessageBox::critical(this, "Parameters Configuration File", parameters + "\ndoes not exist, enter a new file path");
       }
    }
 }
 
-void DerivedWindow::runPipeline()
+//***** Executables Configuration File *****//
+void DerivedWindow::selectExecutables()
 {
-   runPipeline_progressBar->show();
+	QString executables = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", m_data_path,"XML (*.xml)");
+   loadExecutables_lineEdit->setText(executables);
+}
+void DerivedWindow::enterExecutables()
+{
+   QString executables=loadExecutables_lineEdit->text();
+
+   if(!executables.isEmpty()) 
+   {
+      if(!QFile(executables).exists())
+      {
+         loadExecutables_lineEdit->clear();
+         QMessageBox::critical(this, "Executables Configuration File", executables + "\ndoes not exist, enter a new file path");
+      }
+   }
+}
+
+void DerivedWindow::initializeParameters()
+{
+   output_lineEdit->setText(m_parameters->getOutput());
+   T1_lineEdit->setText(m_parameters->getT1());  
+   T2_lineEdit->setText(m_parameters->getT2());
+   mask_lineEdit->setText(m_parameters->getMask());
+   DWI_lineEdit->setText(m_parameters->getDWI());
+   b0_lineEdit->setText(m_parameters->getb0());
+   
+   if(m_parameters->getNewAtlas())
+   {
+      newAtlas_radioButton->setChecked(true);
+      existingAtlas_radioButton->setChecked(false);
+   } 
+   else
+   {
+      newAtlas_radioButton->setChecked(false);
+      existingAtlas_radioButton->setChecked(true);
+   } 
+
+   existingAtlas_lineEdit->setText(m_parameters->getAtlas()); 
+   checkAtlases();  
+   displayAtlases();
+  
+   if(!(m_parameters->getSelectedAtlases()).empty())
+   {
+      m_selectedAtlases=m_parameters->getSelectedAtlases();
+   }
+   else
+   {
+      m_selectedAtlases=m_goodAtlases;
+   }
+
+   checkSelectedAtlases(); 
+
+
+   //smoothing_comboBox
+
+   //smoothingSize_spinBox->setMinimum(m_parameters->getSmoothingSizeMin());
+   smoothingSize_spinBox->setValue(m_parameters->getSmoothingSize());
+
+   computingWeights_checkBox->setChecked(m_parameters->getComputingWeights()); 
+
+
+   //weightsModality_comboBox
+   
+   //weightsRadius_spinBox->setMinimum(m_parameters->getWeightsRadiusMin());
+   weightsRadius_spinBox->setValue(m_parameters->getWeightsRadius());   
+
+   overwriting_checkBox->setChecked(m_parameters->getOverwriting()); 
+
+   cleaningUp_checkBox->setChecked(m_parameters->getCleaningUp()); 
+
+
+   //computingSystem_comboBox
+
+   //numberOfCores_spinBox->setMinimum(m_parameters->getNumberOfCoresMin());
+   numberOfCores_spinBox->setValue(m_parameters->getNumberOfCores());   
+
+
+   //imageMetric1_comboBox
+
+   //weight1_spinBox->setMinimum(m_antsParameters->getWeightMin());
+   weight1_spinBox->setValue(m_antsParameters->getWeight1());
+   
+   //radius1_spinBox->setMinimum(m_antsParameters->getRadiusMin());   
+   radius1_spinBox->setValue(m_antsParameters->getRadius1());
+
+
+   //imageMetric1_comboBox
+
+   //weight1_spinBox->setMinimum(m_antsParameters->getWeightMin());
+   weight1_spinBox->setValue(m_antsParameters->getWeight1());
+   
+   //radius1_spinBox->setMinimum(m_antsParameters->getRadiusMin());   
+   radius1_spinBox->setValue(m_antsParameters->getRadius1());
+
+   //iterationsJ->setMinimum(m_antsParameters->getIterationsMin());   
+   iterationsJ_spinBox->setValue(m_antsParameters->getIterationsJ());
+
+   //iterationsK->setMinimum(m_antsParameters->getIterationsMin());   
+   iterationsK_spinBox->setValue(m_antsParameters->getIterationsK());
+
+   //iterationsL->setMinimum(m_antsParameters->getIterationsMin());   
+   iterationsL_spinBox->setValue(m_antsParameters->getIterationsL());
+
+
+   //transformatiomType_comboBox
+
+   //gradientStepLength_spinBox->setMinimum(m_antsParameters->getGradientStepLengthMin());
+   gradientStepLength_spinBox->setValue(m_antsParameters->getGradientStepLength());
+
+   //numberOfTimeSteps_spinBox->setMinimum(m_antsParameters->getNumberOfTimeStepsMin());
+   numberOfTimeSteps_spinBox->setValue(m_antsParameters->getNumberOfTimeSteps());
+
+   //deltaTime_spinBox->setMinimum(m_antsParameters->getDeltaTimeMin());
+   deltaTime_spinBox->setValue(m_antsParameters->getDeltaTime());
+
+   //regularizationType_comboBox
+
+   //gradientFieldSigma_spinBox->setMinimum(m_antsParameters->getGradientFieldSigmaMin());
+   gradientFieldSigma_spinBox->setValue(m_antsParameters->getGradientFieldSigma());
+
+   //deformationFieldSigma_spinBox->setMinimum(m_antsParameters->getDeformationFieldSigmaMin());
+   deformationFieldSigma_spinBox->setValue(m_antsParameters->getDeformationFieldSigma());
+
+   //truncation_spinBox->setMinimum(m_antsParameters->getTruncationMin());
+   truncation_spinBox->setValue(m_antsParameters->getTruncation());
+
+}
+
+
+void DerivedWindow::setParameters()
+{
+   // Data
+   if(!(output_lineEdit->text()).isEmpty())
+   {
+      m_parameters->setOutput(output_lineEdit->text()); 
+   }
+
+   if(!(T1_lineEdit->text()).isEmpty())
+   {
+      m_parameters->setT1(T1_lineEdit->text());
+   }
+   
+   if(!(T2_lineEdit->text()).isEmpty())
+   {
+      m_parameters->setT2(T2_lineEdit->text());
+   }
+
+   if(!(mask_lineEdit->text()).isEmpty())
+   {
+      m_parameters->setMask(mask_lineEdit->text());
+   }   
+
+   if(!(DWI_lineEdit->text()).isEmpty())
+   {
+      m_parameters->setDWI(DWI_lineEdit->text());
+   }  
+
+   if(!(b0_lineEdit->text()).isEmpty())
+   {
+      m_parameters->setb0(b0_lineEdit->text());
+   }  
+
+   m_parameters->setSkullStripping(skullStripping_checkbox->isChecked());
 
    //Atlas Population 
    if (newAtlas_radioButton->isChecked()) 
    {
-      m_pipeline->setAtlasPopulation(m_atlasPopulation_path, m_selectedAtlases);
+      m_parameters->setNewAtlas(true);
+      m_parameters->setAtlasPopulationDirectory(m_atlasPopulation_path);
+      m_parameters->setSelectedAtlases(m_selectedAtlases);
+      m_parameters->setSmoothing(smoothing_comboBox->currentText());
+      m_parameters->setSmoothingSize(smoothingSize_spinBox->value());
+      m_parameters->setComputingWeights(computingWeights_checkBox->isChecked());
+      m_parameters->setWeightsRadius(weightsRadius_spinBox->value());
    }
 
-   //Smoothing 
-   m_pipeline->setSmoothing(smoothing_comboBox->currentText());
+   else 
+   {
+      m_parameters->setNewAtlas(false);  
+      m_parameters->setAtlas(existingAtlas_lineEdit->text());    
+   }
 
-   //Smoothing Size
-   m_pipeline->setSmoothingSize(smoothingSize_doubleSpinBox->value());
+   // Computation
+   m_parameters->setOverwriting(overwriting_checkBox->isChecked());
+   m_parameters->setCleaningUp(cleaningUp_checkBox->isChecked());
+   m_parameters->setComputingSystem(computingSystem_comboBox->currentText());
+   m_parameters->setNumberOfCores(numberOfCores_spinBox->value());
 
-   //Overwriting
-   m_pipeline->setOverwriting(overwriting_checkBox->isChecked());
    
-   //Cleaning-Up
-   m_pipeline->setCleaningUp(cleaningUp_checkBox->isChecked());
+   //ANTS parameters 
+   m_antsParameters->setImageMetric1(imageMetric1_comboBox->currentText());
+   m_antsParameters->setWeight1(weight1_spinBox->value());
+   m_antsParameters->setRadius1(radius1_spinBox->value());
 
-   //Computing System
-   m_pipeline->setComputingSystem(computingSystem_comboBox->currentText());
+   m_antsParameters->setImageMetric2(imageMetric2_comboBox->currentText());
+   m_antsParameters->setWeight2(weight2_spinBox->value());
+   m_antsParameters->setRadius2(radius2_spinBox->value());
 
-   //Nb of cores
-   m_pipeline->setNbCores(nbCores_spinBox->value());
+   m_antsParameters->setIterationsJ(iterationsJ_spinBox->value());
+   m_antsParameters->setIterationsK(iterationsK_spinBox->value());
+   m_antsParameters->setIterationsL(iterationsL_spinBox->value());
 
-   m_pipeline->runPipeline();
+   m_antsParameters->setTransformationType(transformationType_comboBox->currentText());
+   m_antsParameters->setGradientStepLength(gradientStepLength_spinBox->value());
+   m_antsParameters->setNumberOfTimeSteps(numberOfTimeSteps_spinBox->value());
+   m_antsParameters->setDeltaTime(deltaTime_spinBox->value());
+
+   m_antsParameters->setRegularizationType(regularizationType_comboBox->currentText());  
+   m_antsParameters->setGradientFieldSigma(gradientFieldSigma_spinBox->value());
+   m_antsParameters->setDeformationFieldSigma(deformationFieldSigma_spinBox->value());
+   m_antsParameters->setTruncation(truncation_spinBox->value());
+
+
+   // Neoseg parameters 
+   m_neosegParameters->setFilterMethod(filterMethod_comboBox->currentText()); 
+   m_neosegParameters->setNumberOfIterations(numberOfIterations_spinBox->value());
+   m_neosegParameters->setTimeStep(timeStep_spinBox->value()); 
+
+   m_neosegParameters->setReferenceImage(referenceModality_comboBox->currentText()); 
+   m_neosegParameters->setPriorThreshold(priorThreshold_spinBox->value()); 
+   //m_neosegParameters->setMaxDegree(maxDegree_spinBox->value()); 
+   m_neosegParameters->setPrior1(prior1_spinBox->value()); 
+   m_neosegParameters->setPrior2(prior3_spinBox->value()); 
+   m_neosegParameters->setPrior3(prior3_spinBox->value()); 
+   m_neosegParameters->setPrior4(prior4_spinBox->value()); 
+   m_neosegParameters->setPrior5(prior5_spinBox->value()); 
+
+   m_neosegParameters->setRefinement(refinement_checkBox->isChecked());
+   m_neosegParameters->setInitialParzenKernelWidth(initialParzenKernelWidth_spinBox->value());
+
+
+   m_parametersSet = true; 
 }
+
+
+void DerivedWindow::setExecutables()
+{
+   m_executablesSet = true;
+}
+
+void DerivedWindow::saveParameters()
+{
+   if(!m_parametersSet)
+   {
+      setParameters();
+   }
+
+   QString parameters_path = QFileDialog::getSaveFileName(this, "Save file", "parameters.xml", "XML files (*.xml)");
+
+   XmlWriter* parameters = new::XmlWriter();
+   parameters->setPipelineParameters(m_parameters);  
+   parameters->writeParametersConfiguration(parameters_path);
+}
+
+void DerivedWindow::saveExecutables()
+{
+   if(!m_executablesSet)
+   {
+      setExecutables();
+   }
+
+   QString executables_path = QFileDialog::getSaveFileName(this, "Save file", "executables.xml", "XML files (*.xml)");
+
+   XmlWriter* executables = new::XmlWriter();
+   executables->setPipelineParameters(m_parameters);  
+   executables->writeExecutablesConfiguration(executables_path);
+}
+
+void DerivedWindow::runPipeline()
+{
+   if(!m_parametersSet)
+   {
+      setParameters();
+   }
+
+   runPipeline_progressBar->show();
+
+   m_thread->setPipeline(m_pipeline);
+   m_thread->start();
+}
+
+void DerivedWindow::closeEvent(QCloseEvent *event)
+{
+   if(m_thread->isRunning())
+   {
+      std::cout<<"thread running"<<std::endl; 
+
+      QMessageBox messageBox;
+
+      messageBox.setText("The pipeline is still running,");
+      messageBox.setInformativeText("Do you want to terminate it?");
+      messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+      messageBox.setDefaultButton(QMessageBox::No);
+
+      int answer = messageBox.exec();
+      switch (answer)
+      {
+         case QMessageBox::Yes:
+            m_thread->terminate(); 
+            m_thread->wait();
+            QMainWindow::closeEvent(event);
+            break;
+         case QMessageBox::No:
+            this->hide();
+            break;
+         case QMessageBox::Cancel:
+            messageBox.close();
+            break;
+      }
+   }
+}
+
+
+
 

@@ -7,6 +7,8 @@
 #include <fstream>
 #include <vector>
 #include <iterator>
+#include <map>
+#include <utility>
 
 // Qt Librairies
 #include <QString>
@@ -15,53 +17,76 @@
 // My Specific Librairies
 #include "Atlas.h"
 #include "Neo.h"
-
+#include "AntsParameters.h"
+#include "ExecutablePaths.h"
 
 class AtlasRegistration
 {
+   
    public: 
 
-   // Constructor //
-   AtlasRegistration(QString output_path, QString computingSystem);
+   // Set // 
+   void setNeo(Neo neo);
+   void setAtlasPopulation(std::vector<Atlas> atlasPopulation);  
+   void setOutputPath(QString output_path); 
+   void setComputingSystem(QString computingSystem);
+   void setNumberOfCores(int nbCores); 
+   void setAntsParameters(AntsParameters* ANTSParamaters);
+   void setExecutablePaths(ExecutablePaths* executables);
 
+   // Define Outputs //
+   Atlas defineRegisteredAtlas(Atlas atlas);
+   void defineRegisteredAtlasPopulation();
+ 
    // Checking results //
-   Atlas defineOutput_Atlas(Atlas atlas);
-   bool checkExistingResults_Atlas(Atlas atlas);
-   bool checkExistingResults(std::vector<Atlas> atlasPopulation);
+   bool checkRegisteredAtlas(Atlas atlas);
+   bool checkRegisteredAtlasPopulation();
 
    // Creating directories //
    void createDirectory();
-   void createAtlasDirectories(std::vector<Atlas> atlasPopulation);
+   void createAtlasDirectories();
 
-   // Writting the script //
+   // Scripts //
    QString str(QString str);
    QString variable(QString variable_name);
-
-   // Script //
+   QString listToString(QStringList argumentsList);
    void initializeScript(QString &script);
 
-   void implementRegisterAtlas(QString &script, Neo neo);
-   void writeRegisterAtlas(Neo neo);
+   // Register Atlas Script // 
+   void implementRegisterAtlas(QString &script, bool probabilistic);
+   void writeRegisterAtlas();
+   void writeRegisterProbabilisticAtlas();
 
+   // Register Atlas Population Script // 
    void implementTestRegistrationDone(QString &script);
    void defineRegisterAtlasParameters(QString &script, Atlas atlas);
    void submitRegisterAtlasJob(QString &script);
-   void executeRegisterAtlasProcess(QString &script, int i);
-   void implementRegisterAtlasPopulation(QString &script, std::vector<Atlas> atlasPopulation);
-   void writeRegisterAtlasPopulation(std::vector<Atlas> atlasPopulation);
+   void executeRegisterAtlasProcess(QString &script, int i, bool probabilistic);
+   void implementRegisterAtlasPopulation(QString &script);
+   void writeRegisterAtlasPopulation();
 
    // Output //
-   void updateAtlasPopulation(std::vector<Atlas> &atlasPopulation);
+   void update();
+   std::vector<Atlas> getOutput();
+
 
    private:
 
-   QString m_computingSystem;
+   // Input // 
+   Neo                     m_neo;
+   std::vector<Atlas>      m_atlasPopulation;
+   AntsParameters*         m_parameters;
+   ExecutablePaths*        m_executables; 
+   QString                 m_computingSystem;
+   int                     m_nbCores;
+   
+   // Directories
+   QDir*                   m_output_dir;
+   QDir*                   m_atlasRegistration_dir; 
 
-   QString m_ANTS;
-   QString m_ResampleVolume2; 
+   // Output //
 
-   QDir* m_output_dir;
-   QDir* m_atlasRegistration_dir; 
+   std::vector<Atlas>      m_atlasPopulationRegistered;
 };
 
 #endif 

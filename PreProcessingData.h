@@ -11,28 +11,71 @@
 
 // My specific librairies
 #include "Neo.h"
+#include "ExecutablePaths.h"
 
 class PreProcessingData
 {
    public:
-   PreProcessingData(QString output_path);
-   QString getOutputPath(QString input_path, QString suffix);
-   bool checkExistingResults(Neo neo);
+
+   // Constructor 
+   PreProcessingData();
+
+   // Setting Parameters
+   void setNeo( Neo neo );
+   void setSkullStripping(bool skullStripping);
+   void setOutputPath( QString output_path );
+   void setExecutablePaths(ExecutablePaths* executables);
+
+   // Checking Existing Results
+   void definePreProcessedData();
+   bool checkPreProcessedData();
+
+   // Create Directory 
    void createDirectory();
-   void createScript();
-   QString runNeoseg(QString image);
-   QString skullStripImage (QString image_path, QString mask_path);
-   Neo skullStripNeo (Neo neo, QString mask_path);
+
+   // Writing Script 
+   QString variable(QString variable_name);
+   QString str(QString str);
+   QString listToString(QStringList argumentsList);
+
+   // Implementing Script 
+   void initializeScript(QString &script);
+   void implementLogStdoutAndStderr(QString &script);
+   void implementLogStderr(QString &script);
+   void closeMask(QString &script);
+   void skullStripImages(QString &script);
+   void correctImages(QString &script);
+   void implementPreProcessData(QString &script);
+   void writePreProcessData();
+
+   // Updating & Getting Output 
+   void update();
+   Neo getOutput();
 
 
    private: 
-   std::ofstream* m_script_stream;
-   QString m_script;
-   QString m_output_path;
+   
+   // Data
+   Neo m_neo;
+   bool m_skullStripping;
+
+   //Executables 
+   ExecutablePaths* m_executables;
+
+   // Directories
+   QDir* m_output_dir; 
    QDir* m_preProcessingData_dir; 
 
-   QString m_skullStripping_suffix;
+   // Script 
+   QString m_script;
 
+   // Suffix
+   QString m_skullStripping_suffix;
+   QString m_correcting_suffix;
+   QString m_closing_suffix;
+
+   // Output
+   Neo m_preProcessedNeo;
 };
 
 #endif

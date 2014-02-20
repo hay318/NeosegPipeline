@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+   <parameters>
+      <boolean>
+         <name>noGUI</name>
+         <longflag>noGui</longflag>
+         <description>If you do not need the GUI</description>
+         <label>No GUI</label>
+         <default>false</default>
+      </boolean>
+      <file>
+	 <name>executables</name>
+	 <description>Path of the XML file that contains the executables configuration</description>
+	 <longflag>executables</longflag>
+	 <label>xml file</label>
+      </file>
+      <file>
+	 <name>parameters</name>	
+	 <description>Path of the XML file that contains the parameters configuration</description>
+	 <longflag>parameters</longflag>
+	 <label>xml file</label>
+      </file>
+      <boolean>
+	 <name>skullStripping</name>
+	 <longflag>skullStripping</longflag>
+	 <description>If T1 and the T2 need to be skull-stripped</description>
+	 <label>skullStripping</label>
+      </boolean>
+      <image>
+         <name>DWI</name>
+         <description>Path of the DWI image</description>
+         <longflag>DWI</longflag>
+         <label>DWI image</label>
+      </image>
+      <image>
+      	 <name>b0</name>
+         <description>Path of the b0 image</description>
+         <longflag>b0</longflag>
+         <label>b0 image</label>
+      </image>
+      <image>
+      	  <name>mask</name>
+	  <description>Path of the brain mask</description>
+	  <longflag>mask</longflag>
+	  <label>brain mask</label>
+      </image>
+      <image>
+	  <name>T2</name>
+	  <description>Path of the T2 image to segment</description>
+ 	  <longflag>T2</longflag>
+	  <label>T2 image</label>
+      </image>
+      <image>
+          <name>T1</name>
+	  <description>Path of the T1 image to segment</description>
+	  <longflag>T1</longflag>
+	  <label>T1 image</label>
+      </image>
+      <directory>
+          <name>output</name>
+	  <description>Path of the output directory where all files will be written</description>
+	  <longflag>output</longflag>
+	  <label>output directory</label>
+       </directory>
+   </parameters>
+</executable>
