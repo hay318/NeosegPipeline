@@ -5,6 +5,7 @@
 #include <QFile>
 
 struct Neo {
+QString prefix; 
 QString T1;
 QString T2; 
 QString mask;
@@ -12,6 +13,8 @@ QString DWI;
 QString b0;
 QString FA;
 QString AD;
+QString seg4Labels;
+QString seg3Labels;
 };
 
 #endif

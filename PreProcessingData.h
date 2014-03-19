@@ -10,43 +10,26 @@
 #include <QDir>
 
 // My specific librairies
+#include "Script.h"
 #include "Neo.h"
 #include "ExecutablePaths.h"
 
-class PreProcessingData
+class PreProcessingData : public Script 
 {
    public:
 
    // Constructor 
-   PreProcessingData();
+   PreProcessingData(QString module);
 
    // Setting Parameters
-   void setNeo( Neo neo );
    void setSkullStripping(bool skullStripping);
-   void setOutputPath( QString output_path );
-   void setExecutablePaths(ExecutablePaths* executables);
-
-   // Checking Existing Results
-   void definePreProcessedData();
-   bool checkPreProcessedData();
-
-   // Create Directory 
-   void createDirectory();
-
-   // Writing Script 
-   QString variable(QString variable_name);
-   QString str(QString str);
-   QString listToString(QStringList argumentsList);
 
    // Implementing Script 
    void initializeScript(QString &script);
-   void implementLogStdoutAndStderr(QString &script);
-   void implementLogStderr(QString &script);
-   void closeMask(QString &script);
-   void skullStripImages(QString &script);
-   void correctImages(QString &script);
-   void implementPreProcessData(QString &script);
-   void writePreProcessData();
+   QString closeMask(QString &script);
+   QString skullStripImage(QString &script, QString image);
+   QString correctImage(QString &script, QString image);
+   void implementRun(QString &script);
 
    // Updating & Getting Output 
    void update();
@@ -56,26 +39,16 @@ class PreProcessingData
    private: 
    
    // Data
-   Neo m_neo;
-   bool m_skullStripping;
-
-   //Executables 
-   ExecutablePaths* m_executables;
-
-   // Directories
-   QDir* m_output_dir; 
-   QDir* m_preProcessingData_dir; 
-
-   // Script 
-   QString m_script;
+   bool              m_skullStripping;
 
    // Suffix
-   QString m_skullStripping_suffix;
-   QString m_correcting_suffix;
-   QString m_closing_suffix;
+   QString           m_skullStripping_suffix;
+   QString           m_correcting_suffix;
+   QString           m_rescaling_suffix;
+   QString           m_closing_suffix;
 
    // Output
-   Neo m_preProcessedNeo;
+   Neo               m_preProcessedNeo;
 };
 
 #endif

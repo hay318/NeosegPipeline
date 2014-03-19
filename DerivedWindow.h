@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <map>
 
 // Qt Librairies
 #include <QWidget>
@@ -15,6 +16,7 @@
 #include "Pipeline.h"
 #include "XmlWriter.h"
 #include "MainScriptThread.h"
+#include "ExecutablePaths.h" 
 
 class DerivedWindow : public QMainWindow , public Ui_Window
 {
@@ -28,8 +30,10 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    // Set
    void setPipeline(Pipeline* pipeline);
    void setPipelineParameters(PipelineParameters* parameters);
+   void setMainScriptThread(MainScriptThread* thread);
 
    // Initialization
+   void initializeImagesMap(); 
    void initializeParameters();
    void initializeExecutables(); 
 
@@ -45,9 +49,15 @@ class DerivedWindow : public QMainWindow , public Ui_Window
 
    public slots :
 
+
    // Output
    void selectOuput();
    void enterOutput();
+
+
+   // Images
+   void selectImage(QString image); 
+   void enterImage(QString image);
 
    // T1
    void selectT1();
@@ -110,6 +120,10 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    AntsParameters* m_antsParameters; 
    NeosegParameters* m_neosegParameters; 
 
+   // Executables 
+   ExecutablePaths* m_executables; 
+
+   std::map<QString, QLineEdit*> m_images;
 
    QString m_tests_path;
    QString m_data_path;

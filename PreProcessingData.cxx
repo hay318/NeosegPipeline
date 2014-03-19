@@ -1,257 +1,182 @@
 #include "PreProcessingData.h"
 
-PreProcessingData::PreProcessingData ()
+PreProcessingData::PreProcessingData(QString module) : Script(module)
 {
    m_skullStripping_suffix = "-stripped";
+   m_rescaling_suffix = "-rescaled";
    m_correcting_suffix = "-corrected";
    m_closing_suffix = "-closed";
 }
 
-void PreProcessingData::setNeo(Neo neo) {m_neo=neo;}
-
-void PreProcessingData::setSkullStripping(bool skullStripping) {m_skullStripping=skullStripping;}
-
-void PreProcessingData::setOutputPath(QString output_path) 
+void PreProcessingData::setSkullStripping(bool skullStripping) 
 {
-   m_output_dir = new QDir(output_path);
-
-   QString preProcessingData_path = m_output_dir->filePath("PreProcessingData");
-   m_preProcessingData_dir = new QDir(preProcessingData_path); 
-}
-
-void PreProcessingData::setExecutablePaths(ExecutablePaths* executables) {m_executables=executables;}
-
-void PreProcessingData::definePreProcessedData() 
-{
-   QFileInfo* T1_file = new QFileInfo(m_neo.T1);
-   QString preProcessedT1_name = T1_file->baseName() + m_skullStripping_suffix + m_correcting_suffix + ".nrrd";
-   m_preProcessedNeo.T1 = m_preProcessingData_dir->filePath(preProcessedT1_name); 
-
-   QFileInfo* T2_file = new QFileInfo(m_neo.T2);
-   QString preProcessedT2_name = T2_file->baseName() + m_skullStripping_suffix + m_correcting_suffix + ".nrrd";
-   m_preProcessedNeo.T2 = m_preProcessingData_dir->filePath(preProcessedT2_name); 
-
-   QFileInfo* mask_file = new QFileInfo(m_neo.mask);
-   QString preProcessedMask_name = mask_file->baseName() + m_closing_suffix + ".nrrd";
-   m_preProcessedNeo.mask = m_preProcessingData_dir->filePath(preProcessedMask_name); 
-
-}
-
-bool PreProcessingData::checkPreProcessedData()
-{
-   QFile* T1PreProcessed_file = new QFile(m_preProcessedNeo.T1);
-   QFile* T2PreProcessed_file = new QFile(m_preProcessedNeo.T2);
-   QFile* maskPreProcessed_file = new QFile(m_preProcessedNeo.mask);
-
-   if(T1PreProcessed_file->exists() && T2PreProcessed_file->exists() && maskPreProcessed_file->exists())
-   { 
-      return true;
-   }
-
-   return false;
-}
-
-void PreProcessingData::createDirectory()
-{
-   if (!m_output_dir->exists("PreProcessingData"))
-   {
-     m_output_dir->mkdir("PreProcessingData");
-   }
-}
-
-
-QString PreProcessingData::variable(QString variable_name) {return "\" + " + variable_name + " + \"";}
-
-QString PreProcessingData::str(QString str) {return "\"" + str + "\"";}
-
-QString PreProcessingData::listToString(QStringList argumentsList)
-{
-   QString arguments = argumentsList[0];
-
-   QStringList::const_iterator it;
-   for (it = argumentsList.constBegin()+1; it != argumentsList.constEnd(); ++it)
-   {
-      arguments += "," + (*it) + "";
-   }
-
-   return arguments; 
+   m_skullStripping=skullStripping;
 }
 
 void PreProcessingData::initializeScript(QString &script)
 {
-   // Define the version of Python used
-   script += "#!/usr/bin/env python\n";
+   definePython(script);
+   importGeneralModules(script);
+   importXmlModules(script);
+  
+   defineExecutable(script, "ImageMath");
+   defineExecutable(script, "SegPostProcessCLP");
+   defineExecutable(script, "unu");
+   defineExecutable(script, "N4ITKBiasFieldCorrection");
 
-   // Import the librairies needed  
-   script += "import os\n";
-   script += "import sys\n";
-   script += "import logging \n";
-   script += "import subprocess\n\n";
+   m_script += "runningProcess = None\n\n"; 
 
-   script += "ImageMath = " + str(m_executables->getExecutablePath("ImageMath")) + "\n";
-   script += "SegPostProcessCLP = " + str(m_executables->getExecutablePath("SegPostProcessCLP")) + "\n";
-   script += "N4ITKBiasFieldCorrection = " + str(m_executables->getExecutablePath("N4ITKBiasFieldCorrection")) + "\n";
-
-   script += "T1 = " + str(m_neo.T1) + "\n"; 
-   script += "T2 = " + str(m_neo.T2) + "\n"; 
-   script += "mask = " + str(m_neo.mask) + "\n\n";
+   script += "T1 = '" + m_neo.T1 + "'\n"; 
+   script += "T2 = '" + m_neo.T2 + "'\n"; 
+   script += "mask = '" + m_neo.mask + "'\n\n";
 }
 
-void PreProcessingData::implementLogStdoutAndStderr(QString &script)
-{
-   script += "def logStdoutAndStderr(runningProcess):\n";
-
-   script += "\twhile True:\n";
-   script += "\t\tline = runningProcess.stdout.readline()\n";
-   script += "\t\tif line:\n";
-   script += "\t\t\tlogging.info(line.rstrip())\n";
-   script += "\t\tif not line: break\n";
-
-   script += "\twhile True:\n";
-   script += "\t\tline = runningProcess.stderr.readline()\n";
-   script += "\t\tif line:\n";
-   script += "\t\t\tlogging.error(line.rstrip())\n";
-   script += "\t\tif not line: break\n";
-
-   script += "\trunningProcess.wait()\n\n";
-}
-
-void PreProcessingData::implementLogStderr(QString &script)
-{
-   script += "def logStderr(runningProcess):\n";
-
-   script += "\twhile True:\n";
-   script += "\t\tline = runningProcess.stderr.readline()\n";
-   script += "\t\tif line:\n";
-   script += "\t\t\tlogging.error(line.rstrip())\n";
-   script += "\t\tif not line: break\n";
-
-   script += "\trunningProcess.wait()\n\n";
-}
-
-void PreProcessingData::closeMask(QString &script)
+QString PreProcessingData::closeMask(QString &script)
 {
    QStringList argumentsList;
 
-   script += "\tmask_closed = " + str(m_preProcessedNeo.mask) + "\n";    
+   QFileInfo* mask_file = new QFileInfo(m_neo.mask);
+   QString closedMask_name = mask_file->baseName() + m_closing_suffix + ".nrrd";
+   QString closedMask_path = m_module_dir->filePath(closedMask_name); 
 
-   argumentsList << "ImageMath" << "mask" << "'-dilate'"<< "'5,1'" << "'-outfile'" << "mask_closed"; 
-   script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stderr=subprocess.PIPE)\n";
-   script += "\tlogStderr(runningProcess)\n\n";   
+   script += "\tmask_closed = '" + closedMask_path + "'\n";    
+
+   script += "\tif checkFileExistence(mask_closed)==False:\n";   
+
+   argumentsList << "ImageMath" << "mask" << "'-dilate'"<< "'5,1'" << "'-outfile'" << "mask_closed";  
+   script += "\t\tlogging.info('- Dilating the brain mask (radius=5)...')\n";  
+   script += "\t\targs = " + listToString(argumentsList) + "\n";
+   script += "\t\texecute(args)\n\n";
 
    argumentsList.clear();
    argumentsList << "ImageMath" << "mask_closed" << "'-erode'"<< "'5,1'" << "'-outfile'" << "mask_closed"; 
-   script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stderr=subprocess.PIPE)\n";
-   script += "\tlogStderr(runningProcess)\n\n"; 
+   script += "\t\tlogging.info('- Eroding the brain mask (radius=5)...')\n";  
+   script += "\t\targs = " + listToString(argumentsList) + "\n";
+   script += "\t\texecute(args)\n\n";
+
+   return closedMask_path;
 }
 
-void PreProcessingData::skullStripImages(QString &script)
+QString PreProcessingData::skullStripImage(QString &script, QString image)
 {
    QStringList argumentsList;
 
-   QFileInfo* T1_file = new QFileInfo(m_neo.T1);
-   QString strippedT1_name = T1_file->baseName() + m_skullStripping_suffix;
-   QString strippedT1_path = m_preProcessingData_dir->filePath(strippedT1_name); 
+   QString image_path; 
 
-   script += "\tT1_stripped = " + str(strippedT1_path) + ".nrrd\n";    
+   if(image=="T1")
+   {
+      image_path = m_neo.T1; 
+   }
+   if(image=="T2")
+   {
+      image_path = m_neo.T2;
+   }
 
-   argumentsList << "SegPostProcessCLP" << "mask" << "T1_stripped"<< "'--skullstripping'" << "T1" << "'--MWM'" << "'1'" << "'--WM'" << "'2'" << "'--GM'" << "'3'" << "'--CSF'" << "'4'"; 
-   script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
-   script += "\tlogStdoutAndStderr(runningProcess)\n\n";
+   QFileInfo* image_file = new QFileInfo(image_path);
+   QString strippedImage_name = image_file->baseName() + m_skullStripping_suffix + ".nrrd";
+   QString strippedImage_path = m_module_dir->filePath(strippedImage_name); 
+   script += "\t" + image + "_stripped = '" + strippedImage_path + "'\n";    
 
+   script += "\tif checkFileExistence(" + image + "_stripped)==False:\n";   
 
-   QFileInfo* T2_file = new QFileInfo(m_neo.T2);
-   QString strippedT2_name = T2_file->baseName() + m_skullStripping_suffix;
-   QString strippedT2_path = m_preProcessingData_dir->filePath(strippedT2_name); 
+   argumentsList << "SegPostProcessCLP" << "mask" << image + "_stripped"<< "'--skullstripping'" << "T1" << "'--MWM'" << "'1'" << "'--WM'" << "'2'" << "'--GM'" << "'3'" << "'--CSF'" << "'4'"; 
+   script += "\t\targs = " + listToString(argumentsList) + "\n";
+   script += "\t\texecute(args)\n\n";
 
-   script += "\tT2_stripped = " + str(strippedT2_path) + ".nrrd\n";    
-
-   argumentsList.clear();
-   argumentsList << "SegPostProcessCLP" << "mask" << "T2_stripped"<< "'--skullstripping'" << "T2" << "'--MWM'" << "'1'" << "'--WM'" << "'2'" << "'--GM'" << "'3'" << "'--CSF'" << "'4'"; 
-   script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
-   script += "\tlogStdoutAndStderr(runningProcess)\n\n";   
+   return strippedImage_path;
 }
 
 
-void PreProcessingData::correctImages(QString &script)
+QString PreProcessingData::correctImage(QString &script, QString image)
 {
    QStringList argumentsList;
 
-   QString T1, T2; 
-
-   if(m_skullStripping)
-   {
-      T1 = "T1";
-      T2 = "T2";
-   }
-
-   else
-   {
-      T1 = "T1_stripped";
-      T2 = "T2_stripped";
-   }
-
-   script += "\tT1_corrected = " + str(m_preProcessedNeo.T1) + "\n"; 
-
-   argumentsList << "N4ITKBiasFieldCorrection" << "'--inputimage'" << T1 << "'--maskimage'" << "mask" << "'--outputimage'" << "T1_corrected";
-   script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
-   script += "\tlogStdoutAndStderr(runningProcess)\n\n";   
-
-   script += "\tT2_corrected = " + str(m_preProcessedNeo.T2) + "\n"; 
-
-   argumentsList.clear();
-   argumentsList << "N4ITKBiasFieldCorrection" << "'--inputimage'" << T2 << "'--maskimage'" << "mask" << "'--outputimage'" << "T2_corrected";
-   script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
-   script += "\tlogStdoutAndStderr(runningProcess)\n\n";   
-}
-
-void PreProcessingData::implementPreProcessData(QString &script)
-{
-   script += "def run():\n\n";  
-
-   closeMask(script); 
+   QString previousImage; 
 
    if(!m_skullStripping)
    {
-      skullStripImages(script);
+      previousImage = image + "_stripped";
+   }
+   else
+   {
+      previousImage = image;
    }
 
-   correctImages(script);
+   QString convertedImage_name = m_neo.prefix + "-" + image + "-converted.nrrd";
+   QString convertedImage_path = m_module_dir->filePath(convertedImage_name); 
+   script += "\t" + image + "_converted = '" + convertedImage_path + "'\n"; 
+
+   script += "\tif checkFileExistence(" + image + "_converted)==False:\n"; 
+
+   argumentsList << "unu" << "'convert'" << "'-i'" << previousImage << "'-t'" << "'float'"; 
+   script += "\t\targs1 = " + listToString(argumentsList) + "\n";
+
+   argumentsList.clear();
+   argumentsList << "unu" << "'save'" << "'-e'" << "'gzip'" << "'-f'" << "'nrrd'" << "'-o'" << image + "_converted"; 
+   script += "\t\targs2 = " + listToString(argumentsList) + "\n";
+
+   script += "\t\tlogging.info('- Converting the image in float...')\n";
+   script += "\t\texecutePipe(args1, args2)\n\n";
+
+   QString correctedImage_name = m_neo.prefix + "-" + image + "-corrected.nrrd";
+   QString correctedImage_path = m_module_dir->filePath(correctedImage_name);
+   script += "\t" + image + "_corrected = '" + correctedImage_path + "'\n"; 
+
+   script += "\tif checkFileExistence(" + image + "_corrected)==False:\n"; 
+
+   argumentsList.clear();
+   argumentsList << "N4ITKBiasFieldCorrection" << "'--inputimage'" << image + "_converted" << "'--maskimage'" << "mask" << "'--outputimage'" << image + "_corrected";
+   script += "\t\tlogging.info('- Correcting the inhomogeneity of the image...')\n";  
+   script += "\t\targs = " + listToString(argumentsList) + "\n";
+   script += "\t\texecute(args)\n\n";  
+
+   return correctedImage_path;
 }
 
-void PreProcessingData::writePreProcessData()
+void PreProcessingData::implementRun(QString &script)
 {
-   QString preProcessData;
+   script += "def run():\n\n";  
 
-   initializeScript(preProcessData);
-   implementLogStdoutAndStderr(preProcessData); 
-   implementLogStderr(preProcessData); 
+   script += "\tsignal.signal(signal.SIGINT, stop)\n";
+   script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
 
-   implementPreProcessData(preProcessData);
+   script += "\tlogging.info('=== Preprocessing Data ===')\n";
+   script += "\tlogging.debug('')\n";
 
-   QString script_path = m_output_dir->filePath("preProcessData.py");
+   //m_neo.mask = closeMask(script); 
 
-   std::ofstream* script_stream = new std::ofstream((script_path.toStdString()).c_str(), std::ios::out | std::ios::trunc);
-   *script_stream << preProcessData.toStdString() << std::endl;
-   script_stream->close();
+   if(!m_skullStripping)
+   {
+      script += "\tlogging.info('Skull-stripping the T1...')\n";  
+      m_neo.T1 = skullStripImage(script, "T1");
+
+      script += "\tlogging.info('Skull-stripping the T2...')\n";
+      m_neo.T2 = skullStripImage(script, "T2");
+   }
+   
+   script += "\tlogging.info('Correcting the inhomogeneity of the T1 :')\n";   
+   m_neo.T1 = correctImage(script, "T1");
+
+   script += "\tlogging.info('Correcting the inhomogeneity of the T2 :')\n";   
+   m_neo.T2 = correctImage(script, "T2");
 }
 
 void PreProcessingData::update()
 {
-   createDirectory(); 
-   writePreProcessData();
+   QString preProcessData;
+
+   initializeScript(preProcessData);
+   implementStop(preProcessData); 
+   implementCheckFileExistence(preProcessData); 
+   implementExecute(preProcessData); 
+   implementExecutePipe(preProcessData); 
+   implementRun(preProcessData);
+
+   writeScript(preProcessData);
 }
 
-Neo PreProcessingData::getOutput() {return m_preProcessedNeo;}
-
-/*void PreProcessingData::centerImage()
+Neo PreProcessingData::getOutput()
 {
-   m_T1centered = m_script_dir + "/T1centered.gipl.gz"; 
-   command = ImageMath + " " + m_T1 + " -changeOrig 0,0,0 -outfile " + m_T1centered;
-   *m_script << "os.system(\"" + command + "\")" << std::endl;
-
-   m_T2centered = m_script_dir + "/T2centered.gipl.gz";    
-   command = ImageMath + " " + m_T2 + " -changeOrig 0,0,0 -outfile " + m_T2centered;
-   *m_script << "os.system(\"" + command + "\") \n" << std::endl;
-}*/
+   return m_neo;
+}
 

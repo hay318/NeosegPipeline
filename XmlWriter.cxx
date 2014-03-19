@@ -110,7 +110,7 @@ void XmlWriter::writeAntsParameters(QXmlStreamWriter* stream)
 
    stream->writeStartElement("Regularization");
    writeElement(stream, "Type", "name", antsParameters->getRegularizationType());
-   writeElement(stream, "Parameters", "gradient-field-sigma", QString::number(antsParameters->getGradientFieldSigma()), "deformation-field-sigma", QString::number(antsParameters->getDeformationFieldSigma()), "truncation", QString::number(antsParameters->getTruncation()));
+   writeElement(stream, "Parameters", "gradient-field-sigma", QString::number(antsParameters->getGradientFieldSigma()), "deformation-field-sigma", QString::number(antsParameters->getDeformationFieldSigma()));
    stream->writeEndElement(); 
 
    stream->writeEndElement();

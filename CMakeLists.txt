@@ -26,8 +26,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 GENERATECLP(NeosegPipeline_CLP NeosegPipeline.xml) 
 
-SET(NeosegPipeline_SOURCE main.cxx NeosegPipelineTool.cxx DerivedWindow.cxx XmlReader.cxx XmlWriter.cxx Pipeline.cxx PipelineParameters.cxx AntsParameters.cxx NeosegParameters.cxx ExecutablePaths.cxx PreProcessingData.cxx AtlasRegistration.cxx AtlasGeneration.cxx NeosegExecution.cxx DtiRegistration.cxx MainScriptThread.cxx)
-SET(NeosegPipeline_HEADERS NeosegPipelineTool.h DerivedWindow.h XmlReader.h XmlWriter.h Pipeline.h  PipelineParameters.h Atlas.h Neo.h AntsParameters.h NeosegParameters.h ExecutablePaths.h PreProcessingData.h AtlasRegistration.h AtlasGeneration.h NeosegExecution.h DtiRegistration.h PriorProbability.h TemplateImage.h MainScriptThread.h)
+SET(NeosegPipeline_SOURCE main.cxx NeosegPipelineTool.cxx DerivedWindow.cxx XmlReader.cxx XmlWriter.cxx Pipeline.cxx PipelineParameters.cxx AntsParameters.cxx NeosegParameters.cxx ExecutablePaths.cxx Script.cxx PreProcessingData.cxx AtlasRegistration.cxx AtlasGeneration.cxx NeosegExecution.cxx DtiRegistration.cxx MainScriptThread.cxx)
+SET(NeosegPipeline_HEADERS NeosegPipelineTool.h DerivedWindow.h XmlReader.h XmlWriter.h Pipeline.h  PipelineParameters.h Atlas.h Neo.h AntsParameters.h NeosegParameters.h ExecutablePaths.h Script.h PreProcessingData.h AtlasRegistration.h AtlasGeneration.h NeosegExecution.h DtiRegistration.h PriorProbability.h TemplateImage.h MainScriptThread.h)
 
 add_executable(NeosegPipeline ${NeosegPipeline_SOURCE} ${NeosegPipeline_HEADERS} ${MOC_SOURCES} ${UI_SOURCES} ${NeosegPipeline_CLP})
 

@@ -15,24 +15,25 @@
 #include <QDir>
 
 // My Specific Librairies
+#include "Script.h"
 #include "Atlas.h"
 #include "Neo.h"
 #include "AntsParameters.h"
 #include "ExecutablePaths.h"
 
-class AtlasRegistration
+class AtlasRegistration : public Script  
 {
    
    public: 
 
+   // Constructor // 
+   AtlasRegistration(QString module);
+
    // Set // 
-   void setNeo(Neo neo);
    void setAtlasPopulation(std::vector<Atlas> atlasPopulation);  
-   void setOutputPath(QString output_path); 
    void setComputingSystem(QString computingSystem);
    void setNumberOfCores(int nbCores); 
    void setAntsParameters(AntsParameters* ANTSParamaters);
-   void setExecutablePaths(ExecutablePaths* executables);
 
    // Define Outputs //
    Atlas defineRegisteredAtlas(Atlas atlas);
@@ -47,10 +48,8 @@ class AtlasRegistration
    void createAtlasDirectories();
 
    // Scripts //
-   QString str(QString str);
-   QString variable(QString variable_name);
-   QString listToString(QStringList argumentsList);
    void initializeScript(QString &script);
+   void implementExecute(QString &script);
 
    // Register Atlas Script // 
    void implementRegisterAtlas(QString &script, bool probabilistic);
@@ -61,7 +60,7 @@ class AtlasRegistration
    void implementTestRegistrationDone(QString &script);
    void defineRegisterAtlasParameters(QString &script, Atlas atlas);
    void submitRegisterAtlasJob(QString &script);
-   void executeRegisterAtlasProcess(QString &script, int i, bool probabilistic);
+   void executeRegisterAtlasProcess(QString &script, Atlas atlas, int i);
    void implementRegisterAtlasPopulation(QString &script);
    void writeRegisterAtlasPopulation();
 
@@ -73,19 +72,12 @@ class AtlasRegistration
    private:
 
    // Input // 
-   Neo                     m_neo;
    std::vector<Atlas>      m_atlasPopulation;
    AntsParameters*         m_parameters;
-   ExecutablePaths*        m_executables; 
    QString                 m_computingSystem;
    int                     m_nbCores;
    
-   // Directories
-   QDir*                   m_output_dir;
-   QDir*                   m_atlasRegistration_dir; 
-
    // Output //
-
    std::vector<Atlas>      m_atlasPopulationRegistered;
 };
 

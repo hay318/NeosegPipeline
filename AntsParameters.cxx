@@ -70,11 +70,6 @@ AntsParameters::AntsParameters()
    //m_deformationFieldSigma_max;
    m_deformationFieldSigma_default=0;
    m_deformationFieldSigma=m_deformationFieldSigma_default;
- 
-   m_truncation_min=0; 
-   //m_truncation_max; 
-   m_truncation_default=0; 
-   m_truncation=m_truncation_default; 
 
 }
 
@@ -130,97 +125,249 @@ bool AntsParameters::isIn(QString item, std::vector<QString> vector)
 
 
 
-void AntsParameters::setImageMetric1(QString imageMetric1) {m_imageMetric1=getImageMetricFlag(imageMetric1);}
-bool AntsParameters::checkImageMetric1(QString imageMetric1) {return isIn(imageMetric1, m_imageMetric_values);}
-QString AntsParameters::getImageMetric1() {return m_imageMetric1;}
+void AntsParameters::setImageMetric1(QString imageMetric1)
+{
+   m_imageMetric1=getImageMetricFlag(imageMetric1);
+}
+bool AntsParameters::checkImageMetric1(QString imageMetric1)
+{
+   return isIn(imageMetric1, m_imageMetric_values);
+}
+QString AntsParameters::getImageMetric1()
+{
+   return m_imageMetric1;
+}
 
-void AntsParameters::setImageMetric2(QString imageMetric2) {m_imageMetric2=getImageMetricFlag(imageMetric2);}
-bool AntsParameters::checkImageMetric2(QString imageMetric2) {return isIn(imageMetric2, m_imageMetric_values);}
-QString AntsParameters::getImageMetric2() {return m_imageMetric2;}
-
-
-double AntsParameters::getWeightMin() {return m_weight_min;}
-
-void AntsParameters::setWeight1(double weight1) {m_weight1=weight1;}
-bool AntsParameters::checkWeight1(double weight1) {return isSuperior(weight1, m_weight_min);}
-double AntsParameters::getWeight1() {return m_weight1;}
-
-void AntsParameters::setWeight2(double weight2) {m_weight2=weight2;}
-bool AntsParameters::checkWeight2(double weight2) {return isSuperior(weight2, m_weight_min);}
-double AntsParameters::getWeight2() {return m_weight2;}
-
-
-int AntsParameters::getRadiusMin() {return m_radius_min;}
-
-void AntsParameters::setRadius1(int radius1) {m_radius1=radius1;}
-bool AntsParameters::checkRadius1(int radius1) {return isSuperior(radius1, m_radius_min);}
-int AntsParameters::getRadius1() {return m_radius1;}
-
-void AntsParameters::setRadius2(int radius2) {m_radius2=radius2;}
-bool AntsParameters::checkRadius2(int radius2) {return isSuperior(radius2, m_radius_min);}
-int AntsParameters::getRadius2() {return m_radius2;}
+void AntsParameters::setImageMetric2(QString imageMetric2)
+{
+   m_imageMetric2=getImageMetricFlag(imageMetric2);
+}
+bool AntsParameters::checkImageMetric2(QString imageMetric2)
+{
+   return isIn(imageMetric2, m_imageMetric_values);
+}
+QString AntsParameters::getImageMetric2()
+{
+   return m_imageMetric2;
+}
 
 
-int AntsParameters::getIterationsMin() {return m_iterations_min;}
+double AntsParameters::getWeightMin()
+{
+   return m_weight_min;
+}
 
-void AntsParameters::setIterationsJ(int iterationsJ) {m_iterationsJ=iterationsJ;}
-bool AntsParameters::checkIterationsJ(int iterationsJ) {return isSuperior(iterationsJ, m_iterationsJ_max);}
-int AntsParameters::getIterationsJ() {return m_iterationsJ;}
+void AntsParameters::setWeight1(double weight1)
+{
+   m_weight1=weight1;
+}
+bool AntsParameters::checkWeight1(double weight1)
+{
+   return isSuperior(weight1, m_weight_min);
+}
+double AntsParameters::getWeight1()
+{
+   return m_weight1;
+}
 
-void AntsParameters::setIterationsK(int iterationsK) {m_iterationsK=iterationsK;}
-bool AntsParameters::checkIterationsK(int iterationsK) {return isSuperior(iterationsK, m_iterationsK_max);}
-int AntsParameters::getIterationsK() {return m_iterationsK;}
-
-void AntsParameters::setIterationsL(int iterationsL) {m_iterationsL=iterationsL;}
-bool AntsParameters::checkIterationsL(int iterationsL) {return isSuperior(iterationsL, m_iterationsL_max);}
-int AntsParameters::getIterationsL() {return m_iterationsL;}
-
-
-void AntsParameters::setTransformationType(QString transformationType) {m_transformationType=getTransformationTypeFlag(transformationType);}
-bool AntsParameters::checkTransformationType(QString transformationType) {return isIn(transformationType, m_transformationType_values);}
-QString AntsParameters::getTransformationType() {return m_transformationType;}
-
-
-void AntsParameters::setGradientStepLength(double gradientStepLength) {m_gradientStepLength=gradientStepLength;}
-bool AntsParameters::checkGradientStepLength(double gradientStepLength) {return isSuperior(gradientStepLength, m_gradientStepLength_min);}
-double AntsParameters::getGradientStepLength() {return m_gradientStepLength;}
-double AntsParameters::getGradientStepLengthMin() {return m_gradientStepLength_min;}
-
-
-void AntsParameters::setNumberOfTimeSteps(double numberOfTimeSteps) {m_numberOfTimeSteps=numberOfTimeSteps;}
-bool AntsParameters::checkNumberOfTimeSteps(double numberOfTimeSteps) {return isSuperior(numberOfTimeSteps, m_numberOfTimeSteps_min);}
-double AntsParameters::getNumberOfTimeSteps() {return m_numberOfTimeSteps;}
-double AntsParameters::getNumberOfTimeStepsMin() {return m_numberOfTimeSteps_min;}
-
-
-void AntsParameters::setDeltaTime(double deltaTime) {m_deltaTime=deltaTime;}
-bool AntsParameters::checkDeltaTime(double deltaTime) {return isSuperior(deltaTime, m_deltaTime_min);}
-double AntsParameters::getDeltaTime() {return m_deltaTime;}
-double AntsParameters::getDeltaTimeMin() {return m_deltaTime_min;}
+void AntsParameters::setWeight2(double weight2)
+{
+   m_weight2=weight2;
+}
+bool AntsParameters::checkWeight2(double weight2)
+{
+   return isSuperior(weight2, m_weight_min);
+}
+double AntsParameters::getWeight2()
+{
+   return m_weight2;
+}
 
 
-void AntsParameters::setRegularizationType(QString regularizationType) {m_regularizationType=getRegularizationTypeFlag(regularizationType);}
-bool AntsParameters::checkRegularizationType(QString regularizationType) {return isIn(regularizationType, m_regularizationType_values);}
-QString AntsParameters::getRegularizationType() {return m_regularizationType;}
+int AntsParameters::getRadiusMin()
+{
+   return m_radius_min;
+}
 
+void AntsParameters::setRadius1(int radius1)
+{
+   m_radius1=radius1;
+}
+bool AntsParameters::checkRadius1(int radius1)
+{
+   return isSuperior(radius1, m_radius_min);
+}
+int AntsParameters::getRadius1()
+{
+   return m_radius1;
+}
 
-void AntsParameters::setGradientFieldSigma(double gradientFieldSigma) {m_gradientFieldSigma=gradientFieldSigma;}
-bool AntsParameters::checkGradientFieldSigma(double gradientFieldSigma) {return isSuperior(gradientFieldSigma, m_gradientFieldSigma_min);}
-double AntsParameters::getGradientFieldSigma() {return m_gradientFieldSigma;}
-double AntsParameters::getGradientFieldSigmaMin() {return m_gradientFieldSigma_min;}
+void AntsParameters::setRadius2(int radius2)
+{
+   m_radius2=radius2;
+}
+bool AntsParameters::checkRadius2(int radius2)
+{
+   return isSuperior(radius2, m_radius_min);
+}
+int AntsParameters::getRadius2()
+{
+   return m_radius2;
+}
 
+int AntsParameters::getIterationsMin()
+{
+   return m_iterations_min;
+}
+void AntsParameters::setIterationsJ(int iterationsJ)
+{
+   m_iterationsJ=iterationsJ;
+}
+bool AntsParameters::checkIterationsJ(int iterationsJ)
+{
+   return isSuperior(iterationsJ, m_iterationsJ_max);
+}
+int AntsParameters::getIterationsJ()
+{
+   return m_iterationsJ;
+}
 
-void AntsParameters::setDeformationFieldSigma(double deformationFieldSigma) {m_deformationFieldSigma=deformationFieldSigma;}
-bool AntsParameters::checkDeformationFieldSigma(double deformationFieldSigma) {return isSuperior(deformationFieldSigma, m_deformationFieldSigma_min);}
-double AntsParameters::getDeformationFieldSigma() {return m_deformationFieldSigma;}
-double AntsParameters::getDeformationFieldSigmaMin() {return m_deformationFieldSigma_min;}
+void AntsParameters::setIterationsK(int iterationsK)
+{
+   m_iterationsK=iterationsK;
+}
+bool AntsParameters::checkIterationsK(int iterationsK)
+{
+   return isSuperior(iterationsK, m_iterationsK_max);
+}
+int AntsParameters::getIterationsK()
+{
+   return m_iterationsK;
+}
 
+void AntsParameters::setIterationsL(int iterationsL)
+{
+   m_iterationsL=iterationsL;
+}
+bool AntsParameters::checkIterationsL(int iterationsL)
+{
+   return isSuperior(iterationsL, m_iterationsL_max);
+}
+int AntsParameters::getIterationsL()
+{
+   return m_iterationsL;
+}
 
-void AntsParameters::setTruncation(double truncation) {m_truncation=truncation;}
-bool AntsParameters::checkTruncation(double truncation) {return isSuperior(truncation, m_truncation_min);}
-double AntsParameters::getTruncation() {return m_truncation;}
-double AntsParameters::getTruncationMin() {return m_truncation_min;}
+void AntsParameters::setTransformationType(QString transformationType)
+{
+   m_transformationType=getTransformationTypeFlag(transformationType);
+}
+bool AntsParameters::checkTransformationType(QString transformationType)
+{
+   return isIn(transformationType, m_transformationType_values);
+}
+QString AntsParameters::getTransformationType()
+{
+   return m_transformationType;
+}
 
+void AntsParameters::setGradientStepLength(double gradientStepLength)
+{
+   m_gradientStepLength=gradientStepLength;
+}
+bool AntsParameters::checkGradientStepLength(double gradientStepLength)
+{
+   return isSuperior(gradientStepLength, m_gradientStepLength_min);
+}
+double AntsParameters::getGradientStepLength()
+{
+   return m_gradientStepLength;
+}
+double AntsParameters::getGradientStepLengthMin()
+{
+   return m_gradientStepLength_min;
+}
+
+void AntsParameters::setNumberOfTimeSteps(double numberOfTimeSteps)
+{
+   m_numberOfTimeSteps=numberOfTimeSteps;
+}
+bool AntsParameters::checkNumberOfTimeSteps(double numberOfTimeSteps)
+{
+   return isSuperior(numberOfTimeSteps, m_numberOfTimeSteps_min);
+}
+double AntsParameters::getNumberOfTimeSteps()
+{
+   return m_numberOfTimeSteps;
+}
+double AntsParameters::getNumberOfTimeStepsMin()
+{
+   return m_numberOfTimeSteps_min;
+}
+
+void AntsParameters::setDeltaTime(double deltaTime)
+{
+   m_deltaTime=deltaTime;
+}
+bool AntsParameters::checkDeltaTime(double deltaTime)
+{
+   return isSuperior(deltaTime, m_deltaTime_min);
+}
+double AntsParameters::getDeltaTime()
+{
+   return m_deltaTime;
+}
+double AntsParameters::getDeltaTimeMin()
+{
+   return m_deltaTime_min;
+}
+
+void AntsParameters::setRegularizationType(QString regularizationType)
+{
+   m_regularizationType=getRegularizationTypeFlag(regularizationType);
+}
+bool AntsParameters::checkRegularizationType(QString regularizationType)
+{
+   return isIn(regularizationType, m_regularizationType_values);
+}
+QString AntsParameters::getRegularizationType()
+{
+   return m_regularizationType;
+}
+
+void AntsParameters::setGradientFieldSigma(double gradientFieldSigma)
+{
+   m_gradientFieldSigma=gradientFieldSigma;
+}
+bool AntsParameters::checkGradientFieldSigma(double gradientFieldSigma)
+{
+   return isSuperior(gradientFieldSigma, m_gradientFieldSigma_min);
+}
+double AntsParameters::getGradientFieldSigma() 
+{
+   return m_gradientFieldSigma;
+}
+double AntsParameters::getGradientFieldSigmaMin()
+{
+   return m_gradientFieldSigma_min;
+}
+
+void AntsParameters::setDeformationFieldSigma(double deformationFieldSigma)
+{
+   m_deformationFieldSigma=deformationFieldSigma;
+}
+bool AntsParameters::checkDeformationFieldSigma(double deformationFieldSigma)
+{
+   return isSuperior(deformationFieldSigma, m_deformationFieldSigma_min);
+}
+double AntsParameters::getDeformationFieldSigma()
+{
+   return m_deformationFieldSigma;
+}
+double AntsParameters::getDeformationFieldSigmaMin()
+{
+   return m_deformationFieldSigma_min;
+}
 
 QString AntsParameters::getImageMetricFlag(QString imageMetric)
 {

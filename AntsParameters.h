@@ -100,11 +100,6 @@ class AntsParameters
       bool checkDeformationFieldSigma(double deformationFieldSigma);
       double getDeformationFieldSigma();
 
-      double getTruncationMin();
-      void setTruncation(double truncation);
-      bool checkTruncation(double truncation);
-      double getTruncation();
-
 
       QString getImageMetricFlag(QString imageMetric);
       QString getTransformationTypeFlag(QString transformationType); 
@@ -177,11 +172,6 @@ class AntsParameters
       double m_deformationFieldSigma_max;
       double m_deformationFieldSigma_default;
       double m_deformationFieldSigma;
- 
-      double m_truncation_min; 
-      double m_truncation_max; 
-      double m_truncation_default; 
-      double m_truncation; 
 }; 
 
 

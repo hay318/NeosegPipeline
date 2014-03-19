@@ -2,41 +2,92 @@
 
 Pipeline::Pipeline()
 {
-   m_parameters=new PipelineParameters(); 
+   m_processing_name = "Processing";
 }
 
-PipelineParameters* Pipeline::getParameters() {return m_parameters;}
-
-QProcess* Pipeline::getMainScriptProcess() {return m_mainScriptProcess;}
-
-void Pipeline::runPreProcessingData()
+void Pipeline::setPipelineParameters(PipelineParameters* parameters)
 {
-   PreProcessingData preProcessingData;
+   m_parameters = parameters; 
+}
+
+QProcess* Pipeline::getMainScriptProcess()
+{
+   return m_mainScriptProcess;
+}
+
+void Pipeline::createProcessingDirectory()
+{
+   QDir output_dir(m_parameters->getOutput());
+   if(!output_dir.exists(m_processing_name))
+   {
+      output_dir.mkdir(m_processing_name);
+   } 
+   m_processing_path = output_dir.filePath(m_processing_name);
+}
+
+QString Pipeline::createModuleDirectory(QString directory_name)
+{
+   QDir output_dir(m_parameters->getOutput());
+   if(!output_dir.exists(directory_name))
+   {
+      output_dir.mkdir(directory_name);
+   }  
+   return output_dir.filePath(directory_name);
+}
+
+void Pipeline::writePreProcessingData()
+{
+   QString directory_name = "1.PreProcessingData";
+   QString directory_path = createModuleDirectory(directory_name);
+
+   QString module_name = "preProcessingData";
+   PreProcessingData preProcessingData(module_name);
    
    preProcessingData.setNeo(m_parameters->getNeo());
-   preProcessingData.setSkullStripping(m_parameters->getSkullStripping());
-   preProcessingData.setOutputPath(m_parameters->getOutput());
+   preProcessingData.setSkullStripping(m_parameters->getSkullStripping());  
+   preProcessingData.setModuleDirectory(directory_path);
+   preProcessingData.setProcessingDirectory(m_processing_path);
    preProcessingData.setExecutablePaths(m_parameters->getExecutablePaths());
 
-   preProcessingData.definePreProcessedData(); 
-   if(!preProcessingData.checkPreProcessedData())
-   {
-      preProcessingData.update(); 
-      m_importingModules += "import preProcessData\n"; 
-      m_runningModules += "preProcessData.run()\n"; 
-   }
+   preProcessingData.update(); 
+   m_importingModules += "import " + module_name + "\n"; 
+   m_runningModules += module_name + ".run()\n"; 
 
    m_parameters->setNeo(preProcessingData.getOutput());
 }
 
-
-void Pipeline::runAtlasRegistration()
+void Pipeline::writeDTIRegistration()
 {
-   AtlasRegistration atlasRegistration;
+   QString directory_name = "2.DTIRegistration";
+   QString directory_path = createModuleDirectory(directory_name);
+
+   QString module_name = "DTIRegistration";
+   DtiRegistration dtiRegistration(module_name);
+
+   dtiRegistration.setNeo(m_parameters->getNeo());
+   dtiRegistration.setModuleDirectory(directory_path);
+   dtiRegistration.setProcessingDirectory(m_processing_path);
+   dtiRegistration.setExecutablePaths(m_parameters->getExecutablePaths());
+
+   dtiRegistration.update();
+   m_importingModules += "import " + module_name + "\n"; 
+   m_runningModules += module_name + ".run()\n"; 
+
+   m_parameters->setNeo(dtiRegistration.getOutput());
+}
+
+void Pipeline::writeAtlasRegistration()
+{
+   QString directory_name = "3.AtlasRegistration";
+   QString directory_path = createModuleDirectory(directory_name);
+
+   QString module_name = "atlasRegistration";
+   AtlasRegistration atlasRegistration(module_name); 
 
    atlasRegistration.setNeo(m_parameters->getNeo());
    atlasRegistration.setAtlasPopulation(m_parameters->getAtlasPopulation());
-   atlasRegistration.setOutputPath(m_parameters->getOutput());
+   atlasRegistration.setModuleDirectory(directory_path);
+   atlasRegistration.setProcessingDirectory(m_processing_path);
    atlasRegistration.setComputingSystem(m_parameters->getComputingSystem());
    atlasRegistration.setNumberOfCores(m_parameters->getNumberOfCores());
    atlasRegistration.setAntsParameters(m_parameters->getAntsParameters());
@@ -46,41 +97,28 @@ void Pipeline::runAtlasRegistration()
    if(!atlasRegistration.checkRegisteredAtlasPopulation())
    {
       atlasRegistration.update();
-      m_importingModules += "import registerAtlas\n"; 
-      m_runningModules += "registerAtlas.run()\n"; 
+      m_importingModules += "import " + module_name + "\n"; 
+      m_runningModules += module_name + ".run()\n"; 
    }
 
    m_parameters->setAtlasPopulation(atlasRegistration.getOutput());
 }
 
-void Pipeline::runDTIRegistration()
+void Pipeline::writeAtlasGeneration()
 {
-   DtiRegistration dtiRegistration;
+   QString directory_name = "4.AtlasGeneration";
+   QString directory_path = createModuleDirectory(directory_name);
 
-   dtiRegistration.setNeo(m_parameters->getNeo());
-   dtiRegistration.setOutputPath(m_parameters->getOutput());
-   dtiRegistration.setExecutablePaths(m_parameters->getExecutablePaths());
-
-   dtiRegistration.defineRegisteredDTI();
-   if(!dtiRegistration.checkRegisteredDTI())
-   {
-      dtiRegistration.update();
-      m_importingModules += "import registerDTI\n"; 
-      m_runningModules += "registerDTI.run()\n"; 
-   }
-
-   m_parameters->setNeo(dtiRegistration.getOutput());
-}
-
-void Pipeline::runAtlasGeneration()
-{
-   AtlasGeneration atlasGeneration;
+   QString module_name = "atlasGeneration";
+   AtlasGeneration atlasGeneration(module_name);
 
    atlasGeneration.setNeo(m_parameters->getNeo());
    atlasGeneration.setAtlasPopulation(m_parameters->getAtlasPopulation());
-   atlasGeneration.setOutputPath(m_parameters->getOutput());
+   atlasGeneration.setModuleDirectory(directory_path);
+   atlasGeneration.setProcessingDirectory(m_processing_path);
    atlasGeneration.setSmoothing(m_parameters->getSmoothing());
    atlasGeneration.setSmoothingSize(m_parameters->getSmoothingSize());
+   atlasGeneration.setIncludingFA(m_parameters->getIncludingFA());
    atlasGeneration.setComputingWeights(m_parameters->getComputingWeights());
    atlasGeneration.setNeightborhoodRadius(m_parameters->getWeightsRadius());
    atlasGeneration.setExecutablePaths(m_parameters->getExecutablePaths());
@@ -89,32 +127,39 @@ void Pipeline::runAtlasGeneration()
    if(!atlasGeneration.checkGeneratedAtlas())
    {
       atlasGeneration.update();
-      m_importingModules += "import generateAtlas\n"; 
-      m_runningModules += "generateAtlas.run()\n"; 
+      m_importingModules += "import " + module_name + "\n"; 
+      m_runningModules += module_name + ".run()\n"; 
    }
 
    m_parameters->setAtlas(atlasGeneration.getOutput());
 }
 
-void Pipeline::runNeosegExecution()
+void Pipeline::writeNeosegExecution()
 {
-   NeosegExecution neosegExecution;
+   QString directory_name = "5.NeosegExecution";
+   QString directory_path = createModuleDirectory(directory_name);
+
+   QString module_name = "neosegExecution";
+   NeosegExecution neosegExecution(module_name);
+
+   std::cout<<"using FA:"<<m_parameters->getUsingFA()<<std::endl; 
+   std::cout<<"using AD:"<<m_parameters->getUsingAD()<<std::endl; 
 
    neosegExecution.setNeo(m_parameters->getNeo());
-   neosegExecution.setOutputPath(m_parameters->getOutput());
+   neosegExecution.setModuleDirectory(directory_path);
+   neosegExecution.setProcessingDirectory(m_processing_path);
    neosegExecution.setAtlas(m_parameters->getAtlas());
+   neosegExecution.setUsingFA(m_parameters->getUsingFA());
+   neosegExecution.setUsingAD(m_parameters->getUsingAD());
+   neosegExecution.setComputing3LabelsSeg(m_parameters->getComputing3LabelsSeg());
    neosegExecution.setNeosegParameters(m_parameters->getNeosegParameters());
    neosegExecution.setExecutablePaths(m_parameters->getExecutablePaths());
 
-   neosegExecution.defineSegmentation();
-   if(!neosegExecution.checkSegmentation())
-   {
-      neosegExecution.update();
-      m_importingModules += "import executeNeoseg\n"; 
-      m_runningModules += "executeNeoseg.run()\n"; 
-   }
+   neosegExecution.update();
+   m_importingModules += "import " + module_name +"\n"; 
+   m_runningModules += module_name + ".run()\n"; 
 
-   m_parameters->setSegmentation(neosegExecution.getOutput());
+   m_parameters->setNeo(neosegExecution.getOutput());
 }
 
 void Pipeline::initializeMainScript()
@@ -125,7 +170,8 @@ void Pipeline::initializeMainScript()
    m_script += "import sys\n";
    m_script += "import signal\n";
    m_script += "import logging\n";
-   m_script += "import subprocess\n\n";
+   m_script += "import subprocess\n";
+   m_script += "import shutil\n\n";
 }
 
 void Pipeline::defineSignalHandler()
@@ -143,35 +189,62 @@ void Pipeline::defineSignalHandler()
 void Pipeline::initializeLogging()
 {
    QDir* output_dir = new QDir(m_parameters->getOutput());
-   QString log = output_dir->filePath("pipeline.log"); 
+   QString log = output_dir->filePath((m_parameters->getNeo()).prefix + ".log"); 
 
    m_script += "log = \"" + log + "\"\n";
    m_script += "logFile = open(log, \"w\") \n\n";
 
-   m_script += "logging.basicConfig(level=logging.DEBUG)\n";
+   m_script += "logging.basicConfig(level=logging.DEBUG, filename=log)\n";
+
    m_script += "rootLogger = logging.getLogger()\n";
+   m_script += "fileFormatter = logging.Formatter('%(message)s')\n";
+   m_script += "((rootLogger.handlers)[0]).setFormatter(fileFormatter)\n\n";
 
-   m_script += "logFormatter = logging.Formatter('[%(levelname)s]  %(message)s')\n";
+   m_script += "consoleHandler = logging.StreamHandler()\n";
+   m_script += "consoleHandler.setLevel(logging.INFO)\n";
+   m_script += "consoleFormatter = logging.Formatter('[%(levelname)s]  %(message)s')\n";
+   m_script += "consoleHandler.setFormatter(consoleFormatter)\n";
 
-   m_script += "fileHandler = logging.FileHandler(log)\n";
-   m_script += "fileHandler.setLevel(logging.DEBUG)\n";
-   m_script += "fileHandler.setFormatter(logFormatter)\n";
+   m_script += "rootLogger.addHandler(consoleHandler)\n";
+}
 
-   m_script += "rootLogger.addHandler(fileHandler)\n";
-   m_script += "((rootLogger.handlers)[0]).setFormatter(logFormatter)\n\n";
+void Pipeline::copySegmentations()
+{
+   QDir* output_dir = new QDir(m_parameters->getOutput());
+   Neo neo = m_parameters->getNeo(); 
+
+   m_script += "seg4Labels_src = \"" + neo.seg4Labels + "\"\n";
+   QString seg4Labels_name = neo.prefix + "-seg-4Labels.nrrd";
+   QString seg4Labels_path = output_dir->filePath(seg4Labels_name);
+   m_script += "seg4Labels_dest = \"" + seg4Labels_path + "\"\n";
+
+   m_script += "shutil.copyfile(seg4Labels_src, seg4Labels_dest)\n\n"; 
+
+   if(m_parameters->getComputing3LabelsSeg())
+   {
+      m_script += "seg3Labels_src = \"" + neo.seg3Labels + "\"\n";
+      QString seg3Labels_name = neo.prefix + "-seg-3Labels.nrrd";
+      QString seg3Labels_path = output_dir->filePath(seg3Labels_name);
+      m_script += "seg3Labels_dest = \"" + seg3Labels_path + "\"\n";
+
+      m_script += "shutil.copyfile(seg3Labels_src, seg3Labels_dest)\n\n"; 
+   }
 }
 
 void Pipeline::writeMainScript()
 {
-   QDir* output_dir = new QDir(m_parameters->getOutput()); 
-   m_main_path = output_dir->filePath("main.py");
+   QDir* processing_dir = new QDir(m_processing_path); 
+   m_main_path = processing_dir->filePath("main.py");
 
    std::ofstream* script_stream = new std::ofstream((m_main_path.toStdString()).c_str(), std::ios::out | std::ios::trunc);
 
    m_script += m_importingModules; 
    defineSignalHandler();
    initializeLogging();
+
    m_script += m_runningModules; 
+
+   copySegmentations();
 
    *script_stream << m_script.toStdString() << std::endl; 
    
@@ -202,31 +275,32 @@ void Pipeline::executeMainScript()
    {
    }
 
-   std::cout<<"QProcess finished!"<<std::endl;
+   std::cout<<"pipeline done"<<std::endl; 
 }
-
 
 void Pipeline::runPipeline()
 {
+   createProcessingDirectory();
+
    m_parameters->initializeNeo(); 
    m_parameters->initializeAtlasPopulation(); 
 
    initializeMainScript();
 
-   runPreProcessingData();
-
-   runDTIRegistration(); 
+   writePreProcessingData();
+   writeDTIRegistration(); 
 
    if (m_parameters->getNewAtlas()==true)
    {
-      runAtlasRegistration();
+      writeAtlasRegistration();
 
-      runAtlasGeneration();
+      writeAtlasGeneration();
    }
 
-   runNeosegExecution();
+   writeNeosegExecution();
 
    writeMainScript();
+
    executeMainScript();
 }
 

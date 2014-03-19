@@ -3,11 +3,13 @@
 
 #include <QString>
 #include <QCoreApplication>
+#include <QThread>
 
 #include "Pipeline.h"
 #include "PipelineParameters.h"
 #include "XmlReader.h"
 #include "DerivedWindow.h"
+#include "MainScriptThread.h"
 
 class NeosegPipelineTool
 {
@@ -31,9 +33,9 @@ class NeosegPipelineTool
 
    private:
 
-      Pipeline m_pipeline; 
-      PipelineParameters* m_parameters;
-      XmlReader m_xmlReader;
+      Pipeline             m_pipeline; 
+      PipelineParameters   m_parameters;
+      MainScriptThread*     m_thread;
 }; 
 
 #endif

@@ -31,6 +31,10 @@ class PipelineParameters
    bool isIn(QString item, std::vector<QString> vector);
    QFileInfoList find(QDir* dir, QString name);
 
+   //Suffix
+   void setPrefix(QString prefix);
+   QString getPrefix();
+
    // Output
    bool checkOutput(QString output);
    void setOutput(QString output);
@@ -89,6 +93,7 @@ class PipelineParameters
    QStringList getSelectedAtlases(); 
 
    // Atlas Population 
+   std::map<QString,QFileInfoList> findAtlasFiles(QString atlas);
    bool checkAtlas(QString atlas);
    void initializeAtlasPopulation();
    void setAtlasPopulation(std::vector<Atlas> m_atlasPopulation);
@@ -118,6 +123,22 @@ class PipelineParameters
    bool checkWeightsRadius(double weightsRadius);
    void setWeightsRadius(double weightsRadius);
    double getWeightsRadius();
+
+   // Including FA
+   void setIncludingFA(bool includingFA);
+   bool getIncludingFA();
+
+   // Using FA
+   void setUsingFA(bool usingFA);
+   bool getUsingFA();
+
+   // Using AD
+   void setUsingAD(bool usingAD);
+   bool getUsingAD();
+
+   // Computing 3-Labels Segmentation
+   void setComputing3LabelsSeg(bool computing3LabelsSeg);
+   bool getComputing3LabelsSeg();   
 
    // Overwriting
    void setOverwriting(bool overwriting);
@@ -154,8 +175,8 @@ class PipelineParameters
    private:
 
    // Data
+   QString m_prefix;
    QString m_output;
-
    QString m_T1; 
    QString m_T2;
    QString m_mask; 
@@ -166,6 +187,7 @@ class PipelineParameters
    Neo m_neo; 
 
    // New Atlas 
+   bool m_newAtlas_default;
    bool m_newAtlas;
 
    // Atlas
@@ -201,6 +223,22 @@ class PipelineParameters
    double m_weightsRadius_max;
    double m_weightsRadius_default;
    double m_weightsRadius;
+
+   // Including FA
+   bool m_includingFA_default; 
+   bool m_includingFA;    
+
+   // Using FA
+   bool m_usingFA_default; 
+   bool m_usingFA; 
+
+   // Using AD
+   bool m_usingAD_default; 
+   bool m_usingAD; 
+
+   // Computing 3-labels segmentation
+   bool m_computing3LabelsSeg_default; 
+   bool m_computing3LabelsSeg;
 
    // Overwriting 
    bool m_overwriting_default;

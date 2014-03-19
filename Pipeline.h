@@ -32,7 +32,7 @@ class Pipeline
    Pipeline();
 
    // Parameters
-   PipelineParameters* getParameters();
+   void setPipelineParameters(PipelineParameters* parameters);
 
    // Process
    QProcess* getMainScriptProcess();
@@ -46,19 +46,26 @@ class Pipeline
 
    private: 
 
+   void createProcessingDirectory();
+   QString createModuleDirectory(QString directory_name);
+
    void initializeMainScript();
    void initializeLogging();
    void defineSignalHandler();
-   void runPreProcessingData();
-   void runAtlasRegistration();
-   void runDTIRegistration();   
-   void runAtlasGeneration();
-   void runNeosegExecution();
+   void writePreProcessingData();
+   void writeAtlasRegistration();
+   void writeDTIRegistration();   
+   void writeAtlasGeneration();
+   void writeNeosegExecution();
    void writeMainScript();
    void executeMainScript();
+   void copySegmentations();
 
 
    PipelineParameters* m_parameters; 
+
+   QString m_processing_name;
+   QString m_processing_path;
 
    QString m_script;
    QString m_importingModules;

@@ -1,222 +1,146 @@
 #include "DtiRegistration.h"
 
-DtiRegistration::DtiRegistration()
+DtiRegistration::DtiRegistration(QString module) : Script(module)
 {
-
-}
-
-void DtiRegistration::setNeo(Neo neo) {m_neo=neo;}
-
-void DtiRegistration::setOutputPath(QString outputPath) 
-{
-   m_output_dir = new QDir(outputPath); 
-
-   m_DTIRegistration_path = m_output_dir->filePath("DTIRegistration");
-   m_DTIRegistration_dir = new QDir(m_DTIRegistration_path);
-}
-
-void DtiRegistration::setExecutablePaths(ExecutablePaths* executables) {m_executables=executables;}
-
-void DtiRegistration::defineRegisteredDTI()
-{
-   m_registeredNeo = m_neo; 
-
-   QString FAReg_name = "FA-registered.nrrd";
-   m_registeredNeo.FA = m_DTIRegistration_dir->filePath(FAReg_name); 
-
-   QString ADReg_name = "AD-registered.nrrd";
-   m_registeredNeo.AD = m_DTIRegistration_dir->filePath(ADReg_name); 
-}
-
-// Checking results // 
-
-bool DtiRegistration::checkRegisteredDTI()
-{
-   QFile* FAReg_file = new QFile(m_registeredNeo.FA);
-   QFile* ADReg_file = new QFile(m_registeredNeo.AD);
-
-   if( FAReg_file->exists() && ADReg_file->exists() )
-   {
-      return true;
-   } 
-   return false; 
-}
-
-
-void DtiRegistration::createDirectory()
-{
-   m_output_dir->mkpath("DTIRegistration");
-   m_DTIRegistration_path = m_output_dir->filePath("DTIRegistration");
-   m_DTIRegistration_dir = new QDir(m_DTIRegistration_path);
-}
-
-// Writing Scripts //
-
-QString DtiRegistration::variable(QString variable_name) {return "\" + " + variable_name + " + \"";}
-
-QString DtiRegistration::str(QString str) {return "\"" + str + "\"";}
-
-QString DtiRegistration::listToString(QStringList argumentsList)
-{
-   QString arguments = argumentsList[0];
-
-   QStringList::const_iterator it;
-   for (it = argumentsList.constBegin()+1; it != argumentsList.constEnd(); ++it)
-   {
-      arguments += "," + (*it) + "";
-   }
-
-      return arguments; 
+   m_registering_suffix = "-registered";
 }
 
 void DtiRegistration::initializeScript()
 {
-   m_script += "#!/usr/bin/env python\n";
+   definePython(m_script);
+   importGeneralModules(m_script);
 
-   // Import the librairies needed  
-   m_script += "import os \n";
-   m_script += "import sys \n";
-   m_script += "import signal \n";
-   m_script += "import logging \n";
-   m_script += "import subprocess \n";
    m_script += "import time \n";
    m_script += "import array \n\n";
 
-   m_script += "ANTS = " + str(m_executables->getExecutablePath("ANTS")) + "\n";
-   m_script += "ResampleVolume2 = " + str(m_executables->getExecutablePath("ResampleVolume2")) + "\n";
-   m_script += "ITKTransformTools = " + str(m_executables->getExecutablePath("ITKTransformTools")) + "\n";
-   m_script += "dtiestim = " + str(m_executables->getExecutablePath("dtiestim")) + "\n";
-   m_script += "ImageMath = " + str(m_executables->getExecutablePath("ImageMath")) + "\n";
-   m_script += "bet2 = " + str(m_executables->getExecutablePath("bet2")) + "\n";
-   m_script += "dtiprocess = " + str(m_executables->getExecutablePath("dtiprocess")) + "\n\n";
-}
+   defineExecutable(m_script, "ANTS");
+   defineExecutable(m_script, "ResampleVolume2");
+   defineExecutable(m_script, "ITKTransformTools");
+   defineExecutable(m_script, "dtiestim");
+   defineExecutable(m_script, "ImageMath");
+   defineExecutable(m_script, "bet2");
+   defineExecutable(m_script, "dtiprocess");
+   defineExecutable(m_script, "HistogramMatching");
 
-void DtiRegistration::implementLogStdoutAndStderr()
-{
-   m_script += "def logStdoutAndStderr(runningProcess):\n";
-
-   m_script += "\twhile True:\n";
-   m_script += "\t\tline = runningProcess.stdout.readline()\n";
-   m_script += "\t\tif line:\n";
-   m_script += "\t\t\tlogging.info(line.rstrip())\n";
-   m_script += "\t\tif not line: break\n";
-
-   m_script += "\twhile True:\n";
-   m_script += "\t\tline = runningProcess.stderr.readline()\n";
-   m_script += "\t\tif line:\n";
-   m_script += "\t\t\tlogging.error(line.rstrip())\n";
-   m_script += "\t\tif not line: break\n";
-
-   m_script += "\trunningProcess.wait()\n\n";
-}
-
-void DtiRegistration::implementLogStderr()
-{
-   m_script += "def logStderr(runningProcess):\n";
-
-   m_script += "\twhile True:\n";
-   m_script += "\t\tline = runningProcess.stderr.readline()\n";
-   m_script += "\t\tif line:\n";
-   m_script += "\t\t\tlogging.error(line.rstrip())\n";
-   m_script += "\t\tif not line: break\n";
-
-   m_script += "\trunningProcess.wait()\n\n";
+   m_script += "runningProcess = None\n\n";  
 }
 
 void DtiRegistration::upsample(QString image)
 {
    QStringList argumentsList;
 
-   QString grid_name = image + "-grid.nrrd";
-   QString grid_path = m_DTIRegistration_dir->filePath(grid_name); 
-   m_script += "\tgrid" + image + " = " + str(grid_path) + "\n"; 
+   QString grid_name = m_neo.prefix + "-" + image + "-grid.nrrd";
+   QString grid_path = m_module_dir->filePath(grid_name); 
+   m_script += "\tgrid" + image + " = '" + grid_path + "'\n"; 
+
+   m_script += "\tif checkFileExistence(grid" + image + ")==False:\n";
 
    argumentsList << "ITKTransformTools" << "'size'" << image << "'-'" << "'--grid'" << "grid" + image << "'--spacing'" << "'1'" << "'1'" << "'1'"; 
-   m_script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
-   m_script += "\tlogStdoutAndStderr(runningProcess)\n\n";
+   m_script += "\t\tlogging.info('- Computing the grid of the image upsampled...')\n";
+   m_script += "\t\targs = " + listToString(argumentsList) + "\n";
+   m_script += "\t\texecute(args)\n";
 
-   QString upsampledImage_name = image + "-upsampled.nrrd";
-   QString upsampledImage_path = m_DTIRegistration_dir->filePath(upsampledImage_name); 
-   m_script += "\tupsampled" + image + " = " + str(upsampledImage_path) + "\n"; 
+   QString upsampledImage_name = m_neo.prefix + "-" + image + "-upsampled.nrrd";
+   QString upsampledImage_path = m_module_dir->filePath(upsampledImage_name); 
+   m_script += "\tupsampled" + image + " = '" + upsampledImage_path + "'\n"; 
+
+   m_script += "\tif checkFileExistence(upsampled" + image + ")==False:\n";
 
    argumentsList.clear();
    argumentsList << "ResampleVolume2" << "'-R'" << "grid" + image << "'-i'" << "'linear'" << image << "upsampled" + image; 
-   m_script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stderr=subprocess.PIPE)\n";
-   m_script += "\tlogStderr(runningProcess)\n\n";
+   m_script += "\t\tlogging.info('- Upsampling the image...')\n";
+   m_script += "\t\targs = " + listToString(argumentsList) + "\n";
+   m_script += "\t\texecute(args)\n";
 }
 
 void DtiRegistration::generateDTI()
 {
    QStringList argumentsList;
 
-   QString DTI = m_DTIRegistration_dir->filePath("DTI.nrrd"); 
-   m_script += "\tDTI = " + str(DTI) + "\n";
+   QString DTI_name = m_neo.prefix + "-DTI.nrrd";
+   QString DTI_path = m_module_dir->filePath(DTI_name); 
+   m_script += "\tDTI = '" + DTI_path + "'\n";
+
+   m_script += "\tif checkFileExistence(DTI)==False:\n";
 
    argumentsList << "dtiestim" << "'--dwi_image'" << "DWI" << "'--B0'" << "b0" << "'--tensor_output'" << "DTI"; 
-   m_script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stderr=subprocess.PIPE)\n";
-   m_script += "\tlogStderr(runningProcess)\n\n";
+   m_script += "\t\targs = " + listToString(argumentsList) + "\n";
+   m_script += "\t\texecute(args)\n";
 }
 
 void DtiRegistration::skullStripb0()
 {
    QStringList argumentsList;
 
-   QString b0Nifti = m_DTIRegistration_dir->filePath("b0.nii.gz"); 
-   m_script += "\tb0Nifti = " + str(b0Nifti) + "\n";   
+   QString b0Nifti_name = m_neo.prefix + "-b0.nii.gz";
+   QString b0Nifti_path = m_module_dir->filePath(b0Nifti_name); 
+   m_script += "\tb0Nifti = '" + b0Nifti_path + "'\n";   
+
+   m_script += "\tif checkFileExistence(b0Nifti)==False:\n";
 
    argumentsList << "ResampleVolume2" << "b0" << "b0Nifti"; 
-   m_script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stderr=subprocess.PIPE)\n";
-   m_script += "\tlogStderr(runningProcess)\n\n";
+   m_script += "\t\tlogging.info('- Converting the b0 in nifti...')\n";
+   m_script += "\t\targs = " + listToString(argumentsList) + "\n";
+   m_script += "\t\texecute(args)\n";
 
-   QString outbase = m_DTIRegistration_dir->filePath("b0"); 
-   m_script += "\toutbase = " + str(outbase) + "\n";
+   QString b0Mask_name = m_neo.prefix + "-b0_mask.nii.gz";
+   QString b0Mask_path = m_module_dir->filePath(b0Mask_name); 
+   m_script += "\tb0Mask = '" + b0Mask_path + "'\n";
 
-   QString strippedb0 = m_DTIRegistration_dir->filePath("b0.nii.gz"); 
-   m_script += "\tstrippedb0 = " + str(strippedb0) + "\n";
+   QString strippedb0_name = m_neo.prefix + "-b0.nii.gz";
+   QString strippedb0_path = m_module_dir->filePath(strippedb0_name); 
+   m_script += "\tstrippedb0 = '" + strippedb0_path + "'\n";
 
-   QString b0Mask = m_DTIRegistration_dir->filePath("b0_mask.nii.gz"); 
-   m_script += "\tb0Mask = " + str(b0Mask) + "\n";
+   m_script += "\tif checkFileExistence(strippedb0)==False or checkFileExistence(b0Mask)==False:\n";
+
+   QString outbase_name = m_neo.prefix + "-b0";
+   QString outbase_path = m_module_dir->filePath(outbase_name); 
+   m_script += "\t\toutbase = '" + outbase_path + "'\n";
 
    argumentsList.clear();
    argumentsList << "bet2" << "b0Nifti" << "outbase" << "'-m'";
-   m_script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stderr=subprocess.PIPE)\n";
-   m_script += "\tlogStderr(runningProcess)\n\n";
+   m_script += "\t\tlogging.info('- Skull-stripping the b0...')\n";
+   m_script += "\t\targs = " + listToString(argumentsList) + "\n";
+   m_script += "\t\texecute(args)\n";
 }
 
 void DtiRegistration::skullStripDTI()
 {
    QStringList argumentsList;
 
-   QString strippedDTI = m_DTIRegistration_dir->filePath("DTI-stripped.nrrd"); 
-   m_script += "\tstrippedDTI = " + str(strippedDTI) + "\n";
+   QString strippedDTI_name = m_neo.prefix + "-DTI-stipped.nrrd";
+   QString strippedDTI_path = m_module_dir->filePath(strippedDTI_name); 
+   m_script += "\tstrippedDTI = '" + strippedDTI_path + "'\n";
 
    argumentsList << "ImageMath" << "DTI" << "'-mask'" << "b0Mask" << "'-outfile'" << "strippedDTI"; 
-   m_script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stderr=subprocess.PIPE)\n";
-   m_script += "\tlogStderr(runningProcess)\n\n";
+   m_script += "\targs = " + listToString(argumentsList) + "\n";
+   m_script += "\texecute(args)\n";
 }
 
 void DtiRegistration::generateFA()
 {
    QStringList argumentsList;
 
-   QString FA = m_DTIRegistration_dir->filePath("FA.nrrd"); 
-   m_script += "\tFA = " + str(FA) + "\n";
+   QString FA_name = m_neo.prefix + "-FA.nrrd"; 
+   QString FA_path = m_module_dir->filePath(FA_name); 
+   m_script += "\tFA = '" + FA_path + "'\n";
 
    argumentsList << "dtiprocess" << "'--dti_image'" << "strippedDTI" << "'--fa_output'" << "FA"; 
-   m_script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stderr=subprocess.PIPE)\n";
-   m_script += "\tlogStderr(runningProcess)\n\n";
+   m_script += "\targs = " + listToString(argumentsList) + "\n";
+   m_script += "\texecute(args)\n";
 }
 
 void DtiRegistration::generateAD()
 {
    QStringList argumentsList;
 
-   QString AD = m_DTIRegistration_dir->filePath("AD.nrrd"); 
-   m_script += "\tAD = " + str(AD) + "\n";
+   QString AD_name = m_neo.prefix + "-AD.nrrd";
+   QString AD_path = m_module_dir->filePath(AD_name); 
+   m_script += "\tAD = '" + AD_path + "'\n";
 
    argumentsList << "dtiprocess" << "'--dti_image'" << "strippedDTI" << "'--lambda1_output'" << "AD"; 
-   m_script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stderr=subprocess.PIPE)\n";
-   m_script += "\tlogStderr(runningProcess)\n\n";
+   m_script += "\targs = " + listToString(argumentsList) + "\n";
+   m_script += "\texecute(args)\n";
 }
 
 void DtiRegistration::calculateTransformations()
@@ -226,133 +150,132 @@ void DtiRegistration::calculateTransformations()
    m_script += "\tmodality1 = 'CC[' + T2 + ',' + strippedb0 + ',1,2]'\n"; 
    m_script += "\tmodality2 = 'CC[' + T2 + ',' + upsampledAD + ',1,2]'\n"; 
 
-   QString output = m_DTIRegistration_dir->filePath("DTI_to_neo-.nii.gz"); 
-   m_script += "\toutput = " + str(output) + "\n";
+   QString output_name = "DTI_to_" + m_neo.prefix + "-.nii.gz";
+   QString output_path = m_module_dir->filePath(output_name); 
+   m_script += "\toutput = '" + output_path + "'\n";
 
-   QString warp = m_DTIRegistration_dir->filePath("DTI_to_neo-Warp.nii.gz"); 
-   m_script += "\twarp = " + str(warp) + "\n";
+   QString warp_name = "DTI_to_" + m_neo.prefix + "-Warp.nii.gz";
+   QString warp_path = m_module_dir->filePath(warp_name); 
+   m_script += "\twarp = '" + warp_path + "'\n";
 
-   QString affine = m_DTIRegistration_dir->filePath("DTI_to_neo-Affine.txt"); 
-   m_script += "\taffine = " + str(affine) + "\n";
+   QString affine_name = "DTI_to_" + m_neo.prefix + "-Affine.txt";
+   QString affine_path = m_module_dir->filePath(affine_name); 
+   m_script += "\taffine = '" + affine_path + "'\n";
 
    m_script += "\tif checkFileExistence(affine)==False or checkFileExistence(warp)==False:\n";
    argumentsList << "ANTS" << "'3'" << "'-m'" << "modality1" << "'-m'" << "modality2" << "'-o'" << "output" << "'-i'" << "'30x20x10'" << "'-r'" << "'Gauss[5,5]'" << "'-t'" << "'SyN[0.125]'"; 
-   m_script += "\t\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
-   m_script += "\t\tlogStdoutAndStderr(runningProcess)\n\n";
-}
+   m_script += "\t\tlogging.info('- Calculating transformations...')\n";
+   m_script += "\t\targs = " + listToString(argumentsList) + "\n";
+   m_script += "\t\texecute(args)\n";
 
-void DtiRegistration::applyTransformations()
-{
-   QStringList argumentsList;
-
+   argumentsList.clear();
    argumentsList << "'text_subst.pl'" << "'MatrixOffsetTransformBase_double_3_3'" << "'AffineTransform_double_3_3'" << "affine"; 
-   m_script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
-   m_script += "\tlogStdoutAndStderr(runningProcess)\n\n";
-
-   QString registeredAD = m_DTIRegistration_dir->filePath("AD-registered.nrrd"); 
-   m_script += "\tregisteredAD = " + str(registeredAD) + "\n";
-
-   argumentsList.clear();
-   argumentsList << "ResampleVolume2" << "upsampledAD" << "registeredAD" << "'--Reference'" << "T1" << "'-i'" << "'linear'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine"; 
-   m_script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stderr=subprocess.PIPE)\n";
-   m_script += "\tlogStderr(runningProcess)\n\n";
-
-   m_neo.AD = registeredAD;
-
-   QString registeredFA = m_DTIRegistration_dir->filePath("FA-registered.nrrd"); 
-   m_script += "\tregisteredFA = " + str(registeredFA) + "\n";
-
-   argumentsList.clear();
-   argumentsList << "ResampleVolume2" << "upsampledFA" << "registeredFA" << "'--Reference'" << "T1" << "'-i'" << "'linear'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine"; 
-   m_script += "\trunningProcess = subprocess.Popen([" + listToString(argumentsList) + "],stderr=subprocess.PIPE)\n";
-   m_script += "\tlogStderr(runningProcess)\n\n";
-
-   m_neo.FA = registeredFA;
+   m_script += "\targs = " + listToString(argumentsList) + "\n";
+   m_script += "\texecute(args)\n\n";
 }
 
-
-void DtiRegistration::implementRegisterDTI()
+void DtiRegistration::applyTransformations(QString image)
 {
    QStringList argumentsList;
 
-   m_script += "def signal_handler(signal, frame):\n";
-   m_script += "\tprint '*************** Signal received! ******************'\n";
-   m_script += "\tprint runningProcess\n";
-   m_script += "\tprint runningProcess.pid\n";
-   m_script += "\trunningProcess.terminate()\n";
-   m_script += "\tsys.exit(0)\n\n";
+   QString registeredImage_name = m_neo.prefix + "-" + image + "-registered.nrrd";
+   QString registeredImage_path = m_module_dir->filePath(registeredImage_name); 
+   m_script += "\tregistered" + image + " = '" + registeredImage_path + "'\n";
 
-   m_script += "def checkFileExistence(fileName):\n";
-   m_script += "\ttry:\n";
-   m_script += "\t\twith open(fileName):\n";
-   m_script += "\t\t\treturn True\n";
-   m_script += "\texcept IOError:\n";
-   m_script += "\t\treturn False\n\n";
+   argumentsList << "ResampleVolume2" << "upsampled" + image << "registered" + image << "'--Reference'" << "T1" << "'-i'" << "'linear'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine"; 
+   m_script += "\tlogging.info('- Applying transformations to the " + image + "...')\n";
+   m_script += "\targs = " + listToString(argumentsList) + "\n";
+   m_script += "\texecute(args)\n";
+
+   if(image == "FA")
+   {
+      m_neo.FA = registeredImage_path;
+   }
+   if(image == "AD")
+   {
+      m_neo.AD = registeredImage_path;
+   }
+}
+
+void DtiRegistration::implementRun()
+{
+   QStringList argumentsList;
    
-   m_script += "signal.signal(signal.SIGINT, signal_handler)\n";
-   m_script += "signal.signal(signal.SIGTERM, signal_handler)\n\n";
-
    m_script += "def run():\n\n";
 
-   m_script += "\tT1 = " + str(m_neo.T1) + "\n";
-   m_script += "\tT2 = " + str(m_neo.T2) + "\n";
-   m_script += "\tDWI = " + str(m_neo.DWI) + "\n";
-   m_script += "\tb0 = " + str(m_neo.b0) + "\n\n";
+   m_script += "\tsignal.signal(signal.SIGINT, stop)\n";
+   m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
 
-   m_script += "\t# Upsample b0 #\n";
+   m_script += "\tlogging.info('=== DTI Registration ===')\n";
+   m_script += "\tlogging.debug('')\n";
+
+   m_script += "\tT1 = '" + m_neo.T1 + "'\n";
+   m_script += "\tT2 = '" + m_neo.T2 + "'\n";
+   m_script += "\tDWI = '" + m_neo.DWI + "'\n";
+   m_script += "\tb0 = '" + m_neo.b0 + "'\n";
+
+   m_script += "\n\t# Upsample b0 #\n";
+   m_script += "\tlogging.info('Upsampling the b0 :')\n";
+   m_script += "\tlogging.debug('')\n";
    upsample("b0"); 
+   m_script += "\tlogging.debug('')\n";
 
-   m_script += "\t# Generate DTI #\n";
+   m_script += "\n\t# Generate DTI #\n";
+   m_script += "\tlogging.info('Generating the DTI...')\n";
    generateDTI(); 
 
-   m_script += "\t# Skull-Strip b0 #\n";
+   m_script += "\n\t# Skull-Strip b0 #\n";
+   m_script += "\tlogging.info('Skull-stripping the b0 :')\n";
    skullStripb0(); 
 
-   m_script += "\t# Skull-Strip DTI #\n";
+   m_script += "\n\t# Skull-Strip DTI #\n";
+   m_script += "\tlogging.info('Skull-stripping the DTI...')\n";
    skullStripDTI(); 
 
-   m_script += "\t# Generate FA #\n";  
+   m_script += "\n\t# Generate FA #\n";  
+   m_script += "\tlogging.info('Generating the FA...')\n";
    generateFA(); 
 
-   m_script += "\t# Upsample FA #\n";
-   upsample("FA"); 
+   m_script += "\n\t# Upsample FA #\n";
+   m_script += "\tlogging.info('Upsampling the FA :')\n";
+   m_script += "\tlogging.debug('')\n";
+   upsample("FA");
+   m_script += "\tlogging.debug('')\n"; 
 
-   m_script += "\t# Generate AD #\n";  
+   m_script += "\n\t# Generate AD #\n"; 
+   m_script += "\tlogging.info('Generating the AD...')\n";
    generateAD(); 
 
-   m_script += "\t# Upsample AD #\n";
+   m_script += "\n\t# Upsample AD #\n";
+   m_script += "\tlogging.info('Upsampling the AD :')\n";
+   m_script += "\tlogging.debug('')\n"; 
    upsample("AD"); 
+   m_script += "\tlogging.debug('')\n";
 
-   m_script += "\t# Calculate Transformations #\n";
+   m_script += "\n\t# Registering FA and AD #\n";
+   m_script += "\tlogging.info('Registering the FA and the AD :')\n";
    calculateTransformations(); 
-
-   m_script += "\t# Apply Transformations #\n";
-   applyTransformations(); 
-}
-
-void DtiRegistration::writeRegisterDTI()
-{
-   initializeScript();
-
-   implementLogStdoutAndStderr(); 
-   implementLogStderr(); 
-
-   implementRegisterDTI();
-
-   QString script_path = m_output_dir->filePath("registerDTI.py");
-
-   std::ofstream* script_stream = new std::ofstream((script_path.toStdString()).c_str(), std::ios::out | std::ios::trunc);
-   *script_stream << m_script.toStdString() << std::endl;   
-
-   script_stream->close();
+   applyTransformations("FA"); 
+   applyTransformations("AD"); 
 }
 
 void DtiRegistration::update()
 {
-   createDirectory();       
-   writeRegisterDTI();
+   initializeScript();
+
+   implementStop(m_script);
+   implementCheckFileExistence(m_script);
+   implementExecute(m_script); 
+   implementExecutePipe(m_script); 
+
+   implementRun();
+
+   writeScript(m_script);
 }
 
-Neo DtiRegistration::getOutput() {return m_registeredNeo;}
+Neo DtiRegistration::getOutput()
+{
+   return m_neo;
+}
 
 

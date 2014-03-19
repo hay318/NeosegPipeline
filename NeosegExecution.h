@@ -10,78 +10,57 @@
 // Qt Librairies
 #include <QString>
 #include <QDir>
+#include "Script.h"
 #include "Atlas.h"
 #include "Neo.h"
 #include "NeosegParameters.h"
 #include "ExecutablePaths.h"
 
 
-class NeosegExecution
+class NeosegExecution : public Script 
 {
    public:
 
    // Constructor
-   NeosegExecution();
+   NeosegExecution(QString module);
 
    // Setting Parameters
-   void setNeo(Neo neo);
    void setAtlas(QString atlas);  
-   void setOutputPath(QString output_path); 
+   void setUsingFA(bool usingFA);
+   void setUsingAD(bool usingAD);
+   void setComputing3LabelsSeg(bool computing3LabelsSeg);
    void setNeosegParameters(NeosegParameters* parameters);
-   void setExecutablePaths(ExecutablePaths* executables);
 
    // Checking Existing Results
    void defineSegmentation();
    bool checkSegmentation();
 
-   // Create Directory 
-   void createDirectory();
-
-   // Writing Script 
-   QString variable(QString variable_name);
-   QString str(QString str);
-   QString listToString(QStringList argumentsList);
-
    // Implementing Script 
-   void initializeScript( QString &script );
-   void implementLogStdoutAndStderr(QString &script);
-   void addSubElement(QString &script, QString element, QString pythonName, QString XMLname, QString value);
+   void initializeScript(QString &script);
    void writeXMLFile(QString &script);
-   void writeWriteAffineTranformationFile(QString& script);
+   void implementWriteAffineTranformationFile(QString& script);
    void writeAffineTranformationFiles(QString& script);
    void runNeoseg(QString &script);
-   void implementExecuteNeoseg( QString &script );  
-   void writeExecuteNeoseg( );
+   void mergeWhiteMatters(QString &script);
+   void implementRun(QString &script);  
 
 
    // Updating & Getting Output 
    void update();
-   QString getOutput();
+   Neo getOutput();
+
 
    private:
-   Neo         m_neo;
-   QString     m_suffix;
-   QString     m_atlas; 
-   QString     m_segmentation; 
-
-   bool        m_usingFA;
-   bool        m_usingAD;
-
-   QString     m_Neoseg; 
-
-   QString     m_XML_path;
 
    // Parameters
-   NeosegParameters* m_parameters;
+   QString              m_atlas; 
+   bool                 m_usingFA;
+   bool                 m_usingAD;
+   bool                 m_computing3LabelsSeg;
+   NeosegParameters*    m_parameters;
 
-   //Executables 
-   ExecutablePaths* m_executables;
-
-
-   // Output //
-   QDir*                         m_output_dir;          
-   QString                       m_neosegExecution_path;    
-   QDir*                         m_neosegExecution_dir; 
+   // Outout 
+   QString              m_segmentation;
 };
 
 #endif

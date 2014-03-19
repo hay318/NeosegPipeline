@@ -9,7 +9,7 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    m_parametersSet = false; 
    m_executablesSet = false; 
 
-   m_thread = new MainScriptThread(); 
+   initializeImagesMap();
 
    //Connections
 
@@ -58,6 +58,9 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    connect(loadExecutables_button,  SIGNAL(clicked()), this, SLOT(selectExecutables()));
    connect(loadExecutables_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterExecutables()));
 
+   connect(loadExecutables_button,  SIGNAL(clicked()), this, SLOT(selectExecutables()));
+   connect(loadExecutables_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterExecutables()));
+
    // Save Parameters
    connect(saveParameters_button, SIGNAL(clicked()), this, SLOT(saveParameters()));
 
@@ -67,11 +70,12 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    // Run Pipeline //
    connect(runPipeline_button, SIGNAL(clicked()), this, SLOT(runPipeline()));
 
-   newAtlas_widget->hide();
+   newAtlas_radioButton->setChecked(true);
    existingAtlas_widget->hide();
 
-   runPipeline_progressBar->hide(); 
+   runPipeline_progressBar->setEnabled(false); 
    displayResults_button->setEnabled(false);
+   stopPipeline_button->setEnabled(false);
 
    //QApplication::sendPostedEvents(this, QEvent::LayoutRequest);  
    //tabs->adjustSize();
@@ -80,14 +84,51 @@ DerivedWindow::DerivedWindow() : Ui_Window()
 
 void DerivedWindow::setPipelineParameters(PipelineParameters* parameters)
 {  
-   m_parameters=parameters;
-   m_antsParameters=m_parameters->getAntsParameters(); 
-   m_neosegParameters=m_parameters->getNeosegParameters(); 
+   m_parameters = parameters;
+   m_antsParameters = m_parameters->getAntsParameters(); 
+   m_neosegParameters = m_parameters->getNeosegParameters(); 
+   m_executables = m_parameters->getExecutablePaths();
    initializeParameters();
 }
 
-void DerivedWindow::setPipeline(Pipeline* pipeline) {m_pipeline=pipeline;}
+void DerivedWindow::setPipeline(Pipeline* pipeline) 
+{
+   m_pipeline = pipeline;
+}
 
+void DerivedWindow::setMainScriptThread(MainScriptThread* thread) 
+{
+   m_thread = thread;
+}
+
+void DerivedWindow::initializeImagesMap()
+{
+  m_images.insert(std::pair<QString, QLineEdit*>("T1", T1_lineEdit));
+  m_images.insert(std::pair<QString, QLineEdit*>("T2", T2_lineEdit));
+  m_images.insert(std::pair<QString, QLineEdit*>("mask", mask_lineEdit));
+  m_images.insert(std::pair<QString, QLineEdit*>("DWI", DWI_lineEdit));
+  m_images.insert(std::pair<QString, QLineEdit*>("b0", b0_lineEdit));
+}
+
+
+void DerivedWindow::selectImage(QString image)
+{
+	QString image_path = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
+   (m_images[image])->setText(image_path);
+}
+void DerivedWindow::enterImage(QString image)
+{
+   QString image_path = (m_images[image])->text();
+
+   if(!image_path.isEmpty()) 
+   {      
+      if(!m_parameters->checkT1(image_path))
+      {
+         (m_images[image])->clear();
+         QMessageBox::critical(this, image, image_path + "\ndoes not exist, enter a new file path");
+      }
+   }
+}
 
 //***** Ouput *****//
 void DerivedWindow::selectOuput()
@@ -114,108 +155,52 @@ void DerivedWindow::enterOutput()
 //***** T1 *****//
 void DerivedWindow::selectT1()
 {
-	QString T1 = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
-   T1_lineEdit->setText(T1);
+   selectImage("T1");
 }
 void DerivedWindow::enterT1()
 {
-   QString T1 = T1_lineEdit->text();
-
-   if(!T1.isEmpty()) 
-   {      
-      if(!m_parameters->checkT1(T1))
-      {
-         T1_lineEdit->clear();
-         QMessageBox::critical(this, "T1 File", T1 + "\ndoes not exist, enter a new file path");
-      }
-   }
+   enterImage("T1");
 }
-
 
 //***** T2 *****//
 void DerivedWindow::selectT2()
 {
-	QString T2 = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
-   T2_lineEdit->setText(T2);
+   selectImage("T2");
 }
 void DerivedWindow::enterT2()
 {
-   QString T2 = T2_lineEdit->text();
-
-   if(!T2.isEmpty()) 
-   {
-      if(!m_parameters->checkT2(T2))
-      {
-         T2_lineEdit->clear();
-         QMessageBox::critical(this, "T2 File", T2 + "\ndoes not exist, enter a new file path");
-      }
-   }
+   enterImage("T2");
 }
-
-
 
 //***** Mask *****//
 void DerivedWindow::selectMask()
 {
-   QString mask = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
-   mask_lineEdit->setText(mask);
+   selectImage("mask");
 }
 void DerivedWindow::enterMask()
 {
-   QString mask = mask_lineEdit->text(); 
-
-   if(!mask.isEmpty()) 
-   {
-      if(!m_parameters->checkMask(mask))
-      {
-         mask_lineEdit->clear();
-         QMessageBox::critical(this, "Mask File", mask + "\ndoes not exist, enter a new file path");
-      }
-   }
+   enterImage("mask");
 }
-
 
 //***** DWI *****//
 void DerivedWindow::selectDWI()
 {
-   QString DWI = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
-   DWI_lineEdit->setText(DWI);
+   selectImage("DWI");
 }
 void DerivedWindow::enterDWI()
 {
-   QString DWI = DWI_lineEdit->text(); 
-
-   if(!DWI.isEmpty()) 
-   {
-      if(!m_parameters->checkDWI(DWI))
-      {
-         DWI_lineEdit->clear();
-         QMessageBox::critical(this, "DWI File", DWI + "\ndoes not exist, enter a new file path");
-      }
-   }
+   enterImage("DWI");
 }
-
 
 //***** b0*****//
 void DerivedWindow::selectB0()
 {
-   QString b0 = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
-   b0_lineEdit->setText(b0);
+   selectImage("b0");
 }
 void DerivedWindow::enterB0()
 {
-   QString b0 = b0_lineEdit->text(); 
-
-   if(!b0.isEmpty()) 
-   {
-      if(!m_parameters->checkb0(b0))
-      {
-         b0_lineEdit->clear();
-         QMessageBox::critical(this, "b0 File", b0 + "\ndoes not exist, enter a new file path");
-      }
-   }
+   enterImage("b0");
 }
-
 
 //***** New Atlas/Existing Atlas *****//
 void DerivedWindow::selectNewOrExistingAtlas()
@@ -323,17 +308,16 @@ void DerivedWindow::checkSelectedAtlases()
    QStringList::const_iterator it;
    for (it = m_selectedAtlases.constBegin(); it != m_selectedAtlases.constEnd(); ++it) 
    {
-         QList<QListWidgetItem *> items = atlasPopulation_listWidget->findItems(*it, Qt::MatchExactly);
+      QList<QListWidgetItem *> items = atlasPopulation_listWidget->findItems(*it, Qt::MatchExactly);
 
-         QList<QListWidgetItem *>::iterator item; 
-         for(item=items.begin(); item!=items.end(); ++item)
-         {
-            (*item)->setCheckState(Qt::Checked);
-         }
+      QList<QListWidgetItem *>::iterator item; 
+      for(item=items.begin(); item!=items.end(); ++item)
+      {
+         (*item)->setCheckState(Qt::Checked);
+      }
    }    
-
-
 }
+
 
 //***** Select/Unselect Atlas *****//
 void DerivedWindow::selectAtlas(QListWidgetItem* item)
@@ -523,15 +507,27 @@ void DerivedWindow::initializeParameters()
    //deformationFieldSigma_spinBox->setMinimum(m_antsParameters->getDeformationFieldSigmaMin());
    deformationFieldSigma_spinBox->setValue(m_antsParameters->getDeformationFieldSigma());
 
-   //truncation_spinBox->setMinimum(m_antsParameters->getTruncationMin());
-   truncation_spinBox->setValue(m_antsParameters->getTruncation());
-
+   SegPostProcessCLP_lineEdit->setText(m_executables->getExecutablePath("SegPostProcessCLP"));
+   N4ITKBiasFieldCorrection_lineEdit->setText(m_executables->getExecutablePath("N4ITKBiasFieldCorrection"));
+   ITKTransformTools_lineEdit->setText(m_executables->getExecutablePath("ITKTransformTools"));
+   bet2_lineEdit->setText(m_executables->getExecutablePath("bet2"));
+   dtiestim_lineEdit->setText(m_executables->getExecutablePath("dtiestim"));
+   dtiprocess_lineEdit->setText(m_executables->getExecutablePath("dtiprocess"));
+   ANTS_lineEdit->setText(m_executables->getExecutablePath("ANTS"));
+   ResampleVolume2_lineEdit->setText(m_executables->getExecutablePath("ResampleVolume2"));
+   ImageMath_lineEdit->setText(m_executables->getExecutablePath("ImageMath"));
+   InsightSNAP_lineEdit->setText(m_executables->getExecutablePath("InsightSNAP"));
 }
 
 
 void DerivedWindow::setParameters()
 {
    // Data
+   if(!(prefix_lineEdit->text()).isEmpty())
+   {
+      m_parameters->setPrefix(prefix_lineEdit->text()); 
+   }
+
    if(!(output_lineEdit->text()).isEmpty())
    {
       m_parameters->setOutput(output_lineEdit->text()); 
@@ -562,7 +558,7 @@ void DerivedWindow::setParameters()
       m_parameters->setb0(b0_lineEdit->text());
    }  
 
-   m_parameters->setSkullStripping(skullStripping_checkbox->isChecked());
+   //m_parameters->setSkullStripping(skullStripping_checkbox->isChecked());
 
    //Atlas Population 
    if (newAtlas_radioButton->isChecked()) 
@@ -610,7 +606,6 @@ void DerivedWindow::setParameters()
    m_antsParameters->setRegularizationType(regularizationType_comboBox->currentText());  
    m_antsParameters->setGradientFieldSigma(gradientFieldSigma_spinBox->value());
    m_antsParameters->setDeformationFieldSigma(deformationFieldSigma_spinBox->value());
-   m_antsParameters->setTruncation(truncation_spinBox->value());
 
 
    // Neoseg parameters 
@@ -630,8 +625,12 @@ void DerivedWindow::setParameters()
    m_neosegParameters->setRefinement(refinement_checkBox->isChecked());
    m_neosegParameters->setInitialParzenKernelWidth(initialParzenKernelWidth_spinBox->value());
 
+   m_parameters->setUsingFA(usingFA_checkBox->isChecked());
+   m_parameters->setUsingAD(usingAD_checkBox->isChecked());
+   m_parameters->setComputing3LabelsSeg(computing3LabelsSeg_checkBox->isChecked());
 
    m_parametersSet = true; 
+
 }
 
 
@@ -685,8 +684,6 @@ void DerivedWindow::closeEvent(QCloseEvent *event)
 {
    if(m_thread->isRunning())
    {
-      std::cout<<"thread running"<<std::endl; 
-
       QMessageBox messageBox;
 
       messageBox.setText("The pipeline is still running,");
