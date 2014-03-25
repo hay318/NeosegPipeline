@@ -3,6 +3,7 @@
 PipelineParameters::PipelineParameters()
 {  
    m_prefix = "neo";
+   m_suffix = "NP";
 
    m_newAtlas_default = true; 
    m_newAtlas = m_newAtlas_default;
@@ -121,14 +122,24 @@ QFileInfoList PipelineParameters::find(QDir* dir, QString name)
 } 
 
 
-//Suffix
+// Prefix 
 void PipelineParameters::setPrefix(QString prefix) 
 {
-   m_prefix=prefix;
+   m_prefix = prefix;
 }
 QString PipelineParameters::getPrefix() 
 {
    return m_prefix;
+}
+
+// Suffix
+void PipelineParameters::setSuffix(QString suffix) 
+{
+   m_suffix = suffix;
+}
+QString PipelineParameters::getSuffix() 
+{
+   return m_suffix;
 }
 
 // Output
@@ -234,15 +245,6 @@ Neo PipelineParameters::getNeo()
    return m_neo;
 }
 
-// SkullStripping
-void PipelineParameters::setSkullStripping(bool skullStripping)
-{
-   m_skullStripping=skullStripping;
-}
-bool PipelineParameters::getSkullStripping()
-{
-   return m_skullStripping;
-}
 
 // New Atlas
 void PipelineParameters::setNewAtlas(bool newAtlas)

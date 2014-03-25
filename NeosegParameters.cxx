@@ -2,9 +2,9 @@
 
 NeosegParameters::NeosegParameters()
 {
-   m_filterMethod_values.push_back("curvature flow"); 
-   m_filterMethod_values.push_back("grad aniso diffusion"); 
-   m_filterMethod_default=m_filterMethod_values[0];
+   m_filterMethod_values.insert("curvature flow", 0); 
+   m_filterMethod_values.insert("grad aniso diffusion", 1); 
+   m_filterMethod_default="curvature flow";
    m_filterMethod=m_filterMethod_default;
 
    m_filterIterations_min=0;
@@ -17,9 +17,9 @@ NeosegParameters::NeosegParameters()
    m_filterTimeStep_default=0.01;   
    m_filterTimeStep=m_filterTimeStep_default;
 
-   m_referenceImage_values.push_back("T1"); 
-   m_referenceImage_values.push_back("T2"); 
-   m_referenceImage_default=m_referenceImage_values[0];
+   m_referenceImage_values.insert("T1", 0); 
+   m_referenceImage_values.insert("T2", 1); 
+   m_referenceImage_default="T2";
    m_referenceImage=m_referenceImage_default;
 
    m_priorThreshold_min=0;
@@ -96,12 +96,12 @@ bool NeosegParameters::isBetween(double value, double min, double max)
 }
 
 
-bool NeosegParameters::isIn(QString item, std::vector<QString> vector)
+bool NeosegParameters::isIn(QString item, QMap<QString, int> map)
 {
-   std::vector<QString>::iterator it; 
-   for(it=vector.begin(); it!=vector.end(); ++it)
+   QMap<QString, int>::iterator it; 
+   for(it=map.begin(); it!=map.end(); ++it)
    {
-      if(item.compare(*it, Qt::CaseInsensitive))
+      if(item.compare(it.key(), Qt::CaseInsensitive))
       {
          return true;
       }
@@ -109,86 +109,192 @@ bool NeosegParameters::isIn(QString item, std::vector<QString> vector)
    return false; 
 }
 
+// Reference image
+bool NeosegParameters::checkReferenceImage(QString referenceImage)
+{
+   return isIn(referenceImage, m_referenceImage_values);
+}
+void NeosegParameters::setReferenceImage(QString referenceImage)
+{
+   m_referenceImage=referenceImage;
+}
+QString NeosegParameters::getReferenceImage()
+{
+   return m_referenceImage;
+}
+int NeosegParameters::getReferenceImageIndex()
+{
+   return m_referenceImage_values[m_referenceImage]; 
+}
 
 
+// Filter method 
+bool NeosegParameters::checkFilterMethod(QString filterMethod)
+{
+   return isIn(filterMethod, m_filterMethod_values);
+}
+void NeosegParameters::setFilterMethod(QString filterMethod)
+{
+   m_filterMethod=filterMethod;
+}
+QString NeosegParameters::getFilterMethod()
+{
+   return m_filterMethod;
+}
+int NeosegParameters::getFilterMethodIndex()
+{
+   return m_filterMethod_values[m_filterMethod]; 
+}
 
-bool NeosegParameters::checkFilterMethod(QString filterMethod) {return isIn(filterMethod, m_filterMethod_values);}
-
-bool NeosegParameters::checkNumberOfIterations(int filterIterations) {return isSuperior(filterIterations, m_filterIterations_min);}
-
-bool NeosegParameters::checkTimeStep(double filterTimeStep) {return isSuperior(filterTimeStep, m_filterTimeStep_min);}
-
-bool NeosegParameters::checkReferenceImage(QString referenceImage) {return isIn(referenceImage, m_referenceImage_values);}
-
-bool NeosegParameters::checkPriorThreshold(double priorThreshold) {return isBetween(priorThreshold, m_priorThreshold_min, m_priorThreshold_max);}
-
-bool NeosegParameters::checkMaxBiasDegree(int maxBiasDegree) {return isSuperior(maxBiasDegree, m_maxBiasDegree_min);}
-
-bool NeosegParameters::checkPrior1(double prior1) {return isSuperior(prior1, m_prior_min);}
-
-bool NeosegParameters::checkPrior2(double prior2) {return isSuperior(prior2, m_prior_min);}
-
-bool NeosegParameters::checkPrior3(double prior3) {return isSuperior(prior3, m_prior_min);}
-
-bool NeosegParameters::checkPrior4(double prior4) {return isSuperior(prior4, m_prior_min);}
-
-bool NeosegParameters::checkPrior5(double prior5) {return isSuperior(prior5, m_prior_min);}
-
-bool NeosegParameters::checkInitialParzenKernelWidth(double initialParzenKernelWidth) {return isSuperior(initialParzenKernelWidth, m_initialParzenKernelWidth_min);}
-
-
-void NeosegParameters::setFilterMethod(QString filterMethod) {m_filterMethod=filterMethod;}
-
-void NeosegParameters::setNumberOfIterations(int filterIterations) {m_filterIterations=filterIterations;}
-
-void NeosegParameters::setTimeStep(double filterTimeStep) {m_filterTimeStep=filterTimeStep;}
-
-void NeosegParameters::setReferenceImage(QString referenceImage) {m_referenceImage=referenceImage;}
-
-void NeosegParameters::setPriorThreshold(double priorThreshold) {m_priorThreshold=priorThreshold; }
-
-void NeosegParameters::setMaxBiasDegree(int maxBiasDegree) {m_maxBiasDegree=maxBiasDegree; }
-
-void NeosegParameters::setPrior1(double prior1) {m_prior1=prior1;}
-
-void NeosegParameters::setPrior2(double prior2) {m_prior2=prior2;}
-
-void NeosegParameters::setPrior3(double prior3) {m_prior3=prior3;}
-
-void NeosegParameters::setPrior4(double prior4) {m_prior4=prior4;}
-
-void NeosegParameters::setPrior5(double prior5) {m_prior5=prior5;}
-
-void NeosegParameters::setRefinement(bool refinement) {m_refinement=refinement;}
-
-void NeosegParameters::setInitialParzenKernelWidth(double initialParzenKernelWidth) {m_initialParzenKernelWidth=initialParzenKernelWidth;}
+// Number of iterations
+bool NeosegParameters::checkNumberOfIterations(int filterIterations)
+{
+   return isSuperior(filterIterations, m_filterIterations_min);
+}
+void NeosegParameters::setNumberOfIterations(int filterIterations)
+{
+   m_filterIterations=filterIterations;
+}
+int NeosegParameters::getNumberOfIterations()
+{
+   return m_filterIterations;
+}
 
 
-QString NeosegParameters::getFilterMethod() {return m_filterMethod;}
-
-int NeosegParameters::getNumberOfIterations() {return m_filterIterations;}
-
-double NeosegParameters::getTimeStep() {return m_filterTimeStep;}
-
-QString NeosegParameters::getReferenceImage() {return m_referenceImage;}
-
-double NeosegParameters::getPriorThreshold() {return m_priorThreshold;}
-
-int NeosegParameters::getMaxBiasDegree() {return m_maxBiasDegree;}
-
-double NeosegParameters::getPrior1() {return m_prior1;}
-
-double NeosegParameters::getPrior2() {return m_prior2;}
-
-double NeosegParameters::getPrior3() {return m_prior3;}
-
-double NeosegParameters::getPrior4() {return m_prior4;}
-
-double NeosegParameters::getPrior5() {return m_prior5;}
-
-bool NeosegParameters::getRefinement() {return m_refinement;}
-
-double NeosegParameters::getInitialParzenKernelWidth() {return m_initialParzenKernelWidth;}
+// Time step
+bool NeosegParameters::checkTimeStep(double filterTimeStep)
+{
+   return isSuperior(filterTimeStep, m_filterTimeStep_min);
+}
+void NeosegParameters::setTimeStep(double filterTimeStep)
+{
+   m_filterTimeStep=filterTimeStep;
+}
+double NeosegParameters::getTimeStep()
+{
+   return m_filterTimeStep;
+}
 
 
+// Prior threshold 
+bool NeosegParameters::checkPriorThreshold(double priorThreshold)
+{
+   return isBetween(priorThreshold, m_priorThreshold_min, m_priorThreshold_max);
+}
+void NeosegParameters::setPriorThreshold(double priorThreshold)
+{
+   m_priorThreshold=priorThreshold;
+}
+double NeosegParameters::getPriorThreshold()
+{
+   return m_priorThreshold;
+}
+
+// Max bias degree
+bool NeosegParameters::checkMaxBiasDegree(int maxBiasDegree)
+{
+   return isSuperior(maxBiasDegree, m_maxBiasDegree_min);
+}
+void NeosegParameters::setMaxBiasDegree(int maxBiasDegree)
+{
+   m_maxBiasDegree=maxBiasDegree;
+}
+int NeosegParameters::getMaxBiasDegree()
+{
+   return m_maxBiasDegree;
+}
+
+// Prior 1
+bool NeosegParameters::checkPrior1(double prior1)
+{
+   return isSuperior(prior1, m_prior_min);
+}
+void NeosegParameters::setPrior1(double prior1)
+{
+   m_prior1=prior1;
+}
+double NeosegParameters::getPrior1()
+{
+   return m_prior1;
+}
+
+// Prior 2 
+bool NeosegParameters::checkPrior2(double prior2)
+{
+   return isSuperior(prior2, m_prior_min);
+}
+void NeosegParameters::setPrior2(double prior2)
+{
+   m_prior2=prior2;
+}
+double NeosegParameters::getPrior2()
+{
+   return m_prior2;
+}
+
+// Prior 3 
+bool NeosegParameters::checkPrior3(double prior3)
+{
+   return isSuperior(prior3, m_prior_min);
+}
+void NeosegParameters::setPrior3(double prior3)
+{
+   m_prior3=prior3;
+}
+double NeosegParameters::getPrior3()
+{
+   return m_prior3;
+}
+
+// Prior 4
+bool NeosegParameters::checkPrior4(double prior4)
+{
+   return isSuperior(prior4, m_prior_min);
+}
+void NeosegParameters::setPrior4(double prior4)
+{
+   m_prior4=prior4;
+}
+double NeosegParameters::getPrior4()
+{
+   return m_prior4;
+}
+
+// Prior 5 
+bool NeosegParameters::checkPrior5(double prior5)
+{
+   return isSuperior(prior5, m_prior_min);
+}
+void NeosegParameters::setPrior5(double prior5)
+{
+   m_prior5=prior5;
+}
+double NeosegParameters::getPrior5()
+{
+   return m_prior5;
+}
+
+// Refinement 
+void NeosegParameters::setRefinement(bool refinement)
+{
+   m_refinement=refinement;
+}
+bool NeosegParameters::getRefinement()
+{
+   return m_refinement;
+}
+
+// Initial parzen kernal width
+bool NeosegParameters::checkInitialParzenKernelWidth(double initialParzenKernelWidth)
+{
+   return isSuperior(initialParzenKernelWidth, m_initialParzenKernelWidth_min);
+}
+void NeosegParameters::setInitialParzenKernelWidth(double initialParzenKernelWidth)
+{
+   m_initialParzenKernelWidth=initialParzenKernelWidth;
+}
+double NeosegParameters::getInitialParzenKernelWidth()
+{
+   return m_initialParzenKernelWidth;
+}
 

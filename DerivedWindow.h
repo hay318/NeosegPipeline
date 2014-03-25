@@ -10,6 +10,7 @@
 // Qt Librairies
 #include <QWidget>
 #include <QtGui>  //MessageBox
+#include <QMap>
 
 // My Specific Librairies
 #include "ui_Window.h"
@@ -33,7 +34,8 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void setMainScriptThread(MainScriptThread* thread);
 
    // Initialization
-   void initializeImagesMap(); 
+   void initializeImagesMap();
+   void initializeExecutablesMap();   
    void initializeParameters();
    void initializeExecutables(); 
 
@@ -49,11 +51,9 @@ class DerivedWindow : public QMainWindow , public Ui_Window
 
    public slots :
 
-
    // Output
    void selectOuput();
    void enterOutput();
-
 
    // Images
    void selectImage(QString image); 
@@ -101,6 +101,62 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void enterExecutables(); 
    void saveExecutables(); 
 
+   // Executables 
+   void selectExecutable(QString executable);
+   void enterExecutable(QString executable);
+   void resetExecutable(QString executable);
+   void resetAllExecutables(); 
+
+   // SegPostProcessCLP
+   void selectSegPostProcessCLP();
+   void enterSegPostProcessCLP(); 
+   void resetSegPostProcessCLP(); 
+
+   // N4ITKBiasFieldCorrection
+   void selectN4ITKBiasFieldCorrection();
+   void enterN4ITKBiasFieldCorrection(); 
+   void resetN4ITKBiasFieldCorrection();
+
+   // ITKTransformTools
+   void selectITKTransformTools();
+   void enterITKTransformTools(); 
+   void resetITKTransformTools(); 
+
+   // bet2
+   void selectBet2();
+   void enterBet2(); 
+   void resetBet2(); 
+
+   // dtiestim
+   void selectDtiestim();
+   void enterDtiestim(); 
+   void resetDtiestim(); 
+
+   // dtiprocess
+   void selectDtiprocess();
+   void enterDtiprocess();
+   void resetDtiprocess(); 
+
+   // ANTS
+   void selectANTS();
+   void enterANTS();
+   void resetANTS();
+ 
+   // ResampleVolume2
+   void selectResampleVolume2();
+   void enterResampleVolume2(); 
+   void resetResampleVolume2(); 
+
+   // ImageMath
+   void selectImageMath();
+   void enterImageMath(); 
+   void resetImageMath(); 
+
+   // InsightSNAP
+   void selectInsightSNAP();
+   void enterInsightSNAP(); 
+   void resetInsightSNAP(); 
+
    // Run Pipeline
    void runPipeline();
 
@@ -124,6 +180,7 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    ExecutablePaths* m_executables; 
 
    std::map<QString, QLineEdit*> m_images;
+   QMap<QString, QLineEdit*> m_executables_lineEdit;
 
    QString m_tests_path;
    QString m_data_path;

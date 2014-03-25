@@ -37,11 +37,7 @@ class AtlasRegistration : public Script
 
    // Define Outputs //
    Atlas defineRegisteredAtlas(Atlas atlas);
-   void defineRegisteredAtlasPopulation();
- 
-   // Checking results //
-   bool checkRegisteredAtlas(Atlas atlas);
-   bool checkRegisteredAtlasPopulation();
+   std::vector<Atlas> defineRegisteredAtlasPopulation();
 
    // Creating directories //
    void createDirectory();
@@ -77,8 +73,6 @@ class AtlasRegistration : public Script
    QString                 m_computingSystem;
    int                     m_nbCores;
    
-   // Output //
-   std::vector<Atlas>      m_atlasPopulationRegistered;
 };
 
 #endif 

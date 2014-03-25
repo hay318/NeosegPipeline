@@ -28,7 +28,7 @@ void NeosegExecution::setComputing3LabelsSeg(bool computing3LabelsSeg)
 void NeosegExecution::defineSegmentation()
 {
    QFileInfo* T2 = new QFileInfo(m_neo.T2);
-   QString segmentation_name = T2->baseName() + "_EMonly_labels_" + m_neo.prefix + ".nrrd"; 
+   QString segmentation_name = T2->baseName() + "_EMonly_labels_" + m_prefix + ".nrrd"; 
    m_segmentation = m_module_dir->filePath(segmentation_name);
 }
 
@@ -106,7 +106,7 @@ void NeosegExecution::writeXMLFile(QString &script)
    script += "\t\tlogging.info('Writing the XML file...')\n";  
    script += "\t\tsegmentationParameters = Element('SEGMENTATION-PARAMETERS')\n";
 
-   addSubElement(script, "segmentationParameters", "suffix", "SUFFIX", m_neo.prefix);
+   addSubElement(script, "segmentationParameters", "suffix", "SUFFIX", m_prefix);
    addSubElement(script, "segmentationParameters", "atlasDirectory", "ATLAS-DIRECTORY", m_atlas);
    addSubElement(script, "segmentationParameters", "atlasOrientation", "ATLAS-ORIENTATION", "RAI");
    addSubElement(script, "segmentationParameters", "atlasFormat", "ATLAS-FORMAT", "NRRD");
@@ -134,6 +134,8 @@ void NeosegExecution::writeXMLFile(QString &script)
       addSubElement(script,"AD", "ADFile", "FILE", m_neo.AD);   
       addSubElement(script,"AD", "ADOrientation", "ORIENTATION", "RAI"); 
    }
+
+   std::cout<<m_parameters->getPrior2()<<std::endl;
 
    addSubElement(script, "segmentationParameters", "filterIterations", "FILTER-ITERATIONS", QString::number(m_parameters->getNumberOfIterations()));
    addSubElement(script, "segmentationParameters", "filterTimeStep", "FILTER-TIME-STEP", QString::number(m_parameters->getTimeStep()));
@@ -195,7 +197,7 @@ void NeosegExecution::writeAffineTranformationFiles(QString& script)
       referenceTemplate_name = "templateT2";
    }  
 
-   QString T2ToTemplate_name = T2_name + "_to_" + referenceTemplate_name + "_" + m_neo.prefix + ".affine"; 
+   QString T2ToTemplate_name = T2_name + "_to_" + referenceTemplate_name + "_" + m_prefix + ".affine"; 
    QString T2ToTemplate_path = m_module_dir->filePath(T2ToTemplate_name); 
 
    script += "\tT2ToTemplate = '" + T2ToTemplate_path + "'\n";
@@ -203,7 +205,7 @@ void NeosegExecution::writeAffineTranformationFiles(QString& script)
    script += "\tif checkFileExistence(T2ToTemplate)==False:\n";   
    script += "\t\twriteAffineTransformationFile(T2ToTemplate)\n\n";
 
-   QString T2ToT1_name = T2_name + "_to_" + T1_name + "_" + m_neo.prefix + ".affine"; 
+   QString T2ToT1_name = T2_name + "_to_" + T1_name + "_" + m_prefix + ".affine"; 
    QString T2ToT1_path = m_module_dir->filePath(T2ToT1_name); 
 
    script += "\tT2ToT1 = '" + T2ToT1_path + "'\n";
@@ -214,7 +216,7 @@ void NeosegExecution::writeAffineTranformationFiles(QString& script)
    {
       QString FA_name = (QFileInfo(m_neo.FA)).baseName(); 
 
-      QString T2ToFA_name = T2_name + "_to_" + FA_name + "_" + m_neo.prefix + ".affine"; 
+      QString T2ToFA_name = T2_name + "_to_" + FA_name + "_" + m_prefix + ".affine"; 
       QString T2ToFA_path = m_module_dir->filePath(T2ToFA_name); 
 
       script += "\tT2ToFA = '" + T2ToFA_path + "'\n";
@@ -226,7 +228,7 @@ void NeosegExecution::writeAffineTranformationFiles(QString& script)
    {
       QString AD_name = (QFileInfo(m_neo.AD)).baseName(); 
 
-      QString T2ToAD_name = T2_name + "_to_" + AD_name + "_" + m_neo.prefix + ".affine"; 
+      QString T2ToAD_name = T2_name + "_to_" + AD_name + "_" + m_prefix + ".affine"; 
       QString T2ToAD_path = m_module_dir->filePath(T2ToAD_name); 
 
       script += "\tT2ToAD = '" + T2ToAD_path + "'\n";
@@ -237,110 +239,99 @@ void NeosegExecution::writeAffineTranformationFiles(QString& script)
 
 void NeosegExecution::runNeoseg(QString &script)
 {
-   QStringList argumentsList;
-
    QFileInfo* T2 = new QFileInfo(m_neo.T2);
-   QString segmentation_name = T2->baseName() + "_EMonly_labels_" + m_neo.prefix + ".nrrd"; 
+   QString segmentation_name = T2->baseName() + "_EMonly_labels_" + m_prefix + ".nrrd"; 
    QString segmentation_path = m_module_dir->filePath(segmentation_name);
 
-   script += "\tseg4Labels = '" + segmentation_path + "'\n";
-   script += "\tif checkFileExistence(seg4Labels)==False:\n";  
-
-   argumentsList << "neoseg" << "parameters_path";
-   script += "\t\tlogging.info('Running Neoseg...')\n";  
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args)\n\n";   
+   m_log = "Running Neoseg";
+   m_outputs.insert("seg_4Labels", segmentation_path); 
+   m_argumentsList << "neoseg" << "parameters_path";
+   execute(script); 
 
    m_neo.seg4Labels = segmentation_path;
 }
 
 void NeosegExecution::mergeWhiteMatters(QString &script)
 {
-   QStringList argumentsList;
-
-   QString seg3labels_name = m_neo.prefix + "-seg-3labels.nrrd";
-   QString seg3labels_path = m_module_dir->filePath(seg3labels_name); 
-   script += "\tseg_3Labels = '" + seg3labels_path + "'\n"; 
-
-   script += "\tif checkFileExistence(seg_3Labels)==False:\n";
-
-   script += "\t\tlogging.info('Computing a 3-labels segmentation...')\n";  
-   script += "\t\tseg_4Labels = '" + m_neo.seg4Labels + "'\n";
-
    // Myelinated WM
-   QString myelinatedWM_name = m_neo.prefix + "-myelinatedWM.nrrd";
+   QString myelinatedWM_name = m_prefix + "myelinatedWM" + m_suffix + ".nrrd";
    QString myelinatedWM_path = m_module_dir->filePath(myelinatedWM_name); 
-   script += "\t\tmyelinatedWM = '" + myelinatedWM_path + "'\n"; 
 
-   argumentsList << "ImageMath" << "seg_4Labels" << "'-extractLabel'" << "'1'" << "'-outfile'" << "myelinatedWM"; 
-   script += "\t\tlogging.info('- Extracting the myelinated white matter...')\n";  
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args)\n\n";   
+   m_log = "- Extracting the myelinated white matter";
+   m_inputs.insert("seg_4Labels", m_neo.seg4Labels);
+   m_outputs.insert("myelinatedWM", myelinatedWM_path);
+   m_argumentsList << "ImageMath" << "seg_4Labels" << "'-extractLabel'" << "'1'" << "'-outfile'" << "myelinatedWM"; 
+   execute(script);
 
    // WM
-   QString WM_name = m_neo.prefix + "-WM.nrrd";
+   QString WM_name = m_prefix + "WM" + m_suffix + ".nrrd";
    QString WM_path = m_module_dir->filePath(WM_name); 
-   script += "\t\tWM = '" + WM_path + "'\n"; 
-
-   argumentsList.clear();
-   argumentsList << "ImageMath" << "seg_4Labels" << "'-extractLabel'" << "'2'" << "'-outfile'" << "WM"; 
-   script += "\t\tlogging.info('- Extracting the white matter...')\n";  
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args)\n\n";   
+   
+   m_log = "- Extracting the white matter";
+   m_outputs.insert("WM", WM_path);
+   m_argumentsList << "ImageMath" << "seg_4Labels" << "'-extractLabel'" << "'2'" << "'-outfile'" << "WM"; 
+   execute(script);
 
    // GM
-   QString GM_name = m_neo.prefix + "-GM.nrrd";
+   QString GM_name = m_prefix + "GM" + m_suffix + ".nrrd";
    QString GM_path = m_module_dir->filePath(GM_name); 
-   script += "\t\tGM = '" + GM_path + "'\n"; 
 
-   argumentsList.clear();
-   argumentsList << "ImageMath" << "seg_4Labels" << "'-extractLabel'" << "'3'" << "'-outfile'" << "GM"; 
-   script += "\t\tlogging.info('- Extracting the gray matter...')\n";  
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args)\n\n";  
+   m_log = "- Extracting the gray matter";
+   m_outputs.insert("GM", GM_path); 
+   m_argumentsList << "ImageMath" << "seg_4Labels" << "'-extractLabel'" << "'3'" << "'-outfile'" << "GM"; 
+   execute(script); 
 
-   argumentsList.clear(); 
-   argumentsList << "ImageMath" << "GM" << "'-constOper'" << "'2,2'" << "'-outfile'" << "GM"; 
-   script += "\t\tlogging.info('- Multiplying the gray matter by 2...')\n";  
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args)\n\n"; 
+   QString multipliedGM_name = m_prefix + "GM-multiplied" + m_suffix + ".nrrd";
+   QString multipliedGM_path = m_module_dir->filePath(multipliedGM_name); 
 
+   m_log = "- Multiplying the gray matter by 2";
+   m_outputs.insert("GM_multiplied", multipliedGM_path);
+   m_argumentsList << "ImageMath" << "GM" << "'-constOper'" << "'2,2'" << "'-outfile'" << "GM_multiplied"; 
+   execute(script);
+ 
    // CSF
-   QString CSF_name = m_neo.prefix + "-CSF.nrrd";
+   QString CSF_name = m_prefix + "CSF.nrrd";
    QString CSF_path = m_module_dir->filePath(CSF_name); 
-   script += "\t\tCSF = '" + CSF_path + "'\n"; 
 
-   argumentsList.clear();
-   argumentsList << "ImageMath" << "seg_4Labels" << "'-extractLabel'" << "'4'" << "'-outfile'" << "CSF"; 
-   script += "\t\tlogging.info('- Extracting the CSF...')\n";  
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args)\n\n";  
+   m_log = "- Extracting the CSF";
+   m_outputs.insert("CSF", CSF_path); 
+   m_argumentsList << "ImageMath" << "seg_4Labels" << "'-extractLabel'" << "'4'" << "'-outfile'" << "CSF"; 
+   execute(script);
 
-   argumentsList.clear(); 
-   argumentsList << "ImageMath" << "CSF" << "'-constOper'" << "'2,3'" << "'-outfile'" << "CSF"; 
-   script += "\t\tlogging.info('- Multiplying the CSF by 3...')\n";  
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args)\n\n"; 
+   QString multipliedCSF_name = m_prefix + "CSF-multiplied" + m_suffix + ".nrrd";
+   QString multipliedCSF_path = m_module_dir->filePath(multipliedCSF_name); 
+
+   m_log = "- Multiplying the CSF by 3";
+   m_outputs.insert("CSF_multiplied", multipliedCSF_path); 
+   m_argumentsList << "ImageMath" << "CSF" << "'-constOper'" << "'2,3'" << "'-outfile'" << "CSF_multiplied"; 
+   execute(script);
 
    // 3-labels Seg 
-   script += "\t\tlogging.info('- Adding all the labels...')\n";  
+   QString mergedWM_name = m_prefix + "WM-merged" + m_suffix + ".nrrd";
+   QString mergedWM_path = m_module_dir->filePath(mergedWM_name); 
 
-   argumentsList.clear(); 
-   argumentsList << "ImageMath" << "WM" << "'-add'" << "myelinatedWM" << "'-outfile'" << "seg_3Labels"; 
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args)\n\n";  
+   m_log = "- Adding myelinated WM and WM";
+   m_outputs.insert("WM_merged", mergedWM_path); 
+   m_argumentsList << "ImageMath" << "WM" << "'-add'" << "myelinatedWM" << "'-outfile'" << "WM_merged"; 
+   execute(script);   
 
-   argumentsList.clear(); 
-   argumentsList << "ImageMath" << "seg_3Labels" << "'-add'" << "GM" << "'-outfile'" << "seg_3Labels"; 
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args)\n\n"; 
+   QString tempSeg3Labels_name = m_prefix + "seg-3Labels-temp" + m_suffix + ".nrrd";
+   QString tempSeg3Labels_path = m_module_dir->filePath(tempSeg3Labels_name); 
 
-   argumentsList.clear(); 
-   argumentsList << "ImageMath" << "seg_3Labels" << "'-add'" << "CSF" << "'-outfile'" << "seg_3Labels"; 
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args)\n\n"; 
+   m_log = "- Adding GM";
+   m_outputs.insert("seg3Labels_temp", tempSeg3Labels_path); 
+   m_argumentsList << "ImageMath" << "WM_merged" << "'-add'" << "GM_multiplied" << "'-outfile'" << "seg3Labels_temp"; 
+   execute(script);
 
-   m_neo.seg3Labels = seg3labels_path;
+   QString seg3Labels_name = m_prefix + "seg-3Labels" + m_suffix + ".nrrd";
+   QString seg3Labels_path = m_module_dir->filePath(seg3Labels_name); 
+
+   m_log = "- Adding CSF";
+   m_outputs.insert("seg3Labels", seg3Labels_path); 
+   m_argumentsList << "ImageMath" << "seg3Labels_temp" << "'-add'" << "CSF_multiplied" << "'-outfile'" << "seg3Labels"; 
+   execute(script); 
+
+   m_neo.seg3Labels = seg3Labels_path;
 }
 
 void NeosegExecution::implementRun(QString &script)

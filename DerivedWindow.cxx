@@ -10,6 +10,7 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    m_executablesSet = false; 
 
    initializeImagesMap();
+   initializeExecutablesMap(); 
 
    //Connections
 
@@ -67,6 +68,64 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    // Save Executables
    connect(saveExecutables_button, SIGNAL(clicked()), this, SLOT(saveExecutables()));
 
+   // SegPostProcessCLP
+   connect(SegPostProcessCLP_button, SIGNAL(clicked()), this, SLOT(selectSegPostProcessCLP()));
+   connect(SegPostProcessCLP_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterSegPostProcessCLP()));
+   connect(resetSegPostProcessCLP_button, SIGNAL(clicked()), this, SLOT(resetSegPostProcessCLP()));
+
+   // N4ITKBiasFieldCorrection
+   connect(N4ITKBiasFieldCorrection_button, SIGNAL(clicked()), this, SLOT(selectN4ITKBiasFieldCorrection()));
+   connect(N4ITKBiasFieldCorrection_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterN4ITKBiasFieldCorrection()));
+   connect(resetN4ITKBiasFieldCorrection_button, SIGNAL(clicked()), this, SLOT(resetN4ITKBiasFieldCorrection()));
+
+   // ITKTransformTools
+   connect(ITKTransformTools_button, SIGNAL(clicked()), this, SLOT(selectITKTransformTools()));
+   connect(ITKTransformTools_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterITKTransformTools()));
+   connect(resetITKTransformTools_button, SIGNAL(clicked()), this, SLOT(resetITKTransformTools()));
+
+   // bet2
+   connect(bet2_button, SIGNAL(clicked()), this, SLOT(selectBet2()));
+   connect(bet2_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterBet2()));
+   connect(resetBet2_button, SIGNAL(clicked()), this, SLOT(resetBet2()));
+
+   // dtiestim
+   connect(dtiestim_button, SIGNAL(clicked()), this, SLOT(selectDtiestim()));
+   connect(dtiestim_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterDtiestim()));
+   connect(resetDtiestim_button, SIGNAL(clicked()), this, SLOT(resetDtiestim()));
+
+   // dtiprocess
+   connect(dtiprocess_button, SIGNAL(clicked()), this, SLOT(selectDtiprocess()));
+   connect(dtiprocess_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterDtiprocess()));
+   connect(resetDtiprocess_button, SIGNAL(clicked()), this, SLOT(resetDtiprocess()));
+
+   // ANTS
+   connect(ANTS_button, SIGNAL(clicked()), this, SLOT(selectANTS()));
+   connect(ANTS_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterANTS()));
+   connect(resetANTS_button, SIGNAL(clicked()), this, SLOT(resetANTS()));
+
+   // ResampleVolume2
+   connect(dtiestim_button, SIGNAL(clicked()), this, SLOT(selectDtiestim()));
+   connect(dtiestim_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterDtiestim()));
+   connect(resetDtiestim_button, SIGNAL(clicked()), this, SLOT(resetDtiestim()));
+
+   // dtiestim
+   connect(ResampleVolume2_button, SIGNAL(clicked()), this, SLOT(selectResampleVolume2()));
+   connect(ResampleVolume2_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterResampleVolume2()));
+   connect(resetResampleVolume2_button, SIGNAL(clicked()), this, SLOT(resetResampleVolume2()));
+
+   // ImageMath
+   connect(ImageMath_button, SIGNAL(clicked()), this, SLOT(selectImageMath()));
+   connect(ImageMath_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterImageMath()));
+   connect(resetImageMath_button, SIGNAL(clicked()), this, SLOT(resetImageMath()));
+
+   // InsightSNAP
+   connect(InsightSNAP_button, SIGNAL(clicked()), this, SLOT(selectInsightSNAP()));
+   connect(InsightSNAP_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterInsightSNAP()));
+   connect(resetInsightSNAP_button, SIGNAL(clicked()), this, SLOT(resetInsightSNAP()));
+
+   // Reset all executables 
+   connect(resetAllExecutables_button, SIGNAL(clicked()), this, SLOT(resetAllExecutables()));
+
    // Run Pipeline //
    connect(runPipeline_button, SIGNAL(clicked()), this, SLOT(runPipeline()));
 
@@ -110,6 +169,19 @@ void DerivedWindow::initializeImagesMap()
   m_images.insert(std::pair<QString, QLineEdit*>("b0", b0_lineEdit));
 }
 
+void DerivedWindow::initializeExecutablesMap()
+{
+   m_executables_lineEdit.insert("SegPostProcessCLP", SegPostProcessCLP_lineEdit);
+   m_executables_lineEdit.insert("N4ITKBiasFieldCorrection", N4ITKBiasFieldCorrection_lineEdit);
+   m_executables_lineEdit.insert("ITKTransformTools", ITKTransformTools_lineEdit);
+   m_executables_lineEdit.insert("bet2", bet2_lineEdit);
+   m_executables_lineEdit.insert("dtiestim", dtiestim_lineEdit);
+   m_executables_lineEdit.insert("dtiprocess", dtiprocess_lineEdit);
+   m_executables_lineEdit.insert("ANTS", ANTS_lineEdit);
+   m_executables_lineEdit.insert("ResampleVolume2", ResampleVolume2_lineEdit);
+   m_executables_lineEdit.insert("ImageMath", ImageMath_lineEdit);
+   m_executables_lineEdit.insert("InsightSNAP", InsightSNAP_lineEdit);
+}
 
 void DerivedWindow::selectImage(QString image)
 {
@@ -126,27 +198,6 @@ void DerivedWindow::enterImage(QString image)
       {
          (m_images[image])->clear();
          QMessageBox::critical(this, image, image_path + "\ndoes not exist, enter a new file path");
-      }
-   }
-}
-
-//***** Ouput *****//
-void DerivedWindow::selectOuput()
-{
-   QString output = QFileDialog::getExistingDirectory (0, "Open Directory",m_tests_path , QFileDialog::ShowDirsOnly);
-   output_lineEdit->setText(output);
-
-}
-void DerivedWindow::enterOutput()
-{
-   QString output = output_lineEdit->text();
-
-   if(!output.isEmpty()) 
-   {
-      if(!m_parameters->checkOutput(output))
-      {
-         output_lineEdit->clear();
-         QMessageBox::critical(this, "Output Directory", output + "\ndoes not exist, enter a new directory path");
       }
    }
 }
@@ -201,6 +252,29 @@ void DerivedWindow::enterB0()
 {
    enterImage("b0");
 }
+
+
+//***** Ouput *****//
+void DerivedWindow::selectOuput()
+{
+   QString output = QFileDialog::getExistingDirectory (0, "Open Directory",m_tests_path , QFileDialog::ShowDirsOnly);
+   output_lineEdit->setText(output);
+
+}
+void DerivedWindow::enterOutput()
+{
+   QString output = output_lineEdit->text();
+
+   if(!output.isEmpty()) 
+   {
+      if(!m_parameters->checkOutput(output))
+      {
+         output_lineEdit->clear();
+         QMessageBox::critical(this, "Output Directory", output + "\ndoes not exist, enter a new directory path");
+      }
+   }
+}
+
 
 //***** New Atlas/Existing Atlas *****//
 void DerivedWindow::selectNewOrExistingAtlas()
@@ -401,8 +475,204 @@ void DerivedWindow::enterExecutables()
    }
 }
 
+// Executables 
+void DerivedWindow::selectExecutable(QString executable)
+{   
+	QString executable_path = QFileDialog::getOpenFileName(this, "Select executable", m_data_path);
+   if(QFileInfo(executable_path).isExecutable())
+   {
+      (m_executables_lineEdit[executable])->setText(executable_path);
+   }
+   else
+   {
+      QMessageBox::critical(this, executable, executable_path + "\nis not executable");      
+   }
+}
+void DerivedWindow::enterExecutable(QString executable)
+{
+   QString executable_path = (m_executables_lineEdit[executable])->text();
+
+   if(!executable_path.isEmpty()) 
+   {  
+      if(QFileInfo(executable_path).exists())
+      {
+         if(!QFileInfo(executable_path).isExecutable())
+         {
+            (m_executables_lineEdit[executable])->clear();
+            QMessageBox::critical(this, executable, executable_path + "\nis not executable, enter a new file path");            
+         }
+      }
+
+      else 
+      {
+         (m_executables_lineEdit[executable])->clear();
+         QMessageBox::critical(this, executable, executable_path + "\ndoes not exist, enter a new file path");
+      }
+   }   
+}
+void DerivedWindow::resetExecutable(QString executable)
+{
+   QString defaultPath = m_executables->getDefaultExecutablePath(executable);
+   (m_executables_lineEdit[executable])->setText(defaultPath);
+}
+void DerivedWindow::resetAllExecutables()
+{
+   resetSegPostProcessCLP(); 
+   resetN4ITKBiasFieldCorrection();
+   resetITKTransformTools(); 
+   resetBet2(); 
+   resetDtiestim(); 
+   resetDtiprocess(); 
+   resetANTS(); 
+   resetResampleVolume2(); 
+   resetImageMath(); 
+   resetInsightSNAP(); 
+}
+
+// SegPostProcessCLP
+void DerivedWindow::selectSegPostProcessCLP()
+{
+   selectExecutable("SegPostProcessCLP");
+}
+void DerivedWindow::enterSegPostProcessCLP()
+{
+   enterExecutable("SegPostProcessCLP");
+}
+void DerivedWindow::resetSegPostProcessCLP()
+{
+   resetExecutable("SegPostProcessCLP"); 
+}
+
+// N4ITKBiasFieldCorrection
+void DerivedWindow::selectN4ITKBiasFieldCorrection()
+{
+   selectExecutable("N4ITKBiasFieldCorrection");
+}
+void DerivedWindow::enterN4ITKBiasFieldCorrection()
+{
+   enterExecutable("N4ITKBiasFieldCorrection");
+}
+void DerivedWindow::resetN4ITKBiasFieldCorrection()
+{
+   resetExecutable("N4ITKBiasFieldCorrection");
+}
+
+// ITKTransformTools
+void DerivedWindow::selectITKTransformTools()
+{
+   selectExecutable("ITKTransformTools");
+}
+void DerivedWindow::enterITKTransformTools()
+{
+   enterExecutable("ITKTransformTools");
+}
+void DerivedWindow::resetITKTransformTools()
+{
+   resetExecutable("ITKTransformTools");
+}
+
+// bet2
+void DerivedWindow::selectBet2()
+{
+   selectExecutable("bet2");
+}
+void DerivedWindow::enterBet2()
+{
+   enterExecutable("bet2");
+}
+void DerivedWindow::resetBet2()
+{
+   resetExecutable("bet2");
+}
+
+// dtiestim
+void DerivedWindow::selectDtiestim()
+{
+   selectExecutable("dtiestim");
+}
+void DerivedWindow::enterDtiestim()
+{
+   enterExecutable("dtiestim");
+}
+void DerivedWindow::resetDtiestim()
+{
+   resetExecutable("dtiestim");
+}
+
+// dtiprocess
+void DerivedWindow::selectDtiprocess()
+{
+   selectExecutable("dtiprocess");
+}
+void DerivedWindow::enterDtiprocess()
+{
+   enterExecutable("dtiprocess");
+}
+void DerivedWindow::resetDtiprocess()
+{
+   resetExecutable("dtiprocess");
+}
+
+// ANTS
+void DerivedWindow::selectANTS()
+{
+   selectExecutable("ANTS");
+}
+void DerivedWindow::enterANTS()
+{
+   enterExecutable("ANTS");
+}
+void DerivedWindow::resetANTS()
+{
+   resetExecutable("ANTS");
+}
+
+// ResampleVolume2
+void DerivedWindow::selectResampleVolume2()
+{
+   selectExecutable("ResampleVolume2");
+}
+void DerivedWindow::enterResampleVolume2()
+{
+   enterExecutable("ResampleVolume2");
+}
+void DerivedWindow::resetResampleVolume2()
+{
+   resetExecutable("ResampleVolume2");
+}
+
+// ImageMath
+void DerivedWindow::selectImageMath()
+{
+   selectExecutable("ImageMath");
+}
+void DerivedWindow::enterImageMath()
+{
+   enterExecutable("ImageMath");
+}
+void DerivedWindow::resetImageMath()
+{
+   resetExecutable("ImageMath");
+}
+
+// InsightSNAP
+void DerivedWindow::selectInsightSNAP()
+{
+   selectExecutable("InsightSNAP");
+}
+void DerivedWindow::enterInsightSNAP()
+{
+   enterExecutable("InsightSNAP");
+}
+void DerivedWindow::resetInsightSNAP()
+{
+   resetExecutable("InsightSNAP");
+}
+
 void DerivedWindow::initializeParameters()
 {
+   prefix_lineEdit->setText(m_parameters->getPrefix());
+   suffix_lineEdit->setText(m_parameters->getSuffix());
    output_lineEdit->setText(m_parameters->getOutput());
    T1_lineEdit->setText(m_parameters->getT1());  
    T2_lineEdit->setText(m_parameters->getT2());
@@ -507,6 +777,25 @@ void DerivedWindow::initializeParameters()
    //deformationFieldSigma_spinBox->setMinimum(m_antsParameters->getDeformationFieldSigmaMin());
    deformationFieldSigma_spinBox->setValue(m_antsParameters->getDeformationFieldSigma());
 
+
+   //Neoseg 
+   referenceModality_comboBox->setCurrentIndex(m_neosegParameters->getReferenceImageIndex());
+   usingFA_checkBox->setChecked(m_parameters->getUsingFA()); 
+   usingAD_checkBox->setChecked(m_parameters->getUsingAD()); 
+   filterMethod_comboBox->setCurrentIndex(m_neosegParameters->getFilterMethodIndex()); 
+   numberOfIterations_spinBox->setValue(m_neosegParameters->getNumberOfIterations()); 
+   timeStep_spinBox->setValue(m_neosegParameters->getTimeStep()); 
+   priorThreshold_spinBox->setValue(m_neosegParameters->getPriorThreshold()); 
+   maxDegree_spinBox->setValue(m_neosegParameters->getMaxBiasDegree());
+   prior1_spinBox->setValue(m_neosegParameters->getPrior1());
+   prior2_spinBox->setValue(m_neosegParameters->getPrior2());
+   prior3_spinBox->setValue(m_neosegParameters->getPrior3());
+   prior4_spinBox->setValue(m_neosegParameters->getPrior4());
+   prior5_spinBox->setValue(m_neosegParameters->getPrior5());
+   refinement_checkBox->setChecked(m_neosegParameters->getRefinement());
+   initialParzenKernelWidth_spinBox->setValue(m_neosegParameters->getInitialParzenKernelWidth());  
+
+   // Executables 
    SegPostProcessCLP_lineEdit->setText(m_executables->getExecutablePath("SegPostProcessCLP"));
    N4ITKBiasFieldCorrection_lineEdit->setText(m_executables->getExecutablePath("N4ITKBiasFieldCorrection"));
    ITKTransformTools_lineEdit->setText(m_executables->getExecutablePath("ITKTransformTools"));
@@ -526,6 +815,11 @@ void DerivedWindow::setParameters()
    if(!(prefix_lineEdit->text()).isEmpty())
    {
       m_parameters->setPrefix(prefix_lineEdit->text()); 
+   }
+
+   if(!(suffix_lineEdit->text()).isEmpty())
+   {
+      m_parameters->setSuffix(suffix_lineEdit->text()); 
    }
 
    if(!(output_lineEdit->text()).isEmpty())
@@ -557,8 +851,6 @@ void DerivedWindow::setParameters()
    {
       m_parameters->setb0(b0_lineEdit->text());
    }  
-
-   //m_parameters->setSkullStripping(skullStripping_checkbox->isChecked());
 
    //Atlas Population 
    if (newAtlas_radioButton->isChecked()) 
@@ -607,6 +899,9 @@ void DerivedWindow::setParameters()
    m_antsParameters->setGradientFieldSigma(gradientFieldSigma_spinBox->value());
    m_antsParameters->setDeformationFieldSigma(deformationFieldSigma_spinBox->value());
 
+   m_antsParameters->setUsingMask(usingMask_checkBox->isChecked());
+   m_antsParameters->setUsingSmoothedMask(usingSmoothedMask_checkBox->isChecked());
+
 
    // Neoseg parameters 
    m_neosegParameters->setFilterMethod(filterMethod_comboBox->currentText()); 
@@ -617,7 +912,7 @@ void DerivedWindow::setParameters()
    m_neosegParameters->setPriorThreshold(priorThreshold_spinBox->value()); 
    //m_neosegParameters->setMaxDegree(maxDegree_spinBox->value()); 
    m_neosegParameters->setPrior1(prior1_spinBox->value()); 
-   m_neosegParameters->setPrior2(prior3_spinBox->value()); 
+   m_neosegParameters->setPrior2(prior2_spinBox->value()); 
    m_neosegParameters->setPrior3(prior3_spinBox->value()); 
    m_neosegParameters->setPrior4(prior4_spinBox->value()); 
    m_neosegParameters->setPrior5(prior5_spinBox->value()); 
@@ -675,6 +970,7 @@ void DerivedWindow::runPipeline()
    }
 
    runPipeline_progressBar->show();
+   runPipeline_button->setEnabled(false);
 
    m_thread->setPipeline(m_pipeline);
    m_thread->start();

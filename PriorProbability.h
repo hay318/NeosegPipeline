@@ -7,8 +7,8 @@
 struct PriorProbability {
 QString     name;
 QDir*       dir;
-QString     image;
-QString     finalImage;
+QString     input; 
+QString     output;
 };
 
 #endif

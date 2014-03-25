@@ -168,7 +168,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabs">
       <property name="currentIndex">
-       <number>2</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="Data">
        <attribute name="title">
@@ -348,7 +348,7 @@
                </widget>
               </item>
               <item alignment="Qt::AlignLeft">
-               <widget class="QLineEdit" name="prefix_lineEdit_2"/>
+               <widget class="QLineEdit" name="suffix_lineEdit"/>
               </item>
              </layout>
             </widget>
@@ -688,6 +688,19 @@ p, li { white-space: pre-wrap; }
            </item>
           </layout>
          </widget>
+        </item>
+        <item row="2" column="0">
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item row="1" column="0">
          <widget class="QGroupBox" name="groupBox_14">
@@ -1123,21 +1136,31 @@ p, li { white-space: pre-wrap; }
              </layout>
             </widget>
            </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_23">
+             <property name="title">
+              <string>Mask</string>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_38">
+              <item>
+               <widget class="QCheckBox" name="usingMask_checkBox">
+                <property name="text">
+                 <string>Use the brain mask</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="usingSmoothedMask_checkBox">
+                <property name="text">
+                 <string>Use a smoothed version of the brain mask</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
           </layout>
          </widget>
-        </item>
-        <item row="2" column="0">
-         <spacer name="verticalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </widget>
@@ -2045,7 +2068,7 @@ p, li { white-space: pre-wrap; }
                  <string>Use FA as an additional modality </string>
                 </property>
                 <property name="checked">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -2122,7 +2145,7 @@ p, li { white-space: pre-wrap; }
          <widget class="QWidget" name="widget_2" native="true">
           <layout class="QGridLayout" name="gridLayout_2">
            <item row="7" column="0">
-            <widget class="QPushButton" name="pushButton_2">
+            <widget class="QPushButton" name="ANTS_button">
              <property name="text">
               <string>ANTS</string>
              </property>
@@ -2150,7 +2173,7 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item row="8" column="0">
-            <widget class="QPushButton" name="pushButton_3">
+            <widget class="QPushButton" name="ResampleVolume2_button">
              <property name="text">
               <string>ResampleVolume2</string>
              </property>
@@ -2164,21 +2187,21 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="SegPostProcessCLP_button">
              <property name="text">
               <string>SegPostProcessCLP</string>
              </property>
             </widget>
            </item>
            <item row="9" column="0">
-            <widget class="QPushButton" name="pushButton_4">
+            <widget class="QPushButton" name="ImageMath_button">
              <property name="text">
               <string>ImageMath</string>
              </property>
             </widget>
            </item>
            <item row="10" column="0">
-            <widget class="QPushButton" name="pushButton_5">
+            <widget class="QPushButton" name="InsightSNAP_button">
              <property name="text">
               <string>InsightSNAP</string>
              </property>
@@ -2192,56 +2215,56 @@ p, li { white-space: pre-wrap; }
             </widget>
            </item>
            <item row="1" column="3">
-            <widget class="QPushButton" name="pushButton_7">
+            <widget class="QPushButton" name="resetSegPostProcessCLP_button">
              <property name="text">
               <string>Reset</string>
              </property>
             </widget>
            </item>
            <item row="8" column="3">
-            <widget class="QPushButton" name="pushButton_9">
+            <widget class="QPushButton" name="resetResampleVolume2_button">
              <property name="text">
               <string>Reset</string>
              </property>
             </widget>
            </item>
            <item row="7" column="3">
-            <widget class="QPushButton" name="pushButton_8">
+            <widget class="QPushButton" name="resetANTS_button">
              <property name="text">
               <string>Reset</string>
              </property>
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QPushButton" name="pushButton_13">
+            <widget class="QPushButton" name="bet2_button">
              <property name="text">
               <string>bet2</string>
              </property>
             </widget>
            </item>
            <item row="5" column="3">
-            <widget class="QPushButton" name="pushButton_18">
+            <widget class="QPushButton" name="resetDtiestim_button">
              <property name="text">
               <string>Reset</string>
              </property>
             </widget>
            </item>
            <item row="9" column="3">
-            <widget class="QPushButton" name="pushButton_10">
+            <widget class="QPushButton" name="resetImageMath_button">
              <property name="text">
               <string>Reset</string>
              </property>
             </widget>
            </item>
            <item row="10" column="3">
-            <widget class="QPushButton" name="pushButton_11">
+            <widget class="QPushButton" name="resetInsightSNAP_button">
              <property name="text">
               <string>Reset</string>
              </property>
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QPushButton" name="pushButton_12">
+            <widget class="QPushButton" name="N4ITKBiasFieldCorrection_button">
              <property name="text">
               <string>N4ITKBiasFieldCorrection </string>
              </property>
@@ -2251,7 +2274,7 @@ p, li { white-space: pre-wrap; }
             <widget class="QLineEdit" name="dtiestim_lineEdit"/>
            </item>
            <item row="6" column="0">
-            <widget class="QPushButton" name="pushButton_15">
+            <widget class="QPushButton" name="dtiprocess_button">
              <property name="text">
               <string>dtiprocess</string>
              </property>
@@ -2261,7 +2284,7 @@ p, li { white-space: pre-wrap; }
             <widget class="QLineEdit" name="N4ITKBiasFieldCorrection_lineEdit"/>
            </item>
            <item row="5" column="0">
-            <widget class="QPushButton" name="pushButton_14">
+            <widget class="QPushButton" name="dtiestim_button">
              <property name="text">
               <string>dtiestim</string>
              </property>
@@ -2274,14 +2297,14 @@ p, li { white-space: pre-wrap; }
             <widget class="QLineEdit" name="dtiprocess_lineEdit"/>
            </item>
            <item row="2" column="3">
-            <widget class="QPushButton" name="pushButton_16">
+            <widget class="QPushButton" name="resetN4ITKBiasFieldCorrection_button">
              <property name="text">
               <string>Reset</string>
              </property>
             </widget>
            </item>
            <item row="4" column="3">
-            <widget class="QPushButton" name="pushButton_17">
+            <widget class="QPushButton" name="resetBet2_button">
              <property name="text">
               <string>Reset</string>
              </property>
@@ -2291,28 +2314,28 @@ p, li { white-space: pre-wrap; }
             <widget class="QLineEdit" name="ITKTransformTools_lineEdit"/>
            </item>
            <item row="6" column="3">
-            <widget class="QPushButton" name="pushButton_19">
+            <widget class="QPushButton" name="resetDtiprocess_button">
              <property name="text">
               <string>Reset</string>
              </property>
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QPushButton" name="pushButton_20">
+            <widget class="QPushButton" name="ITKTransformTools_button">
              <property name="text">
               <string>ITKTransformTools</string>
              </property>
             </widget>
            </item>
            <item row="3" column="3">
-            <widget class="QPushButton" name="pushButton_21">
+            <widget class="QPushButton" name="resetITKTransformTools_button">
              <property name="text">
               <string>Reset</string>
              </property>
             </widget>
            </item>
            <item row="11" column="3">
-            <widget class="QPushButton" name="pushButton_6">
+            <widget class="QPushButton" name="resetAllExecutables_button">
              <property name="text">
               <string>Reset all</string>
              </property>

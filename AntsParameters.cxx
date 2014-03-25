@@ -71,6 +71,11 @@ AntsParameters::AntsParameters()
    m_deformationFieldSigma_default=0;
    m_deformationFieldSigma=m_deformationFieldSigma_default;
 
+   m_usingMask_default = false; 
+   m_usingMask = m_usingMask_default; 
+
+   m_usingSmoothedMask_default = false; 
+   m_usingSmoothedMask = m_usingSmoothedMask_default; 
 }
 
 bool AntsParameters::isSuperior(int value, int min)
@@ -367,6 +372,24 @@ double AntsParameters::getDeformationFieldSigma()
 double AntsParameters::getDeformationFieldSigmaMin()
 {
    return m_deformationFieldSigma_min;
+}
+
+void AntsParameters::setUsingMask(bool usingMask)
+{
+   m_usingMask = usingMask; 
+}
+bool AntsParameters::getUsingMask()
+{
+   return m_usingMask; 
+}
+
+void AntsParameters::setUsingSmoothedMask(bool usingSmoothedMask)
+{
+   m_usingSmoothedMask = usingSmoothedMask; 
+}
+bool AntsParameters::getUsingSmoothedMask()
+{
+   return m_usingSmoothedMask; 
 }
 
 QString AntsParameters::getImageMetricFlag(QString imageMetric)

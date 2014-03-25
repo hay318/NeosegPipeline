@@ -17,7 +17,6 @@ int main(int argc, char *argv[])
    tool.setMask(QString::fromStdString(mask));
    tool.setDWI(QString::fromStdString(DWI));
    tool.setb0(QString::fromStdString(b0));
-   tool.setSkullStripping(!skullStripping);
    
    tool.setParametersFile(QString::fromStdString(parameters));
    tool.setExecutablesFile(QString::fromStdString(executables));

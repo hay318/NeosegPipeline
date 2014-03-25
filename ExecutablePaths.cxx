@@ -36,11 +36,26 @@ QString ExecutablePaths::findExecutablePath(QStringList splitPath, QString execu
 }*/
 
 
-bool ExecutablePaths::checkExecutablePath(QString path) {return QFileInfo(path).isExecutable();} 
+bool ExecutablePaths::checkExecutablePath(QString path)
+{
+   return QFileInfo(path).isExecutable();
+}
 
-void ExecutablePaths::setDefaultExecutablePath(QString name) {m_executables[name]=findExecutablePath(m_splitPath, name);}
+void ExecutablePaths::setDefaultExecutablePath(QString name)
+{
+   m_executables[name]=findExecutablePath(m_splitPath, name);
+}
+QString ExecutablePaths::getDefaultExecutablePath(QString name)
+{
+   return findExecutablePath(m_splitPath, name);
+} 
 
-void ExecutablePaths::setExecutablePath(QString name, QString path) {m_executables[name]=path;}
-
-QString ExecutablePaths::getExecutablePath(QString name) {return m_executables[name];}
+void ExecutablePaths::setExecutablePath(QString name, QString path)
+{
+   m_executables[name]=path;
+}
+QString ExecutablePaths::getExecutablePath(QString name)
+{
+   return m_executables[name];
+}
 

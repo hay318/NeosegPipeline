@@ -31,9 +31,13 @@ class PipelineParameters
    bool isIn(QString item, std::vector<QString> vector);
    QFileInfoList find(QDir* dir, QString name);
 
-   //Suffix
+   // Prefix
    void setPrefix(QString prefix);
    QString getPrefix();
+
+   // Suffix
+   void setSuffix(QString suffix);
+   QString getSuffix();
 
    // Output
    bool checkOutput(QString output);
@@ -69,10 +73,6 @@ class PipelineParameters
    void initializeNeo();
    void setNeo(Neo neo); 
    Neo getNeo(); 
-
-   // SkullStripping
-   void setSkullStripping(bool skullStripping);
-   bool getSkullStripping(); 
 
    // New Atlas    
    void setNewAtlas(bool newAtlas);
@@ -176,6 +176,7 @@ class PipelineParameters
 
    // Data
    QString m_prefix;
+   QString m_suffix;
    QString m_output;
    QString m_T1; 
    QString m_T2;

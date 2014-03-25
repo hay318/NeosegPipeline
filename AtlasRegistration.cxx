@@ -23,9 +23,7 @@ void AtlasRegistration::setAntsParameters(AntsParameters* parameters)
    m_parameters=parameters;
 }
 
-
 // Define Output //  
-
 Atlas AtlasRegistration::defineRegisteredAtlas(Atlas atlas)
 {
    Atlas atlasReg = atlas;
@@ -60,8 +58,9 @@ Atlas AtlasRegistration::defineRegisteredAtlas(Atlas atlas)
    return atlasReg;
 }
 
-void AtlasRegistration::defineRegisteredAtlasPopulation()
+std::vector<Atlas> AtlasRegistration::defineRegisteredAtlasPopulation()
 {
+   std::vector<Atlas> atlasPopulationRegistered;
    Atlas atlas;
 
    std::vector<Atlas>::const_iterator it;
@@ -69,49 +68,10 @@ void AtlasRegistration::defineRegisteredAtlasPopulation()
    for (it = m_atlasPopulation.begin(); it != m_atlasPopulation.end(); ++it)
    {  
       atlas=defineRegisteredAtlas(*it);
-      m_atlasPopulationRegistered.push_back(atlas);
+      atlasPopulationRegistered.push_back(atlas);
    }   
-}
 
-
-// Checking results // 
-
-bool AtlasRegistration::checkRegisteredAtlas(Atlas atlas)
-{
-   QFile* T1Reg_file = new QFile (atlas.T1);
-   QFile* T2Reg_file = new QFile (atlas.T2);
-
-   QFile* segReg_file = new QFile (atlas.seg);
-
-   QFile* whiteReg_file = new QFile (atlas.white);
-   QFile* grayReg_file = new QFile (atlas.gray);
-   QFile* csfReg_file = new QFile (atlas.csf);
-
-   if (!atlas.probabilistic && T1Reg_file->exists() && T2Reg_file->exists() && segReg_file->exists())
-   {
-      return true;
-   } 
-
-   if (atlas.probabilistic && T1Reg_file->exists() && T2Reg_file->exists() && whiteReg_file->exists() && grayReg_file->exists() && csfReg_file->exists())
-   {
-      return true;
-   } 
-
-   return false;
-}
-
-bool AtlasRegistration::checkRegisteredAtlasPopulation()
-{
-   std::vector<Atlas>::const_iterator it;
-
-   for (it = m_atlasPopulationRegistered.begin(); it != m_atlasPopulationRegistered.end(); ++it)
-   {  
-      if(!checkRegisteredAtlas(*it))
-      {
-         return false;
-      } 
-   }
-   return true;
+   return atlasPopulationRegistered;
 }
 
 
@@ -131,27 +91,27 @@ void AtlasRegistration::createAtlasDirectories()
 
 void AtlasRegistration::initializeScript(QString &script)
 {
-   script += "#!/usr/bin/env python\n";
-
-   // Import the librairies needed 
-   script += "import os\n"; 
-   script += "import sys\n";
-   script += "import signal\n";
-   script += "import subprocess\n";
-   script += "import logging\n";   
+   definePython(script);
+   importGeneralModules(script);
+  
    script += "import time\n";
    script += "import array\n";
    script += "from collections import namedtuple\n\n";
 
-   script += "ANTS = '" + m_executables->getExecutablePath("ANTS") + "'\n";
-   script += "ResampleVolume2 = '" + m_executables->getExecutablePath("ResampleVolume2") + "'\n\n";
-
-   script += "runningProcess = None\n\n";  
+   defineExecutable(script, "ANTS");
+   defineExecutable(script, "ResampleVolume2");
+   defineExecutable(script, "ImageMath");
+   defineExecutable(script, "unu");
+   defineExecutable(script, "N4ITKBiasFieldCorrection");
+ 
+   script += "runningRegistrations = None\n"; 
+   script += "runningProcess = None\n";  
+   script += "logFile = None\n\n";  
 }
 
 void AtlasRegistration::implementExecute(QString &script)
 {
-   script += "def execute(args, logFile):\n";
+   script += "def execute(args):\n";
    script += "\tlogFile.write(subprocess.list2cmdline(args))\n";
    script += "\trunningProcess = subprocess.Popen(args,stdout=logFile,stderr=logFile)\n";
    script += "\tlogging.info(runningProcess)\n";
@@ -160,6 +120,8 @@ void AtlasRegistration::implementExecute(QString &script)
 
 void AtlasRegistration::implementRegisterAtlas(QString &script, bool probabilistic)
 {   
+   //QString log = variable("log");
+
    if(probabilistic)
    {
       script += "def main(T1Atlas, T2Atlas, whiteAtlas, grayAtlas, csfAtlas, outbase, log):\n";
@@ -172,101 +134,128 @@ void AtlasRegistration::implementRegisterAtlas(QString &script, bool probabilist
    script += "\tsignal.signal(signal.SIGINT, stop)\n";
    script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
 
-   script += "\t# Inputs # \n";
-   script += "\tT1 = '" + m_neo.T1 + "'\n";
-   script += "\tT2 = '" + m_neo.T2 + "'\n\n "; 
-
-   script += "\t# Transformations # \n";
-   script += "\toutput = outbase + '_.nii.gz'\n";
-   script += "\taffine = outbase + '_Affine.txt'\n";
-   script += "\twarp = outbase + '_Warp.nii.gz'\n\n"; 
-
-   script += "\t# Outputs # \n";
-   script += "\tT1Reg = outbase + '-T1.nrrd'\n";
-   script += "\tT2Reg = outbase + '-T2.nrrd'\n";
-
-   if(probabilistic)
-   {
-      script += "\twhiteReg = outbase + '-white.nrrd'\n";
-      script += "\tgrayReg = outbase + '-gray.nrrd'\n";
-      script += "\tcsfReg = outbase + '-csf.nrrd'\n\n";
-   }
-   
-   else
-   {
-      script += "\tsegReg = outbase + '-seg.nrrd'\n\n";
-   }
-
-   QString log = variable("log");
-   script += "\t# Log File #\n";
+   script += "\tglobal logFile\n";
    script += "\tlogFile=open(log, \"w\") \n\n";
 
-   script += "\t# Calculate transformations # \n";
-   QString modality1 = "'CC[' + T1 + ',' + T1Atlas + '," + QString::number(m_parameters->getWeight1()) + "," + QString::number(m_parameters->getRadius1()) + "]'";
-   QString modality2 = "'CC[' + T2 + ',' + T2Atlas + '," + QString::number(m_parameters->getWeight2()) + "," + QString::number(m_parameters->getRadius2()) + "]'";
+   script += "\tT1 = '" + m_neo.T1 + "'\n";
+   script += "\tT2 = '" + m_neo.T2 + "'\n";
+
+   if(m_parameters->getUsingSmoothedMask())
+   {
+      QString smoothedMask_name = m_prefix + "mask-smoothed" + m_suffix + ".nrrd";
+      QString smoothedMask_path = m_module_dir->filePath(smoothedMask_name) ;
+
+      m_log = "- Smoothing brain mask"; 
+      m_inputs.insert("mask", m_neo.mask);
+      m_outputs.insert("smoothedMask", smoothedMask_path); 
+      m_argumentsList << "ImageMath" << "mask" << "'-smooth'" << "'-gauss'" << "'-size'" << "'1'" << "'-outfile'" << "smoothedMask"; 
+      execute(script); 
+   }
+
+   QString modality1, modality2; 
+
+   if(m_parameters->getImageMetric1()=="Mutual Information")
+   {
+      modality1 = "MI[' + T1 + ',' + T1Atlas + '," + QString::number(m_parameters->getWeight1()) + "," + QString::number(m_parameters->getRadius1()) + "]";
+      modality2 = "MI[' + T2 + ',' + T2Atlas + '," + QString::number(m_parameters->getWeight2()) + "," + QString::number(m_parameters->getRadius2()) + "]";
+   }
+
+   else
+   {
+      modality1 = m_parameters->getImageMetric1() + "[' + T1 + ',' + T1Atlas + '," + QString::number(m_parameters->getWeight1()) + "," + QString::number(m_parameters->getRadius1()) + "]";
+      modality2 = m_parameters->getImageMetric2() + "[' + T2 + ',' + T2Atlas + '," + QString::number(m_parameters->getWeight2()) + "," + QString::number(m_parameters->getRadius2()) + "]";
+   }
    QString iterations = QString::number(m_parameters->getIterationsJ()) + "x" + QString::number(m_parameters->getIterationsK()) + "x" + QString::number(m_parameters->getIterationsL());
    QString transformation = m_parameters->getTransformationType() + "[" + QString::number(m_parameters->getGradientStepLength()) + "]"; //"," + QString::number(m_parameters->getNumberOfTimeSteps()) + "," + QString::number(m_parameters->getDeltaTime()) + "]";
-   QString regularization = m_parameters->getRegularizationType() + "[" + QString::number(m_parameters->getGradientFieldSigma()) + "," + QString::number(m_parameters->getDeformationFieldSigma()) + "]"; //"," + QString::number(m_parameters->getTruncation()) + "]";
+   QString regularization = m_parameters->getRegularizationType() + "[" + QString::number(m_parameters->getGradientFieldSigma()) + "," + QString::number(m_parameters->getDeformationFieldSigma()) + "]";
+   QString output = "' + outbase + '_.nii.gz";
 
-   script += "\tif checkFileExistence(affine)==False or checkFileExistence(warp)==False: \n";
-   script += "\t\tmodality1 = " + modality1 + "\n";
-   script += "\t\tmodality2 = " + modality2 + "\n";
-   script += "\t\titerations = '" + iterations + "'\n";
-   script += "\t\ttransformation = '" + transformation + "'\n";
-   script += "\t\tregularization = '" + regularization + "'\n";
+   QString affine = "' + outbase + '_Affine.txt";
+   QString warp = "' + outbase + '_Warp.nii.gz";
 
-   QStringList argumentsList; 
-   argumentsList << "ANTS" << "'3'" << "'-m'" << "modality1" << "'-m'" << "modality2" << "'-o'" << "output" << "'-i'" << "iterations" << "'-t'" << "transformation" << "'-r'" << "regularization"; 
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args, logFile)\n\n"; 
+   m_log = "Calculating transformations";
+   m_inputs.insert("modality1", modality1);
+   m_inputs.insert("modality2", modality2);
+   m_inputs.insert("iterations", iterations); 
+   m_inputs.insert("transformation", transformation);
+   m_inputs.insert("regularization", regularization);  
+   m_inputs.insert("output", output );
+   m_outputs.insert("affine", affine);
+   m_outputs.insert("warp", warp);  
 
-   argumentsList.clear();
-   argumentsList << "'text_subst.pl'" << "'MatrixOffsetTransformBase_double_3_3'" << "'AffineTransform_double_3_3'" << "affine"; 
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args, logFile)\n\n"; 
+   if(m_parameters->getUsingMask())
+   {
+      m_inputs.insert("mask", m_neo.mask);
+      m_argumentsList << "ANTS" << "'3'" << "'-m'" << "modality1" << "'-m'" << "modality2" << "'-o'" << "output" << "'-i'" << "iterations" << "'-t'" << "transformation" << "'-r'" << "regularization" << "'-x'" << "mask"; 
+   }
+   else    if(m_parameters->getUsingSmoothedMask())
+   {
+      m_argumentsList << "ANTS" << "'3'" << "'-m'" << "modality1" << "'-m'" << "modality2" << "'-o'" << "output" << "'-i'" << "iterations" << "'-t'" << "transformation" << "'-r'" << "regularization" << "'-x'" << "smoothedMask";       
+   }
+   else
+   {
+      m_argumentsList << "ANTS" << "'3'" << "'-m'" << "modality1" << "'-m'" << "modality2" << "'-o'" << "output" << "'-i'" << "iterations" << "'-t'" << "transformation" << "'-r'" << "regularization";
+   }
 
-   script += "\t# Apply transformations # \n";
+   execute(script); 
 
-   argumentsList.clear();
-   argumentsList << "ResampleVolume2" << "T1Atlas" << "T1Reg" << "'--Reference'" << "T2" << "'-i'" << "'bs'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
-   script += "\tif checkFileExistence(T1Reg)==False:\n";
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args, logFile)\n\n"; 
+   // Normalizing affine file
+   m_log = "Normalizing affine file";
+   m_argumentsList << "'text_subst.pl'" << "'MatrixOffsetTransformBase_double_3_3'" << "'AffineTransform_double_3_3'" << "affine"; 
+   execute(script);
 
-   argumentsList.clear();
-   argumentsList << "ResampleVolume2" << "T2Atlas" << "T2Reg" << "'--Reference'" << "T2" << "'-i'" << "'bs'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
-   script += "\tif checkFileExistence(T2Reg)==False:\n";
-   script += "\t\targs = " + listToString(argumentsList) + "\n";
-   script += "\t\texecute(args, logFile)\n\n"; 
+   // Applying transformations to T1
+   QString T1Reg = "' + outbase + '-T1.nrrd";
+
+   m_log = "Applying transformations to T1";
+   m_outputs.insert("T1Reg", T1Reg); 
+   m_argumentsList << "ResampleVolume2" << "T1Atlas" << "T1Reg" << "'--Reference'" << "T2" << "'-i'" << "'bs'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+   execute(script);
+
+   // Applying transformations to T2
+   QString T2Reg = "' + outbase + '-T2.nrrd";
+
+   m_log = "Applying transformations to T2";
+   m_outputs.insert("T2Reg", T2Reg); 
+   m_argumentsList << "ResampleVolume2" << "T2Atlas" << "T2Reg" << "'--Reference'" << "T2" << "'-i'" << "'bs'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+   execute(script); 
 
    if(probabilistic)
    {
-      argumentsList.clear();
-      argumentsList << "ResampleVolume2" << "whiteAtlas" << "whiteReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
-      script += "\tif checkFileExistence(whiteReg)==False:\n";
-      script += "\t\targs = " + listToString(argumentsList) + "\n";
-      script += "\t\texecute(args, logFile)\n\n"; 
+      // Applying transformations to the white probability 
+      QString whiteReg = "' + outbase + '-white.nrrd";
 
-      argumentsList.clear();
-      argumentsList << "ResampleVolume2" << "grayAtlas" << "grayReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
-      script += "\tif checkFileExistence(grayReg)==False:\n";
-      script += "\t\targs = " + listToString(argumentsList) + "\n";
-      script += "\t\texecute(args, logFile)\n\n"; 
+      m_log = "Applying transformations to the white probability";
+      m_outputs.insert("whiteReg", whiteReg); 
+      m_argumentsList << "ResampleVolume2" << "whiteAtlas" << "whiteReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+      execute(script); 
 
-      argumentsList.clear();
-      argumentsList << "ResampleVolume2" << "csfAtlas" << "csfReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
-      script += "\tif checkFileExistence(csfReg)==False:\n";
-      script += "\t\targs = " + listToString(argumentsList) + "\n";
-      script += "\t\texecute(args, logFile)\n\n"; 
+      // Applying transformations to the gray probability 
+      QString grayReg = "' + outbase + '-gray.nrrd";
+
+      m_log = "Applying transformations to the gray probability";
+      m_outputs.insert("grayReg", grayReg);
+      m_argumentsList << "ResampleVolume2" << "grayAtlas" << "grayReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+      execute(script); 
+
+      // Applying transformations to the CSF probability 
+      QString csfReg = "' + outbase + '-csf.nrrd";
+
+      m_log = "Applying transformations to the CSF probability";
+      m_outputs.insert("csfReg", csfReg);
+      m_argumentsList << "ResampleVolume2" << "csfAtlas" << "csfReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+      execute(script); 
    }
    
    else
    {
-      argumentsList.clear();
-      argumentsList << "ResampleVolume2" << "segAtlas" << "segReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
-      script += "\tif checkFileExistence(segReg)==False:\n";
-      script += "\t\targs = " + listToString(argumentsList) + "\n";
-      script += "\t\texecute(args, logFile)\n\n"; 
+      // Applying transformations to the segmentation
+      QString segReg = "' + outbase + '-seg.nrrd";
+
+      m_log = "Applying transformations to the white probability";
+      m_outputs.insert("segReg", segReg);
+      m_argumentsList << "ResampleVolume2" << "segAtlas" << "segReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+      execute(script); 
    }
 }
 
@@ -384,12 +373,14 @@ void AtlasRegistration::executeRegisterAtlasProcess(QString &script, Atlas atlas
 
 void AtlasRegistration::implementRegisterAtlasPopulation(QString &script)
 {
+   script += "import registerAtlas\n";
+   script += "import registerProbabilisticAtlas\n";
+
    int i;
-   script += "def signal_handler(signal, frame):\n";
+   script += "def stop(signal, frame):\n";
    script += "\tprint 'Signal received'\n";
-   script += "\tfor process in runningRegistrations:\n";
-   script += "\t\tprint process.pid\n";
-   script += "\t\tprocess.terminate()\n";
+   script += "\tfor registration in runningRegistrations:\n";
+   script += "\t\t(registration.process).terminate()\n";
    script += "\tsys.exit(0)\n\n";
 
    script += "def checkrunningRegistrations(runningRegistrations):\n";
@@ -398,16 +389,14 @@ void AtlasRegistration::implementRegisterAtlasPopulation(QString &script)
    script += "\t\t\tlogging.info('Registering %s done' %registration.name)\n";
    script += "\t\t\trunningRegistrations.remove(registration)\n\n";
 
-   script += "import registerAtlas\n";
-   script += "import registerProbabilisticAtlas\n";
-
-   script += "signal.signal(signal.SIGINT, signal_handler)\n";
-   script += "signal.signal(signal.SIGTERM, signal_handler)\n\n";
-
    script += "def run():\n";
 
    script += "\tlogging.info('=== Atlas Registration ===')\n";
    script += "\tlogging.debug('')\n";
+
+   script += "\tglobal runningRegistrations\n";
+   script += "\tsignal.signal(signal.SIGINT, stop)\n";
+   script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
 
    QString atlasRegistration_script = m_processing_dir->filePath("registerAtlas.py");
    script += "\tatlasRegistration_script = '" + atlasRegistration_script + "'\n";
@@ -430,20 +419,17 @@ void AtlasRegistration::implementRegisterAtlasPopulation(QString &script)
 
       Atlas atlas= *(it);
 
-      if (!checkRegisteredAtlas(m_atlasPopulationRegistered[i]))
-      { 
-         defineRegisterAtlasParameters(script, atlas);
+      defineRegisterAtlasParameters(script, atlas);
 
-         if (m_computingSystem == "Killdevil")
-         {
-            submitRegisterAtlasJob(script);
-         }
+      if (m_computingSystem == "Killdevil")
+      {
+         submitRegisterAtlasJob(script);
+      }
 
-         if (m_computingSystem == "Local")
-         {
-            i = std::distance(m_atlasPopulation.begin(), it);
-            executeRegisterAtlasProcess(script, *it, i);
-         }
+      if (m_computingSystem == "Local")
+      {
+         i = std::distance(m_atlasPopulation.begin(), it);
+         executeRegisterAtlasProcess(script, *it, i);
       }
    }
    script += "\texit_codes = [(registration.process).wait() for registration in runningRegistrations]\n";
@@ -454,19 +440,21 @@ void AtlasRegistration::writeRegisterAtlasPopulation()
    QString registerAtlasPopulation;
 
    initializeScript(registerAtlasPopulation);
-
    implementRegisterAtlasPopulation(registerAtlasPopulation);
-
    writeScript(registerAtlasPopulation);
 }
 
 void AtlasRegistration::update()
 {     
+   defineRegisteredAtlasPopulation();
    createAtlasDirectories();
    writeRegisterAtlas();
    writeRegisterProbabilisticAtlas();
    writeRegisterAtlasPopulation();
 }
 
-std::vector< Atlas > AtlasRegistration::getOutput() { return m_atlasPopulationRegistered; }
+std::vector<Atlas> AtlasRegistration::getOutput()
+{
+   return defineRegisteredAtlasPopulation();
+}
 

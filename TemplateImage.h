@@ -7,7 +7,8 @@
 struct TemplateImage {
 QString     name;
 QDir*       dir;
-QString     finalImage;
+QString     input;
+QString     output;
 };
 
 #endif

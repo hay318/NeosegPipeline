@@ -37,7 +37,6 @@ class AtlasGeneration : public Script
 
    // Checking Existing Results
    void defineGeneratedAtlas();
-   bool checkGeneratedAtlas();
 
    // Creating Directories 
    void createDirectories();
@@ -47,11 +46,11 @@ class AtlasGeneration : public Script
 
    // Implementation 
    QString getImage(Atlas atlas, QString name);
-   void generateTemplate(QString& script, TemplateImage templateImage);
+   void generateTemplate(QString& script, TemplateImage& templateImage);
    void extractWMFromFA(QString &script);
    void generateWeightedAveragedLabels(QString& script);
    void generatePriorProbability(QString& script, PriorProbability& priorProbability);
-   void preNormalizePriorProbability(QString &script, PriorProbability priorProbability);
+   void preNormalizePriorProbability(QString &script, PriorProbability& priorProbability);
    void computeSumProbabilities(QString &script);
    void computeRest(QString& script);
    void copyFinalPriorProbability(QString& script, PriorProbability& probability);

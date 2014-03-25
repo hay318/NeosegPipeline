@@ -41,7 +41,11 @@ class DtiRegistration : public Script
    Neo getOutput();
 
    private:
-         
+  
+   // Suffix
+   QString m_grid_suffix;
+   QString m_upsampling_suffix; 
+   QString m_stripping_suffix;       
    QString m_registering_suffix;
 
    // Output 

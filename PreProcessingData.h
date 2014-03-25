@@ -21,12 +21,8 @@ class PreProcessingData : public Script
    // Constructor 
    PreProcessingData(QString module);
 
-   // Setting Parameters
-   void setSkullStripping(bool skullStripping);
-
    // Implementing Script 
    void initializeScript(QString &script);
-   QString closeMask(QString &script);
    QString skullStripImage(QString &script, QString image);
    QString correctImage(QString &script, QString image);
    void implementRun(QString &script);
@@ -37,18 +33,13 @@ class PreProcessingData : public Script
 
 
    private: 
-   
-   // Data
-   bool              m_skullStripping;
 
    // Suffix
    QString           m_skullStripping_suffix;
+   QString           m_converting_suffix;
    QString           m_correcting_suffix;
    QString           m_rescaling_suffix;
    QString           m_closing_suffix;
-
-   // Output
-   Neo               m_preProcessedNeo;
 };
 
 #endif

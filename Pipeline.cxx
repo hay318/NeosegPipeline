@@ -43,11 +43,11 @@ void Pipeline::writePreProcessingData()
    QString module_name = "preProcessingData";
    PreProcessingData preProcessingData(module_name);
    
-   preProcessingData.setNeo(m_parameters->getNeo());
-   preProcessingData.setSkullStripping(m_parameters->getSkullStripping());  
+   preProcessingData.setNeo(m_parameters->getNeo()); 
    preProcessingData.setModuleDirectory(directory_path);
    preProcessingData.setProcessingDirectory(m_processing_path);
    preProcessingData.setExecutablePaths(m_parameters->getExecutablePaths());
+   preProcessingData.setSuffix(m_parameters->getSuffix()); 
 
    preProcessingData.update(); 
    m_importingModules += "import " + module_name + "\n"; 
@@ -68,6 +68,7 @@ void Pipeline::writeDTIRegistration()
    dtiRegistration.setModuleDirectory(directory_path);
    dtiRegistration.setProcessingDirectory(m_processing_path);
    dtiRegistration.setExecutablePaths(m_parameters->getExecutablePaths());
+   dtiRegistration.setSuffix(m_parameters->getSuffix()); 
 
    dtiRegistration.update();
    m_importingModules += "import " + module_name + "\n"; 
@@ -92,15 +93,12 @@ void Pipeline::writeAtlasRegistration()
    atlasRegistration.setNumberOfCores(m_parameters->getNumberOfCores());
    atlasRegistration.setAntsParameters(m_parameters->getAntsParameters());
    atlasRegistration.setExecutablePaths(m_parameters->getExecutablePaths());
+   atlasRegistration.setSuffix(m_parameters->getSuffix()); 
 
-   atlasRegistration.defineRegisteredAtlasPopulation();
-   if(!atlasRegistration.checkRegisteredAtlasPopulation())
-   {
-      atlasRegistration.update();
-      m_importingModules += "import " + module_name + "\n"; 
-      m_runningModules += module_name + ".run()\n"; 
-   }
-
+   atlasRegistration.update();
+   m_importingModules += "import " + module_name + "\n"; 
+   m_runningModules += module_name + ".run()\n"; 
+   
    m_parameters->setAtlasPopulation(atlasRegistration.getOutput());
 }
 
@@ -122,14 +120,11 @@ void Pipeline::writeAtlasGeneration()
    atlasGeneration.setComputingWeights(m_parameters->getComputingWeights());
    atlasGeneration.setNeightborhoodRadius(m_parameters->getWeightsRadius());
    atlasGeneration.setExecutablePaths(m_parameters->getExecutablePaths());
+   atlasGeneration.setSuffix(m_parameters->getSuffix()); 
 
-   atlasGeneration.defineGeneratedAtlas();
-   if(!atlasGeneration.checkGeneratedAtlas())
-   {
-      atlasGeneration.update();
-      m_importingModules += "import " + module_name + "\n"; 
-      m_runningModules += module_name + ".run()\n"; 
-   }
+   atlasGeneration.update();
+   m_importingModules += "import " + module_name + "\n"; 
+   m_runningModules += module_name + ".run()\n"; 
 
    m_parameters->setAtlas(atlasGeneration.getOutput());
 }
@@ -154,6 +149,7 @@ void Pipeline::writeNeosegExecution()
    neosegExecution.setComputing3LabelsSeg(m_parameters->getComputing3LabelsSeg());
    neosegExecution.setNeosegParameters(m_parameters->getNeosegParameters());
    neosegExecution.setExecutablePaths(m_parameters->getExecutablePaths());
+   neosegExecution.setSuffix(m_parameters->getSuffix());
 
    neosegExecution.update();
    m_importingModules += "import " + module_name +"\n"; 
@@ -293,7 +289,6 @@ void Pipeline::runPipeline()
    if (m_parameters->getNewAtlas()==true)
    {
       writeAtlasRegistration();
-
       writeAtlasGeneration();
    }
 

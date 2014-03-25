@@ -14,7 +14,6 @@ void NeosegPipelineTool::setOutput(QString output)
       m_parameters.setOutput(output);
    }
 }
-
 void NeosegPipelineTool::setT1(QString T1)
 {
    if(m_parameters.checkT1(T1))
@@ -22,7 +21,6 @@ void NeosegPipelineTool::setT1(QString T1)
       m_parameters.setT1(T1);
    }
 }
-
 void NeosegPipelineTool::setT2(QString T2)
 {
    if(m_parameters.checkT2(T2))
@@ -30,7 +28,6 @@ void NeosegPipelineTool::setT2(QString T2)
       m_parameters.setT2(T2);
    }
 }
-
 void NeosegPipelineTool::setMask(QString mask)
 {
    if(m_parameters.checkMask(mask))
@@ -38,7 +35,6 @@ void NeosegPipelineTool::setMask(QString mask)
       m_parameters.setMask(mask);
    }
 }
-
 void NeosegPipelineTool::setDWI(QString DWI)
 {
    if(m_parameters.checkDWI(DWI))
@@ -46,7 +42,6 @@ void NeosegPipelineTool::setDWI(QString DWI)
       m_parameters.setDWI(DWI);
    }
 }
-
 void NeosegPipelineTool::setb0(QString b0)
 {
    if(m_parameters.checkb0(b0))
@@ -54,12 +49,6 @@ void NeosegPipelineTool::setb0(QString b0)
       m_parameters.setb0(b0);
    }
 }
-
-void NeosegPipelineTool::setSkullStripping(bool skullStripping)
-{
-   m_parameters.setSkullStripping(skullStripping);
-}
-
 void NeosegPipelineTool::setParametersFile(QString xmlFile) 
 {
    if(!xmlFile.isEmpty())

@@ -21,9 +21,12 @@ class ExecutablePaths
    ExecutablePaths();
 
    bool checkExecutablePath(QString path);
+
    void setExecutablePath(QString name, QString path); 
-   void setDefaultExecutablePath(QString name);
    QString getExecutablePath(QString name); 
+
+   void setDefaultExecutablePath(QString name);
+   QString getDefaultExecutablePath(QString name);
 
    QString findExecutablePath(QStringList splitPath, QString executableName);
   

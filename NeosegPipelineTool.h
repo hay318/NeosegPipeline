@@ -24,7 +24,6 @@ class NeosegPipelineTool
       void setMask(QString mask);    
       void setDWI(QString DWI);
       void setb0(QString b0);
-      void setSkullStripping(bool skullStripping);
 
       void setParametersFile(QString xmlFile);
       void setExecutablesFile(QString xmlFile);
