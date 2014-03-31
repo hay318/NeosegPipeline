@@ -19,9 +19,23 @@
 #include "MainScriptThread.h"
 #include "ExecutablePaths.h" 
 
+
 class DerivedWindow : public QMainWindow , public Ui_Window
 {
 	Q_OBJECT // Enable slots and signals 
+
+   struct Executable
+   {
+      QPushButton* select_button;
+      QLineEdit* enter_lineEdit; 
+      QPushButton* reset_button; 
+   };
+
+   struct Image
+   {
+      QPushButton* select_button;
+      QLineEdit* enter_lineEdit; 
+   }; 
 
    public:
 
@@ -38,6 +52,9 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void initializeExecutablesMap();   
    void initializeParameters();
    void initializeExecutables(); 
+
+   // Connection 
+
 
    // Atlas Population
    void checkAtlases();
@@ -65,26 +82,6 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void selectImage(QString image); 
    void enterImage(QString image);
 
-   // T1
-   void selectT1();
-   void enterT1();
-
-   // T2
-   void selectT2();
-   void enterT2();
-
-   // Mask 
-   void selectMask();
-   void enterMask();
-
-   // DWI
-   void selectDWI();
-   void enterDWI();
-
-   // b0
-   void selectB0();
-   void enterB0();
-
    // New or Existing Atlas
    void selectNewOrExistingAtlas();
 
@@ -109,60 +106,10 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void saveExecutables(); 
 
    // Executables 
-   void selectExecutable(QString executable);
-   void enterExecutable(QString executable);
-   void resetExecutable(QString executable);
+   void selectExecutable(QString executable_name);
+   void enterExecutable(QString executable_name);
+   void resetExecutable(QString executable_name);
    void resetAllExecutables(); 
-
-   // SegPostProcessCLP
-   void selectSegPostProcessCLP();
-   void enterSegPostProcessCLP(); 
-   void resetSegPostProcessCLP(); 
-
-   // N4ITKBiasFieldCorrection
-   void selectN4ITKBiasFieldCorrection();
-   void enterN4ITKBiasFieldCorrection(); 
-   void resetN4ITKBiasFieldCorrection();
-
-   // ITKTransformTools
-   void selectITKTransformTools();
-   void enterITKTransformTools(); 
-   void resetITKTransformTools(); 
-
-   // bet2
-   void selectBet2();
-   void enterBet2(); 
-   void resetBet2(); 
-
-   // dtiestim
-   void selectDtiestim();
-   void enterDtiestim(); 
-   void resetDtiestim(); 
-
-   // dtiprocess
-   void selectDtiprocess();
-   void enterDtiprocess();
-   void resetDtiprocess(); 
-
-   // ANTS
-   void selectANTS();
-   void enterANTS();
-   void resetANTS();
- 
-   // ResampleVolume2
-   void selectResampleVolume2();
-   void enterResampleVolume2(); 
-   void resetResampleVolume2(); 
-
-   // ImageMath
-   void selectImageMath();
-   void enterImageMath(); 
-   void resetImageMath(); 
-
-   // InsightSNAP
-   void selectInsightSNAP();
-   void enterInsightSNAP(); 
-   void resetInsightSNAP(); 
 
    // Run Pipeline
    void runPipeline();
@@ -194,7 +141,7 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    ExecutablePaths* m_executables; 
 
    std::map<QString, QLineEdit*> m_images;
-   QMap<QString, QLineEdit*> m_executables_lineEdit;
+   //QMap<QString, QLineEdit*> m_executables_lineEdit;
 
    QString m_tests_path;
    QString m_data_path;
@@ -207,6 +154,14 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    bool m_executablesSet;
 
    MainScriptThread* m_thread; 
+
+
+   QMap<QString, Image> m_images_map; 
+   QMap<QString, Executable> m_executables_map; 
+
+
+
+
 };
 
 #endif

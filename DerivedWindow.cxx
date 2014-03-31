@@ -7,10 +7,58 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    m_parametersSet = false; 
    m_executablesSet = false; 
 
-   initializeImagesMap();
-   initializeExecutablesMap(); 
+   // Select Image Signal Mapper
+   QSignalMapper* selectImage_signalMapper = new QSignalMapper(this);
+   connect(selectImage_signalMapper, SIGNAL(mapped(QString)), this, SLOT(selectImage(QString)));
 
-   //Connections
+   // Enter Image Signal Mapper
+   QSignalMapper* enterImage_signalMapper = new QSignalMapper(this);
+   connect(enterImage_signalMapper, SIGNAL(mapped(QString)), this, SLOT(enterImage(QString)));
+
+   // Connect Images Signal/Slot
+   initializeImagesMap();
+   QMap<QString, Image>::iterator it_images; 
+   for(it_images = m_images_map.begin(); it_images != m_images_map.end(); ++it_images)
+   {
+      QString name = it_images.key(); 
+      Image image = it_images.value();  
+
+      selectImage_signalMapper->setMapping(image.select_button, name);
+      connect(image.select_button, SIGNAL(clicked()), selectImage_signalMapper, SLOT(map())); 
+
+      enterImage_signalMapper->setMapping(image.enter_lineEdit, name);
+      connect(image.enter_lineEdit, SIGNAL(editingFinished()), enterImage_signalMapper, SLOT(map())); 
+   }
+
+   // Select Executable Signal Mapper
+   QSignalMapper* selectExecutable_signalMapper = new QSignalMapper(this);
+   connect(selectExecutable_signalMapper, SIGNAL(mapped(QString)), this, SLOT(selectExecutable(QString)));
+
+   // Enter Executable Signal Mapper
+   QSignalMapper* enterExecutable_signalMapper = new QSignalMapper(this);
+   connect(enterExecutable_signalMapper, SIGNAL(mapped(QString)), this, SLOT(enterExecutable(QString)));
+
+   // Reset Executable Signal Mapper
+   QSignalMapper* resetExecutable_signalMapper = new QSignalMapper(this);
+   connect(resetExecutable_signalMapper, SIGNAL(mapped(QString)), this, SLOT(resetExecutable(QString)));
+
+   // Connect Executables Signal/Slot
+   initializeExecutablesMap(); 
+   QMap<QString, Executable>::iterator it_exec; 
+   for(it_exec = m_executables_map.begin(); it_exec != m_executables_map.end(); ++it_exec)
+   {
+      QString name = it_exec.key(); 
+      Executable executable = it_exec.value();  
+
+      selectExecutable_signalMapper->setMapping(executable.select_button, name);
+      connect(executable.select_button, SIGNAL(clicked()), selectExecutable_signalMapper, SLOT(map())); 
+
+      enterExecutable_signalMapper->setMapping(executable.enter_lineEdit, name);
+      connect(executable.enter_lineEdit, SIGNAL(editingFinished()), enterExecutable_signalMapper, SLOT(map())); 
+
+      resetExecutable_signalMapper->setMapping(executable.reset_button, name);
+      connect(executable.reset_button, SIGNAL(clicked()), resetExecutable_signalMapper, SLOT(map()));      
+   }
 
    // OutputDir //
    connect(output_button, SIGNAL(clicked()), this, SLOT(selectOuput()));
@@ -21,26 +69,6 @@ DerivedWindow::DerivedWindow() : Ui_Window()
 
    // Suffix //
    connect(suffix_lineEdit, SIGNAL(returnPressed()), this, SLOT(enterSuffix()));   
-
-   // T1 // 
-	connect(T1_button, SIGNAL(clicked()), this, SLOT(selectT1()));
-   connect(T1_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterT1()));
-
-   // T2 //
-	connect(T2_button, SIGNAL(clicked()), this, SLOT(selectT2()));
-   connect(T2_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterT2()));
-
-   // Mask //
-	connect(mask_button, SIGNAL(clicked()), this, SLOT(selectMask()));
-   connect(mask_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterMask()));
-
-   // DWI //
-	connect(DWI_button, SIGNAL(clicked()), this, SLOT(selectDWI()));
-   connect(DWI_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterDWI()));
-
-   // T2 //
-	connect(b0_button, SIGNAL(clicked()), this, SLOT(selectB0()));
-   connect(b0_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterB0()));
 
    // New Or Existing Atlas //
    connect(newAtlas_radioButton, SIGNAL(clicked()), this, SLOT(selectNewOrExistingAtlas()));
@@ -64,69 +92,11 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    connect(loadExecutables_button,  SIGNAL(clicked()), this, SLOT(selectExecutables()));
    connect(loadExecutables_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterExecutables()));
 
-   connect(loadExecutables_button,  SIGNAL(clicked()), this, SLOT(selectExecutables()));
-   connect(loadExecutables_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterExecutables()));
-
    // Save Parameters
    connect(saveParameters_button, SIGNAL(clicked()), this, SLOT(saveParameters()));
 
    // Save Executables
    connect(saveExecutables_button, SIGNAL(clicked()), this, SLOT(saveExecutables()));
-
-   // SegPostProcessCLP
-   connect(SegPostProcessCLP_button, SIGNAL(clicked()), this, SLOT(selectSegPostProcessCLP()));
-   connect(SegPostProcessCLP_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterSegPostProcessCLP()));
-   connect(resetSegPostProcessCLP_button, SIGNAL(clicked()), this, SLOT(resetSegPostProcessCLP()));
-
-   // N4ITKBiasFieldCorrection
-   connect(N4ITKBiasFieldCorrection_button, SIGNAL(clicked()), this, SLOT(selectN4ITKBiasFieldCorrection()));
-   connect(N4ITKBiasFieldCorrection_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterN4ITKBiasFieldCorrection()));
-   connect(resetN4ITKBiasFieldCorrection_button, SIGNAL(clicked()), this, SLOT(resetN4ITKBiasFieldCorrection()));
-
-   // ITKTransformTools
-   connect(ITKTransformTools_button, SIGNAL(clicked()), this, SLOT(selectITKTransformTools()));
-   connect(ITKTransformTools_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterITKTransformTools()));
-   connect(resetITKTransformTools_button, SIGNAL(clicked()), this, SLOT(resetITKTransformTools()));
-
-   // bet2
-   connect(bet2_button, SIGNAL(clicked()), this, SLOT(selectBet2()));
-   connect(bet2_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterBet2()));
-   connect(resetBet2_button, SIGNAL(clicked()), this, SLOT(resetBet2()));
-
-   // dtiestim
-   connect(dtiestim_button, SIGNAL(clicked()), this, SLOT(selectDtiestim()));
-   connect(dtiestim_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterDtiestim()));
-   connect(resetDtiestim_button, SIGNAL(clicked()), this, SLOT(resetDtiestim()));
-
-   // dtiprocess
-   connect(dtiprocess_button, SIGNAL(clicked()), this, SLOT(selectDtiprocess()));
-   connect(dtiprocess_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterDtiprocess()));
-   connect(resetDtiprocess_button, SIGNAL(clicked()), this, SLOT(resetDtiprocess()));
-
-   // ANTS
-   connect(ANTS_button, SIGNAL(clicked()), this, SLOT(selectANTS()));
-   connect(ANTS_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterANTS()));
-   connect(resetANTS_button, SIGNAL(clicked()), this, SLOT(resetANTS()));
-
-   // ResampleVolume2
-   connect(dtiestim_button, SIGNAL(clicked()), this, SLOT(selectDtiestim()));
-   connect(dtiestim_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterDtiestim()));
-   connect(resetDtiestim_button, SIGNAL(clicked()), this, SLOT(resetDtiestim()));
-
-   // dtiestim
-   connect(ResampleVolume2_button, SIGNAL(clicked()), this, SLOT(selectResampleVolume2()));
-   connect(ResampleVolume2_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterResampleVolume2()));
-   connect(resetResampleVolume2_button, SIGNAL(clicked()), this, SLOT(resetResampleVolume2()));
-
-   // ImageMath
-   connect(ImageMath_button, SIGNAL(clicked()), this, SLOT(selectImageMath()));
-   connect(ImageMath_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterImageMath()));
-   connect(resetImageMath_button, SIGNAL(clicked()), this, SLOT(resetImageMath()));
-
-   // InsightSNAP
-   connect(InsightSNAP_button, SIGNAL(clicked()), this, SLOT(selectInsightSNAP()));
-   connect(InsightSNAP_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterInsightSNAP()));
-   connect(resetInsightSNAP_button, SIGNAL(clicked()), this, SLOT(resetInsightSNAP()));
 
    // Reset all executables 
    connect(resetAllExecutables_button, SIGNAL(clicked()), this, SLOT(resetAllExecutables()));
@@ -174,97 +144,80 @@ void DerivedWindow::setMainScriptThread(MainScriptThread* thread)
 
 void DerivedWindow::initializeImagesMap()
 {
-  m_images.insert(std::pair<QString, QLineEdit*>("T1", T1_lineEdit));
-  m_images.insert(std::pair<QString, QLineEdit*>("T2", T2_lineEdit));
-  m_images.insert(std::pair<QString, QLineEdit*>("mask", mask_lineEdit));
-  m_images.insert(std::pair<QString, QLineEdit*>("DWI", DWI_lineEdit));
-  m_images.insert(std::pair<QString, QLineEdit*>("b0", b0_lineEdit));
+   Image T1 = {T1_button, T1_lineEdit}; 
+   m_images_map.insert("T1", T1);
+
+   Image T2 = {T2_button, T2_lineEdit}; 
+   m_images_map.insert("T2", T2);
+
+   Image mask = {mask_button, mask_lineEdit}; 
+   m_images_map.insert("mask", mask);
+
+   Image b0 = {b0_button, b0_lineEdit}; 
+   m_images_map.insert("b0", b0);
+
+   Image DWI = {DWI_button, DWI_lineEdit}; 
+   m_images_map.insert("DWI", DWI);
 }
 
 void DerivedWindow::initializeExecutablesMap()
 {
-   m_executables_lineEdit.insert("SegPostProcessCLP", SegPostProcessCLP_lineEdit);
-   m_executables_lineEdit.insert("N4ITKBiasFieldCorrection", N4ITKBiasFieldCorrection_lineEdit);
-   m_executables_lineEdit.insert("ITKTransformTools", ITKTransformTools_lineEdit);
-   m_executables_lineEdit.insert("bet2", bet2_lineEdit);
-   m_executables_lineEdit.insert("dtiestim", dtiestim_lineEdit);
-   m_executables_lineEdit.insert("dtiprocess", dtiprocess_lineEdit);
-   m_executables_lineEdit.insert("ANTS", ANTS_lineEdit);
-   m_executables_lineEdit.insert("ResampleVolume2", ResampleVolume2_lineEdit);
-   m_executables_lineEdit.insert("ImageMath", ImageMath_lineEdit);
-   m_executables_lineEdit.insert("InsightSNAP", InsightSNAP_lineEdit);
+   Executable SegPostProcessCLP = {SegPostProcessCLP_button, SegPostProcessCLP_lineEdit, resetSegPostProcessCLP_button};
+   m_executables_map.insert("SegPostProcessCLP", SegPostProcessCLP);
+
+   Executable N4ITKBiasFieldCorrection = {N4ITKBiasFieldCorrection_button, N4ITKBiasFieldCorrection_lineEdit, resetN4ITKBiasFieldCorrection_button};
+   m_executables_map.insert("N4ITKBiasFieldCorrection", N4ITKBiasFieldCorrection);
+
+   Executable ITKTransformTools = {ITKTransformTools_button, ITKTransformTools_lineEdit, resetITKTransformTools_button};
+   m_executables_map.insert("ITKTransformTools", ITKTransformTools);
+
+   Executable bet2 = {bet2_button, bet2_lineEdit, resetBet2_button};
+   m_executables_map.insert("bet2", bet2);
+
+   Executable dtiestim = {dtiestim_button, dtiestim_lineEdit, resetDtiestim_button};
+   m_executables_map.insert("dtiestim", dtiestim);
+
+   Executable dtiprocess = {dtiprocess_button, dtiprocess_lineEdit, resetDtiprocess_button};
+   m_executables_map.insert("dtiprocess", dtiprocess);
+
+   Executable ANTS = {ANTS_button, ANTS_lineEdit, resetANTS_button};
+   m_executables_map.insert("ANTS", ANTS);
+
+   Executable ResampleVolume2 = {ResampleVolume2_button, ResampleVolume2_lineEdit, resetResampleVolume2_button};
+   m_executables_map.insert("ResampleVolume2", ResampleVolume2);
+
+   Executable ImageMath = {ImageMath_button, ImageMath_lineEdit, resetImageMath_button};
+   m_executables_map.insert("ImageMath", ImageMath);
+
+   Executable InsightSNAP = {InsightSNAP_button, InsightSNAP_lineEdit, resetInsightSNAP_button};
+   m_executables_map.insert("InsightSNAP", InsightSNAP);
 }
 
-void DerivedWindow::selectImage(QString image)
+void DerivedWindow::selectImage(QString image_name)
 {
+   Image image = m_images_map[image_name]; 
+
 	QString image_path = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
-   (m_images[image])->setText(image_path);
+   if(!image_path.isEmpty())
+   {
+      (image.enter_lineEdit)->setText(image_path);
+   }
 }
-void DerivedWindow::enterImage(QString image)
+void DerivedWindow::enterImage(QString image_name)
 {
-   QString image_path = (m_images[image])->text();
+   Image image = m_images_map[image_name];
+
+   QString image_path = (image.enter_lineEdit)->text();
 
    if(!image_path.isEmpty()) 
-   {      
+   {    
       if(!m_parameters->checkT1(image_path))
       {
-         (m_images[image])->clear();
-         QMessageBox::critical(this, image, image_path + "\ndoes not exist, enter a new file path");
+         (image.enter_lineEdit)->clear();
+         QMessageBox::critical(this, image_name, image_path + "\ndoes not exist, enter a new file path");
       }
    }
 }
-
-
-//***** T1 *****//
-void DerivedWindow::selectT1()
-{
-   selectImage("T1");
-}
-void DerivedWindow::enterT1()
-{
-   enterImage("T1");
-}
-
-//***** T2 *****//
-void DerivedWindow::selectT2()
-{
-   selectImage("T2");
-}
-void DerivedWindow::enterT2()
-{
-   enterImage("T2");
-}
-
-//***** Mask *****//
-void DerivedWindow::selectMask()
-{
-   selectImage("mask");
-}
-void DerivedWindow::enterMask()
-{
-   enterImage("mask");
-}
-
-//***** DWI *****//
-void DerivedWindow::selectDWI()
-{
-   selectImage("DWI");
-}
-void DerivedWindow::enterDWI()
-{
-   enterImage("DWI");
-}
-
-//***** b0*****//
-void DerivedWindow::selectB0()
-{
-   selectImage("b0");
-}
-void DerivedWindow::enterB0()
-{
-   enterImage("b0");
-}
-
 
 //***** Ouput *****//
 void DerivedWindow::selectOuput()
@@ -551,21 +504,28 @@ void DerivedWindow::enterExecutables()
 }
 
 // Executables 
-void DerivedWindow::selectExecutable(QString executable)
+void DerivedWindow::selectExecutable(QString executable_name)
 {   
+   Executable executable = m_executables_map[executable_name];
+
 	QString executable_path = QFileDialog::getOpenFileName(this, "Select executable", m_data_path);
-   if(QFileInfo(executable_path).isExecutable())
+   if(!executable_path.isEmpty())
    {
-      (m_executables_lineEdit[executable])->setText(executable_path);
-   }
-   else
-   {
-      QMessageBox::critical(this, executable, executable_path + "\nis not executable");      
+      if(QFileInfo(executable_path).isExecutable())
+      {
+         (executable.enter_lineEdit)->setText(executable_path);
+      }
+      else
+      {
+         QMessageBox::critical(this, executable_name, executable_path + "\nis not executable");      
+      }
    }
 }
-void DerivedWindow::enterExecutable(QString executable)
+void DerivedWindow::enterExecutable(QString executable_name)
 {
-   QString executable_path = (m_executables_lineEdit[executable])->text();
+   Executable executable = m_executables_map[executable_name];   
+
+   QString executable_path = (executable.enter_lineEdit)->text();
 
    if(!executable_path.isEmpty()) 
    {  
@@ -573,175 +533,37 @@ void DerivedWindow::enterExecutable(QString executable)
       {
          if(!QFileInfo(executable_path).isExecutable())
          {
-            (m_executables_lineEdit[executable])->clear();
-            QMessageBox::critical(this, executable, executable_path + "\nis not executable, enter a new file path");            
+            (executable.enter_lineEdit)->clear();
+            QMessageBox::critical(this, executable_name, executable_path + "\nis not executable, enter a new executable path");            
          }
       }
 
       else 
       {
-         (m_executables_lineEdit[executable])->clear();
-         QMessageBox::critical(this, executable, executable_path + "\ndoes not exist, enter a new file path");
+         (executable.enter_lineEdit)->clear();
+         QMessageBox::critical(this, executable_name, executable_path + "\ndoes not exist, enter a new file path");
       }
    }   
 }
-void DerivedWindow::resetExecutable(QString executable)
+void DerivedWindow::resetExecutable(QString executable_name)
 {
-   QString defaultPath = m_executables->getDefaultExecutablePath(executable);
-   (m_executables_lineEdit[executable])->setText(m_executables->getExecutablePath(executable));
+   Executable executable = m_executables_map[executable_name]; 
+
+   QString defaultPath = m_executables->getDefaultExecutablePath(executable_name);
+   (executable.enter_lineEdit)->setText(m_executables->getExecutablePath(executable_name));
 }
 void DerivedWindow::resetAllExecutables()
 {
-   resetSegPostProcessCLP(); 
-   resetN4ITKBiasFieldCorrection();
-   resetITKTransformTools(); 
-   resetBet2(); 
-   resetDtiestim(); 
-   resetDtiprocess(); 
-   resetANTS(); 
-   resetResampleVolume2(); 
-   resetImageMath(); 
-   resetInsightSNAP(); 
-}
-
-// SegPostProcessCLP
-void DerivedWindow::selectSegPostProcessCLP()
-{
-   selectExecutable("SegPostProcessCLP");
-}
-void DerivedWindow::enterSegPostProcessCLP()
-{
-   enterExecutable("SegPostProcessCLP");
-}
-void DerivedWindow::resetSegPostProcessCLP()
-{
-   resetExecutable("SegPostProcessCLP"); 
-}
-
-// N4ITKBiasFieldCorrection
-void DerivedWindow::selectN4ITKBiasFieldCorrection()
-{
-   selectExecutable("N4ITKBiasFieldCorrection");
-}
-void DerivedWindow::enterN4ITKBiasFieldCorrection()
-{
-   enterExecutable("N4ITKBiasFieldCorrection");
-}
-void DerivedWindow::resetN4ITKBiasFieldCorrection()
-{
-   resetExecutable("N4ITKBiasFieldCorrection");
-}
-
-// ITKTransformTools
-void DerivedWindow::selectITKTransformTools()
-{
-   selectExecutable("ITKTransformTools");
-}
-void DerivedWindow::enterITKTransformTools()
-{
-   enterExecutable("ITKTransformTools");
-}
-void DerivedWindow::resetITKTransformTools()
-{
-   resetExecutable("ITKTransformTools");
-}
-
-// bet2
-void DerivedWindow::selectBet2()
-{
-   selectExecutable("bet2");
-}
-void DerivedWindow::enterBet2()
-{
-   enterExecutable("bet2");
-}
-void DerivedWindow::resetBet2()
-{
-   resetExecutable("bet2");
-}
-
-// dtiestim
-void DerivedWindow::selectDtiestim()
-{
-   selectExecutable("dtiestim");
-}
-void DerivedWindow::enterDtiestim()
-{
-   enterExecutable("dtiestim");
-}
-void DerivedWindow::resetDtiestim()
-{
-   resetExecutable("dtiestim");
-}
-
-// dtiprocess
-void DerivedWindow::selectDtiprocess()
-{
-   selectExecutable("dtiprocess");
-}
-void DerivedWindow::enterDtiprocess()
-{
-   enterExecutable("dtiprocess");
-}
-void DerivedWindow::resetDtiprocess()
-{
-   resetExecutable("dtiprocess");
-}
-
-// ANTS
-void DerivedWindow::selectANTS()
-{
-   selectExecutable("ANTS");
-}
-void DerivedWindow::enterANTS()
-{
-   enterExecutable("ANTS");
-}
-void DerivedWindow::resetANTS()
-{
-   resetExecutable("ANTS");
-}
-
-// ResampleVolume2
-void DerivedWindow::selectResampleVolume2()
-{
-   selectExecutable("ResampleVolume2");
-}
-void DerivedWindow::enterResampleVolume2()
-{
-   enterExecutable("ResampleVolume2");
-}
-void DerivedWindow::resetResampleVolume2()
-{
-   resetExecutable("ResampleVolume2");
-}
-
-// ImageMath
-void DerivedWindow::selectImageMath()
-{
-   selectExecutable("ImageMath");
-}
-void DerivedWindow::enterImageMath()
-{
-   enterExecutable("ImageMath");
-}
-void DerivedWindow::resetImageMath()
-{
-   resetExecutable("ImageMath");
-}
-
-// InsightSNAP
-void DerivedWindow::selectInsightSNAP()
-{
-   selectExecutable("InsightSNAP");
-}
-void DerivedWindow::enterInsightSNAP()
-{
-   enterExecutable("InsightSNAP");
-}
-void DerivedWindow::resetInsightSNAP()
-{
-   resetExecutable("InsightSNAP");
+   /*resetExecutable("SegPostProcessCLP"); 
+   resetExecutable("N4ITKBiasFieldCorrection"); 
+   resetExecutable("ITKTransformTools"); 
+   resetExecutable("bet2"); 
+   resetExecutable("dtiestim"); 
+   resetExecutable("dtiprocess"); 
+   resetExecutable("ANTS"); 
+   resetExecutable("ResampleVolume2"); 
+   resetExecutable("ImageMath"); 
+   resetExecutable("InsightSNAP");*/
 }
 
 void DerivedWindow::initializeParameters()
