@@ -159,9 +159,14 @@ void XmlWriter::writeParametersConfiguration(QString file_path)
    stream->writeStartDocument(); 
 
    stream->writeDTD("<!DOCTYPE Neoseg-pipeline-parameters>");
+
+   stream->writeStartElement("Parameters");
+
    writeGeneralParameters(stream);  
    writeAntsParameters(stream);
    writeNeosegParameters(stream); 
+
+   stream->writeEndElement();
 
    stream->writeEndDocument();
 
@@ -184,7 +189,7 @@ void XmlWriter::writeExecutables(QXmlStreamWriter* stream)
    writeElement(stream, "unu", "path", executablePaths->getExecutablePath("unu")); 
    writeElement(stream, "ResampleVolume2", "path", executablePaths->getExecutablePath("ResampleVolume2")); 
    writeElement(stream, "ImageMath", "path", executablePaths->getExecutablePath("ImageMath")); 
-   writeElement(stream, "InsightSnap", "path", executablePaths->getExecutablePath("InsightSnap"));
+   writeElement(stream, "InsightSNAP", "path", executablePaths->getExecutablePath("InsightSNAP"));
    stream->writeEndElement(); 
 }
 

@@ -18,6 +18,8 @@ class NeosegPipelineTool
 
       NeosegPipelineTool(); 
 
+      void setProgramPath(QString programPath);
+
       void setOutput(QString output); 
       void setT1(QString T1);
       void setT2(QString T2);
@@ -28,12 +30,14 @@ class NeosegPipelineTool
       void setParametersFile(QString xmlFile);
       void setExecutablesFile(QString xmlFile);
 
+      void setDebug(bool debug); 
+
       void launch(int argc, char *argv[], bool gui);
 
    private:
 
-      Pipeline             m_pipeline; 
-      PipelineParameters   m_parameters;
+      Pipeline*             m_pipeline; 
+      PipelineParameters    m_parameters;
       MainScriptThread*     m_thread;
 }; 
 

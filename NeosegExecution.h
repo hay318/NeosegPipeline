@@ -26,8 +26,6 @@ class NeosegExecution : public Script
 
    // Setting Parameters
    void setAtlas(QString atlas);  
-   void setUsingFA(bool usingFA);
-   void setUsingAD(bool usingAD);
    void setComputing3LabelsSeg(bool computing3LabelsSeg);
    void setNeosegParameters(NeosegParameters* parameters);
 
@@ -36,13 +34,13 @@ class NeosegExecution : public Script
    bool checkSegmentation();
 
    // Implementing Script 
-   void initializeScript(QString &script);
-   void writeXMLFile(QString &script);
-   void implementWriteAffineTranformationFile(QString& script);
-   void writeAffineTranformationFiles(QString& script);
-   void runNeoseg(QString &script);
-   void mergeWhiteMatters(QString &script);
-   void implementRun(QString &script);  
+   void initializeScript();
+   void writeXMLFile();
+   void implementWriteAffineTranformationFile();
+   void writeAffineTranformationFiles();
+   void runNeoseg();
+   void mergeWhiteMatters();
+   void implementRun();  
 
 
    // Updating & Getting Output 
@@ -54,8 +52,6 @@ class NeosegExecution : public Script
 
    // Parameters
    QString              m_atlas; 
-   bool                 m_usingFA;
-   bool                 m_usingAD;
    bool                 m_computing3LabelsSeg;
    NeosegParameters*    m_parameters;
 

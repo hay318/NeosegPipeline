@@ -1,9 +1,8 @@
 #ifndef DEF_AntsParameters
 #define DEF_AntsParameters
 
-#include <vector>
-
 #include <QString>
+#include <QStringList>
 
 class AntsParameters
 {
@@ -19,17 +18,20 @@ class AntsParameters
    bool isBetween(int value, int min, int max);
    bool isBetween(double value, double min, double max);
    
-   bool isIn(QString item, std::vector<QString> vector);
+   bool isIn(QString item, QStringList list);
+
+   bool checkImageMetric(QString imageMetric);
+   QStringList getImageMetricValues(); 
 
    // Image Metric 1 
    void setImageMetric1(QString imageMetric1);
-   bool checkImageMetric1(QString imageMetric1);
    QString getImageMetric1();
+   int getImageMetric1Index();
 
    // Image Metric 2
    void setImageMetric2(QString imageMetric2);
-   bool checkImageMetric2(QString imageMetric2);
    QString getImageMetric2();
+   int getImageMetric2Index();
 
    double getWeightMin();
 
@@ -76,6 +78,8 @@ class AntsParameters
    void setTransformationType(QString transformationType);
    bool checkTransformationType(QString transformationType);
    QString getTransformationType();
+   int getTransformationTypeIndex(); 
+   QStringList getTransformationTypeValues(); 
 
    // Gradient step Length
    double getGradientStepLengthMin();
@@ -99,7 +103,9 @@ class AntsParameters
    void setRegularizationType(QString regularizationType);
    bool checkRegularizationType(QString regularizationType);
    QString getRegularizationType();
-
+   int getRegularizationTypeIndex(); 
+   QStringList getRegularizationTypeValues(); 
+   
    // Gradient field sigma
    double getGradientFieldSigmaMin();
    void setGradientFieldSigma(double gradientFieldSigma);
@@ -127,7 +133,7 @@ class AntsParameters
 
    private:
    
-   std::vector<QString> m_imageMetric_values; 
+   QStringList m_imageMetric_values; 
    QString m_imageMetric_default;
    QString m_imageMetric1;
    QString m_imageMetric2;
@@ -159,7 +165,7 @@ class AntsParameters
    int m_iterationsL_default;
    int m_iterationsL;
 
-   std::vector<QString> m_transformationType_values;
+   QStringList m_transformationType_values;
    QString m_tranformation_default;
    QString m_transformationType;
 
@@ -178,7 +184,7 @@ class AntsParameters
    double m_deltaTime_default;
    double m_deltaTime;
 
-   std::vector<QString> m_regularizationType_values;
+   QStringList m_regularizationType_values;
    QString m_regularizationType_default;
    QString m_regularizationType;
 

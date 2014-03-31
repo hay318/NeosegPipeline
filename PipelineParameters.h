@@ -24,12 +24,18 @@ class PipelineParameters
 
    PipelineParameters();
 
-
    bool isBoolean(int value);
    bool isBetween(int value, int min, int max);
    bool isBetween(double value, double min, double max);
-   bool isIn(QString item, std::vector<QString> vector);
+   bool isIn(QString item, QStringList list);
    QFileInfoList find(QDir* dir, QString name);
+
+   // Current Directory
+   void setProgramPath(QString programPath); 
+   QString getProgramPath();
+
+   bool checkPrefixSuffix(QString string); 
+   QString getForbiddenCharacters(); 
 
    // Prefix
    void setPrefix(QString prefix);
@@ -104,6 +110,8 @@ class PipelineParameters
    QString getSmoothingFlag(QString regularizationType);
    void setSmoothing(QString smoothing);
    QString getSmoothing();
+   int getSmoothingIndex();
+   QStringList getSmoothingValues(); 
 
    // Smoothing Size
    bool checkSmoothingSize(double smoothingSize);
@@ -118,23 +126,32 @@ class PipelineParameters
    bool checkWeightsModality(QString weightsModality);
    void setWeightsModality(QString weightsModality);
    QString getWeightsModality();
+   int getWeightsModalityIndex();
+   QStringList getWeightsModalityValues(); 
 
    // Weights Radius 
    bool checkWeightsRadius(double weightsRadius);
    void setWeightsRadius(double weightsRadius);
    double getWeightsRadius();
 
+   // Weights Radius Unit
+   bool checkWeightsRadiusUnit(QString radiusUnit);
+   void setWeightsRadiusUnit(QString radiusUnit);
+   QString getWeightsRadiusUnit();
+   int getWeightsRadiusUnitIndex();
+   QStringList getWeightsRadiusUnitValues();
+
    // Including FA
    void setIncludingFA(bool includingFA);
    bool getIncludingFA();
 
-   // Using FA
-   void setUsingFA(bool usingFA);
-   bool getUsingFA();
+   // FA Weight
+   void setFAWeight(double FAWeight);
+   double getFAWeight(); 
 
-   // Using AD
-   void setUsingAD(bool usingAD);
-   bool getUsingAD();
+   // FA Smoothing Size
+   void setFASmoothingSize(double FASmoothingSize);
+   double getFASmoothingSize(); 
 
    // Computing 3-Labels Segmentation
    void setComputing3LabelsSeg(bool computing3LabelsSeg);
@@ -148,15 +165,25 @@ class PipelineParameters
    void setCleaningUp(bool cleaningUp);
    bool getCleaningUp(); 
 
+   // Stopping If Error
+   void setStoppingIfError(bool stoppingIfError); 
+   bool getStoppingIfError();  
+
    // Computing System 
    bool checkComputingSystem(QString computingSystem);
    void setComputingSystem(QString computingSystem);
    QString getComputingSystem(); 
+   int getComputingSystemIndex(); 
+   QStringList getComputingSystemValues(); 
 
    // Number Of Cores 
    bool checkNumberOfCores(int NumberOfCores);
    void setNumberOfCores(int NumberOfCores); 
    int getNumberOfCores();
+
+   // Debug 
+   void setDebug(bool debug);
+   bool getDebug();
 
    // ANTS Parameters 
    AntsParameters* getAntsParameters();  
@@ -168,11 +195,14 @@ class PipelineParameters
    ExecutablePaths* getExecutablePaths(); 
 
    // Segmentation
-   void setSegmentation(QString segmentation);
    QString getSegmentation(); 
 
 
    private:
+
+   QString m_programPath; 
+   
+   QStringList m_forbiddenCharacters; 
 
    // Data
    QString m_prefix;
@@ -194,13 +224,16 @@ class PipelineParameters
    // Atlas
    QString m_atlas; 
 
-   // Atlas Population 
+   // Atlas Population Directory
+   QString m_atlasPopulationDirectory_default; 
    QString m_atlasPopulationDirectory; 
+
+   // Atlas Population
    QStringList m_selectedAtlases; 
    std::vector<Atlas> m_atlasPopulation; 
 
    // Smoothing 
-   std::vector<QString> m_smoothing_values;
+   QStringList m_smoothing_values;
    QString m_smoothing_default;
    QString m_smoothing;
 
@@ -215,7 +248,7 @@ class PipelineParameters
    bool m_computingWeights;
 
    // Weights Modality
-   std::vector<QString> m_weightsModality_values;
+   QStringList m_weightsModality_values;
    QString m_weightsModality_default;
    QString m_weightsModality;
 
@@ -225,18 +258,24 @@ class PipelineParameters
    double m_weightsRadius_default;
    double m_weightsRadius;
 
+   // Weights Radius Unit
+   QStringList m_weightsRadiusUnit_values; 
+   QString m_weightsRadiusUnit_default; 
+   QString m_weightsRadiusUnit; 
+
    // Including FA
    bool m_includingFA_default; 
    bool m_includingFA;    
 
-   // Using FA
-   bool m_usingFA_default; 
-   bool m_usingFA; 
+   // FA weight
+   double m_FAWeight_default; 
+   double m_FAWeight; 
 
-   // Using AD
-   bool m_usingAD_default; 
-   bool m_usingAD; 
-
+   // FA Smoothing Size 
+   double m_FASmoothingSize_default;
+   double m_FASmoothingSize;
+    
+   
    // Computing 3-labels segmentation
    bool m_computing3LabelsSeg_default; 
    bool m_computing3LabelsSeg;
@@ -249,8 +288,12 @@ class PipelineParameters
    bool m_cleaningUp_default;
    bool m_cleaningUp;
 
+   // Stopping if error 
+   bool m_stoppingIfError_default; 
+   bool m_stoppingIfError; 
+
    // Computing System
-   std::vector<QString> m_computingSystem_values;
+   QStringList m_computingSystem_values;
    QString m_computingSystem_default;
    QString m_computingSystem;
 
@@ -260,6 +303,10 @@ class PipelineParameters
    int m_numberOfCores_default;
    int m_numberOfCores;
 
+   // Debug 
+   bool m_debug_default; 
+   bool m_debug; 
+   
    // ANTS Parameters 
    AntsParameters* m_antsParameters;
 
@@ -268,9 +315,6 @@ class PipelineParameters
 
    // Executable Paths 
    ExecutablePaths* m_executablePaths;
-
-   // Segmentation
-   QString m_segmentation;
 };
 
 

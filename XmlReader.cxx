@@ -163,7 +163,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                if(ok && isBoolean(usingFA))
                {
                   std::cout<<"Using-FA :"<<usingFA<<std::endl;
-                  m_parameters->setUsingFA(usingFA);
+                  m_neosegParameters->setUsingFA(usingFA);
                }
                else 
                {
@@ -174,7 +174,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                if(ok && isBoolean(usingAD))
                {
                   std::cout<<"Using-AD :"<<usingAD<<std::endl;
-                  m_parameters->setUsingAD(usingAD);
+                  m_neosegParameters->setUsingAD(usingAD);
                }
                else 
                {
@@ -237,7 +237,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
             else if (stream->name() == "First-modality")
             {
                QString imageMetric = (attributes.value("metric")).toString(); 
-               if(m_antsParameters->checkImageMetric1(imageMetric))   
+               if(m_antsParameters->checkImageMetric(imageMetric))   
                {
                   m_antsParameters->setImageMetric1(imageMetric);
                }
@@ -270,7 +270,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
             else if (stream->name() == "Second-modality")
             {
                QString imageMetric = (attributes.value("metric")).toString(); 
-               if(m_antsParameters->checkImageMetric2(imageMetric))   
+               if(m_antsParameters->checkImageMetric(imageMetric))   
                {
                   m_antsParameters->setImageMetric2(imageMetric);
                }
@@ -502,7 +502,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                   m_errors += "'Prior1' is not correct";
                }   
 
-               double prior2=(attributes.value("value")).toString().toDouble(&ok);
+               double prior2=(attributes.value("prior2")).toString().toDouble(&ok);
                if(ok && m_neosegParameters->checkPrior2(prior2))
                {
                   m_neosegParameters->setPrior2(prior2);    
@@ -512,7 +512,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                   m_errors += "'Prior2' is not correct";
                }
 
-               double prior3=(attributes.value("value")).toString().toDouble(&ok);
+               double prior3=(attributes.value("prior3")).toString().toDouble(&ok);
                if( ok && m_neosegParameters->checkPrior3(prior3))
                {
                   m_neosegParameters->setPrior3(prior3);    
@@ -522,7 +522,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                   m_errors += "'Prior3' is not correct";
                }
 
-               double prior4=(attributes.value("value")).toString().toDouble(&ok);
+               double prior4=(attributes.value("prior4")).toString().toDouble(&ok);
                if(ok && m_neosegParameters->checkPrior4(prior4))
                {
                   m_neosegParameters->setPrior4(prior4);    
@@ -532,7 +532,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                   m_errors += "'Prior4' is not correct";
                }
 
-               double prior5=(attributes.value("value")).toString().toDouble(&ok);
+               double prior5=(attributes.value("prior5")).toString().toDouble(&ok);
                if(ok && m_neosegParameters->checkPrior5(prior5))
                {
                   m_neosegParameters->setPrior5(prior5);    
@@ -592,7 +592,7 @@ void XmlReader::readExecutablesConfigurationFile(QString file_path)
 {
    QFile* file = new::QFile(file_path);
 
-   if(file->exists())
+   if(!file->exists())
    {
       std::cout<<file_path.toStdString()<<" does not exist"<<std::endl; 
    }

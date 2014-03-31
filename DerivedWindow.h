@@ -55,6 +55,12 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void selectOuput();
    void enterOutput();
 
+   // Prefix 
+   void enterPrefix(); 
+
+   // Suffix
+   void enterSuffix();
+
    // Images
    void selectImage(QString image); 
    void enterImage(QString image);
@@ -85,6 +91,7 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    // New Atlas
    void selectAtlasPopulationDirectory();
    void enterAtlasPopulationDirectory();
+   void resetAtlasPopulationDirectory();
    void selectAtlas(QListWidgetItem* item);
 
    // Existing Atlas
@@ -160,6 +167,13 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    // Run Pipeline
    void runPipeline();
 
+   // Stop Pipeline
+   void stopPipeline(); 
+
+   // Display Results
+   void enableDisplayButton();
+   void displayResults(); 
+
    // Exit Application 
    void closeEvent(QCloseEvent *event);
 
@@ -184,7 +198,6 @@ class DerivedWindow : public QMainWindow , public Ui_Window
 
    QString m_tests_path;
    QString m_data_path;
-   QString m_atlasPopulation_path;
    QString m_existingAtlases_path;
    QStringList m_goodAtlases;
    QStringList m_wrongAtlases;  

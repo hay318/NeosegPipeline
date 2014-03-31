@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
+   <title>Neoseg Pipeline</title>
+   <description>A tool to create an sharp atlas specific atlas for Neoseg. For any suggestion or question, please contact cherel[at]unc.edu</description>
+   <contributor>Marie Cherel</contributor>
+   <version>1.1 | Compiled ${TODAY}</version>
    <parameters>
+      <boolean>
+         <name>debug</name>
+         <longflag>debug</longflag>
+         <description>If you need to display all debug information in the console</description>
+         <label>debug</label>
+         <default>false</default>
+      </boolean>      
       <boolean>
          <name>noGUI</name>
          <longflag>noGui</longflag>

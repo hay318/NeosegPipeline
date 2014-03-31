@@ -22,15 +22,14 @@ class PreProcessingData : public Script
    PreProcessingData(QString module);
 
    // Implementing Script 
-   void initializeScript(QString &script);
-   QString skullStripImage(QString &script, QString image);
-   QString correctImage(QString &script, QString image);
-   void implementRun(QString &script);
+   void initializeScript();
+   QString skullStripImage(QString image);
+   QString correctImage(QString image);
+   void implementRun();
 
    // Updating & Getting Output 
    void update();
    Neo getOutput();
-
 
    private: 
 

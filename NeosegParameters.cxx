@@ -2,61 +2,65 @@
 
 NeosegParameters::NeosegParameters()
 {
-   m_filterMethod_values.insert("curvature flow", 0); 
-   m_filterMethod_values.insert("grad aniso diffusion", 1); 
-   m_filterMethod_default="curvature flow";
-   m_filterMethod=m_filterMethod_default;
+   m_referenceImage_values << "T1" << "T2";  
+   m_referenceImage_default = m_referenceImage_values[0];
+   m_referenceImage = m_referenceImage_default;
 
-   m_filterIterations_min=0;
+   m_usingFA_default = false; 
+   m_usingFA = m_usingFA_default;
+
+   m_usingAD_default = true; 
+   m_usingAD = m_usingAD_default;
+
+   m_filterMethod_values << "curvature flow" << "grad aniso diffusion"; 
+   m_filterMethod_default = m_filterMethod_values[0];
+   m_filterMethod = m_filterMethod_default;
+
+   m_filterIterations_min = 0;
    //m_filterIterations_max;
-   m_filterIterations_default=5;
-   m_filterIterations=m_filterIterations_default;
+   m_filterIterations_default = 5;
+   m_filterIterations = m_filterIterations_default;
 
-   m_filterTimeStep_min=0;
+   m_filterTimeStep_min = 0;
    //m_filterTimeStep_max;
-   m_filterTimeStep_default=0.01;   
-   m_filterTimeStep=m_filterTimeStep_default;
+   m_filterTimeStep_default = 0.01;   
+   m_filterTimeStep = m_filterTimeStep_default;
 
-   m_referenceImage_values.insert("T1", 0); 
-   m_referenceImage_values.insert("T2", 1); 
-   m_referenceImage_default="T2";
-   m_referenceImage=m_referenceImage_default;
+   m_priorThreshold_min = 0;
+   m_priorThreshold_max = 1;
+   m_priorThreshold_default = 0.9;
+   m_priorThreshold = m_priorThreshold_default;
 
-   m_priorThreshold_min=0;
-   m_priorThreshold_max=1;
-   m_priorThreshold_default=0.9;
-   m_priorThreshold=m_priorThreshold_default;
-
-   m_maxBiasDegree_min=2;
+   m_maxBiasDegree_min = 2;
    //m_maxBiasDegree_max;
-   m_maxBiasDegree_default=4;
-   m_maxBiasDegree=m_maxBiasDegree_default;
+   m_maxBiasDegree_default = 4;
+   m_maxBiasDegree = m_maxBiasDegree_default;
 
-   m_prior_min=0; 
+   m_prior_min = 0; 
    //m_prior_max; 
 
-   m_prior1_default=0.4;
-   m_prior1=m_prior1_default;
+   m_prior1_default = 0.4;
+   m_prior1 = m_prior1_default;
 
-   m_prior2_default=1.4;
-   m_prior2=m_prior2_default;
+   m_prior2_default = 1.4;
+   m_prior2 = m_prior2_default;
 
-   m_prior3_default=1;
-   m_prior3=m_prior3_default;
+   m_prior3_default = 1;
+   m_prior3 = m_prior3_default;
 
-   m_prior4_default=1;
-   m_prior4=m_prior4_default;
+   m_prior4_default = 1;
+   m_prior4 = m_prior4_default;
 
-   m_prior5_default=1;
-   m_prior5=m_prior5_default;
+   m_prior5_default = 1;
+   m_prior5 = m_prior5_default;
 
-   m_refinement_default=false; 
-   m_refinement=m_refinement_default;
+   m_refinement_default = false; 
+   m_refinement = m_refinement_default;
 
-   m_initialParzenKernelWidth_min=0;
+   m_initialParzenKernelWidth_min = 0;
    //m_initialParzenKernelWidth_max;
-   m_initialParzenKernelWidth_default=0.05;
-   m_initialParzenKernelWidth=m_initialParzenKernelWidth_default;
+   m_initialParzenKernelWidth_default = 0.05;
+   m_initialParzenKernelWidth = m_initialParzenKernelWidth_default;
 }
 
 bool NeosegParameters::isSuperior(int value, int min)
@@ -96,12 +100,12 @@ bool NeosegParameters::isBetween(double value, double min, double max)
 }
 
 
-bool NeosegParameters::isIn(QString item, QMap<QString, int> map)
+bool NeosegParameters::isIn(QString item, QStringList list)
 {
-   QMap<QString, int>::iterator it; 
-   for(it=map.begin(); it!=map.end(); ++it)
+   QStringList::iterator it; 
+   for(it=list.begin(); it!=list.end(); ++it)
    {
-      if(item.compare(it.key(), Qt::CaseInsensitive))
+      if(item.compare(*it, Qt::CaseInsensitive))
       {
          return true;
       }
@@ -124,9 +128,32 @@ QString NeosegParameters::getReferenceImage()
 }
 int NeosegParameters::getReferenceImageIndex()
 {
-   return m_referenceImage_values[m_referenceImage]; 
+   return m_referenceImage_values.indexOf(m_referenceImage); 
+}
+QStringList NeosegParameters::getReferenceImageValues()
+{
+   return m_referenceImage_values; 
 }
 
+// Using FA
+void NeosegParameters::setUsingFA(bool usingFA)
+{
+   m_usingFA = usingFA; 
+}
+bool NeosegParameters::getUsingFA()
+{
+   return m_usingFA; 
+}
+
+// Using AD
+void NeosegParameters::setUsingAD(bool usingAD)
+{
+   m_usingAD = usingAD; 
+}
+bool NeosegParameters::getUsingAD()
+{
+   return m_usingAD; 
+}
 
 // Filter method 
 bool NeosegParameters::checkFilterMethod(QString filterMethod)
@@ -143,7 +170,11 @@ QString NeosegParameters::getFilterMethod()
 }
 int NeosegParameters::getFilterMethodIndex()
 {
-   return m_filterMethod_values[m_filterMethod]; 
+   return m_filterMethod_values.indexOf(m_filterMethod); 
+}
+QStringList NeosegParameters::getFilterMethodValues()
+{
+   return m_filterMethod_values; 
 }
 
 // Number of iterations

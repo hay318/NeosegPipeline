@@ -11,25 +11,31 @@
 #include <sys/stat.h>
 
 // Qt Librairies
+#include <QObject>
 #include <QDir>
 #include <QStringList>
 #include <QProcess>
+#include <QTime>
 
 // My Specific Librairies
 #include "PipelineParameters.h"
 #include "PreProcessingData.h"
 #include "DtiRegistration.h"
+#include "AtlasPopulationRegistration.h"
 #include "AtlasRegistration.h"
 #include "AtlasGeneration.h"
 #include "NeosegExecution.h"
 
 
-class Pipeline
+class Pipeline : public QObject
 {
+	Q_OBJECT
+
    public:
 
    // Constructor
    Pipeline();
+   ~Pipeline(); 
 
    // Parameters
    void setPipelineParameters(PipelineParameters* parameters);
@@ -44,6 +50,9 @@ class Pipeline
    void runPipeline();
 
 
+   public slots:
+   void evaluateTime();
+
    private: 
 
    void createProcessingDirectory();
@@ -54,13 +63,21 @@ class Pipeline
    void defineSignalHandler();
    void writePreProcessingData();
    void writeAtlasRegistration();
+   void writeAtlasPopulationRegistration();
    void writeDTIRegistration();   
    void writeAtlasGeneration();
    void writeNeosegExecution();
    void writeMainScript();
    void executeMainScript();
    void copySegmentations();
+   void cleanUp(); 
 
+   PreProcessingData* m_preProcessingData;
+   DtiRegistration* m_dtiRegistration; 
+   AtlasRegistration* m_atlasRegistration; 
+   AtlasPopulationRegistration* m_atlasPopulationRegistration; 
+   AtlasGeneration* m_atlasGeneration; 
+   NeosegExecution* m_neosegExecution; 
 
    PipelineParameters* m_parameters; 
 
@@ -75,6 +92,9 @@ class Pipeline
 
    // QProcess
    QProcess* m_mainScriptProcess;
+
+   // Timer
+   QTime m_timer; 
 };
 
 #endif

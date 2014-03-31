@@ -11,6 +11,8 @@ int main(int argc, char *argv[])
 
    NeosegPipelineTool tool;
 
+   tool.setProgramPath(QString::fromStdString(argv[0])); 
+
    tool.setOutput(QString::fromStdString(output));
    tool.setT1(QString::fromStdString(T1));
    tool.setT2(QString::fromStdString(T2));
@@ -20,6 +22,8 @@ int main(int argc, char *argv[])
    
    tool.setParametersFile(QString::fromStdString(parameters));
    tool.setExecutablesFile(QString::fromStdString(executables));
+
+   tool.setDebug(debug);
 
    tool.launch(argc, argv, !noGUI);
 

@@ -9,25 +9,27 @@ PreProcessingData::PreProcessingData(QString module) : Script(module)
    m_closing_suffix = "-closed";
 }
 
-void PreProcessingData::initializeScript(QString &script)
+void PreProcessingData::initializeScript()
 {
-   definePython(script);
-   importGeneralModules(script);
-   importXmlModules(script);
+   definePython();
+   importGeneralModules();
+   importXmlModules();
   
-   defineExecutable(script, "ImageMath");
-   defineExecutable(script, "SegPostProcessCLP");
-   defineExecutable(script, "unu");
-   defineExecutable(script, "N4ITKBiasFieldCorrection");
+   defineExecutable("ImageMath");
+   defineExecutable("SegPostProcessCLP");
+   defineExecutable("unu");
+   defineExecutable("N4ITKBiasFieldCorrection");
+
+   m_script += "logger = logging.getLogger('NeosegPipeline')\n\n"; 
 
    m_script += "runningProcess = None\n\n"; 
 
-   script += "T1 = '" + m_neo.T1 + "'\n"; 
-   script += "T2 = '" + m_neo.T2 + "'\n"; 
-   script += "mask = '" + m_neo.mask + "'\n\n";
+   m_script += "T1 = '" + m_neo.T1 + "'\n"; 
+   m_script += "T2 = '" + m_neo.T2 + "'\n"; 
+   m_script += "mask = '" + m_neo.mask + "'\n\n";
 }
 
-QString PreProcessingData::skullStripImage(QString &script, QString image)
+QString PreProcessingData::skullStripImage(QString image)
 {
    QString strippedImage_name = m_prefix + image + m_skullStripping_suffix + m_suffix + ".nrrd";
    QString strippedImage_path = m_module_dir->filePath(strippedImage_name);
@@ -35,13 +37,15 @@ QString PreProcessingData::skullStripImage(QString &script, QString image)
    m_outputs.insert(image + "_stripped", strippedImage_path);
    m_log = "Skull-stripping the " + image;   
    m_argumentsList << "SegPostProcessCLP" << "mask" << image + "_stripped"<< "'--skullstripping'" << image << "'--MWM'" << "'1'" << "'--WM'" << "'2'" << "'--GM'" << "'3'" << "'--CSF'" << "'4'"; 
-   execute(script); 
+   execute(); 
+
+   m_unnecessaryFiles << strippedImage_path; 
 
    return strippedImage_path;
 }
 
 
-QString PreProcessingData::correctImage(QString &script, QString image)
+QString PreProcessingData::correctImage(QString image)
 {
    QString convertedImage_name = m_prefix + image + m_skullStripping_suffix + m_converting_suffix + m_suffix + ".nrrd";
    QString convertedImage_path = m_module_dir->filePath(convertedImage_name); 
@@ -50,7 +54,9 @@ QString PreProcessingData::correctImage(QString &script, QString image)
    m_log = "- Converting the image in float";
    m_argumentsList_1 << "unu" << "'convert'" << "'-i'" << image + "_stripped" << "'-t'" << "'float'"; 
    m_argumentsList_2 << "unu" << "'save'" << "'-e'" << "'gzip'" << "'-f'" << "'nrrd'" << "'-o'" << image + "_converted"; 
-   executePipe(script); 
+   executePipe(); 
+
+   m_unnecessaryFiles << convertedImage_path; 
 
    QString correctedImage_name = m_prefix + image + m_skullStripping_suffix + m_correcting_suffix + m_suffix + ".nrrd";
    QString correctedImage_path = m_module_dir->filePath(correctedImage_name);
@@ -58,43 +64,51 @@ QString PreProcessingData::correctImage(QString &script, QString image)
    m_log = "- Correcting the inhomogeneity of the image";
    m_outputs.insert(image + "_corrected", correctedImage_path);
    m_argumentsList << "N4ITKBiasFieldCorrection" << "'--inputimage'" << image + "_converted" << "'--maskimage'" << "mask" << "'--outputimage'" << image + "_corrected";
-   execute(script);   
+   execute();   
 
    return correctedImage_path;
 }
 
-void PreProcessingData::implementRun(QString &script)
+void PreProcessingData::implementRun()
 {
-   script += "def run():\n\n";  
+   m_script += "def run():\n\n";  
 
-   script += "\tsignal.signal(signal.SIGINT, stop)\n";
-   script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
+   m_script += "\tsignal.signal(signal.SIGINT, stop)\n";
+   m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
 
-   script += "\tlogging.info('=== Preprocessing Data ===')\n";
-   script += "\tlogging.debug('')\n";
+   m_script += "\tlogger.info('=== Preprocessing Data ===')\n";
+   m_script += "\tlogger.debug('')\n";
 
-   m_neo.T1 = skullStripImage(script, "T1");
-   m_neo.T2 = skullStripImage(script, "T2");
+   QString correctedT1_name = m_prefix + "T1" + m_skullStripping_suffix + m_correcting_suffix + m_suffix + ".nrrd";
+   QString correctedT1_path = m_module_dir->filePath(correctedT1_name);
 
-   script += "\tlogging.info('Correcting the inhomogeneity of the T1 :')\n";   
-   m_neo.T1 = correctImage(script, "T1");
+   QString correctedT2_name = m_prefix + "T2" + m_skullStripping_suffix + m_correcting_suffix + m_suffix + ".nrrd";
+   QString correctedT2_path = m_module_dir->filePath(correctedT2_name);
 
-   script += "\tlogging.info('Correcting the inhomogeneity of the T2 :')\n";   
-   m_neo.T2 = correctImage(script, "T2");
+   m_outputs.insert("finalT1", correctedT1_path);
+   m_outputs.insert("finalT2", correctedT2_path);
+   checkFinalOutputs(); 
+
+   m_neo.T1 = skullStripImage("T1");
+   m_neo.T2 = skullStripImage("T2");
+
+   m_script += "\tlogger.info('Correcting the inhomogeneity of the T1 :')\n";   
+   m_neo.T1 = correctImage("T1");
+
+   m_script += "\tlogger.info('Correcting the inhomogeneity of the T2 :')\n";   
+   m_neo.T2 = correctImage("T2");
 }
 
 void PreProcessingData::update()
 {
-   QString preProcessData;
+   initializeScript();
+   implementStop(); 
+   implementCheckFileExistence(); 
+   implementExecute(); 
+   implementExecutePipe(); 
+   implementRun();
 
-   initializeScript(preProcessData);
-   implementStop(preProcessData); 
-   implementCheckFileExistence(preProcessData); 
-   implementExecute(preProcessData); 
-   implementExecutePipe(preProcessData); 
-   implementRun(preProcessData);
-
-   writeScript(preProcessData);
+   writeScript();
 }
 
 Neo PreProcessingData::getOutput()

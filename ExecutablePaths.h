@@ -20,6 +20,8 @@ class ExecutablePaths
 
    ExecutablePaths();
 
+   void setProgramPath(QString programPath);
+
    bool checkExecutablePath(QString path);
 
    void setExecutablePath(QString name, QString path); 
@@ -31,6 +33,8 @@ class ExecutablePaths
    QString findExecutablePath(QStringList splitPath, QString executableName);
   
    private: 
+
+   QString m_currentDirectory; 
 
    std::map<QString, QString> m_executables; 
 

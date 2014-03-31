@@ -2,74 +2,67 @@
 
 AntsParameters::AntsParameters()
 {
-   m_imageMetric_values.push_back("Cross-Correlation"); 
-   m_imageMetric_values.push_back("Mutual Information"); 
-   m_imageMetric_values.push_back("Probability Mapping"); 
-   m_imageMetric_values.push_back("Mean Square Difference"); 
-   m_imageMetric_default=getImageMetricFlag(m_imageMetric_values[0]);
-   m_imageMetric1=m_imageMetric_default;
-   m_imageMetric2=m_imageMetric_default;
+   m_imageMetric_values << "CC" << "MI" << "PR" << "MSQ"; 
+   m_imageMetric_default = m_imageMetric_values[0];
+   m_imageMetric1 = m_imageMetric_default;
+   m_imageMetric2 = m_imageMetric_default;
 
-   m_weight_min=0;
+   m_weight_min = 0;
    //m_weight_max;
-   m_weight_default=1; 
-   m_weight1=m_weight_default;
-   m_weight2=m_weight_default;
+   m_weight_default = 1; 
+   m_weight1 = m_weight_default;
+   m_weight2 = m_weight_default;
 
-   m_radius_min=0;
+   m_radius_min = 0;
    //m_radius_max;
-   m_radius_default=4;
-   m_radius1=m_radius_default;
-   m_radius2=m_radius_default;
+   m_radius_default = 4;
+   m_radius1 = m_radius_default;
+   m_radius2 = m_radius_default;
 
-   m_iterations_min=0; 
+   m_iterations_min = 0; 
    //m_iterations_max;
  
-   m_iterationsJ_default=200;
-   m_iterationsJ=m_iterationsJ_default;
+   m_iterationsJ_default = 200;
+   m_iterationsJ = m_iterationsJ_default;
 
-   m_iterationsK_default=75; 
-   m_iterationsK=m_iterationsK_default;
+   m_iterationsK_default = 75; 
+   m_iterationsK = m_iterationsK_default;
 
-   m_iterationsL_default=50;
-   m_iterationsL=m_iterationsL_default;
+   m_iterationsL_default = 50;
+   m_iterationsL = m_iterationsL_default;
 
-   m_transformationType_values.push_back("Symmetric Normalization");
-   m_transformationType_values.push_back("Diffeomorphic");
-   m_transformationType_values.push_back("Elastic");
-   m_transformationType_values.push_back("Exponential Diff");
-   m_tranformation_default=getTransformationTypeFlag(m_transformationType_values[0]);
-   m_transformationType=m_tranformation_default;
+   m_transformationType_values << "SyN" << "Diff" << "Elast" << "Exp"; 
+   m_tranformation_default = m_transformationType_values[0];
+   m_transformationType = m_tranformation_default;
 
-   m_gradientStepLength_min=0;   
+   m_gradientStepLength_min = 0;   
    //m_gradientStepLength_max;   
-   m_gradientStepLength_default=0.125;   
-   m_gradientStepLength=m_gradientStepLength_default;
+   m_gradientStepLength_default = 0.125;   
+   m_gradientStepLength = m_gradientStepLength_default;
 
-   m_numberOfTimeSteps_min=0;
+   m_numberOfTimeSteps_min = 0;
    //m_numberOfTimeSteps_max;
-   m_numberOfTimeSteps_default=2;
-   m_numberOfTimeSteps=m_numberOfTimeSteps_default;
+   m_numberOfTimeSteps_default = 2;
+   m_numberOfTimeSteps = m_numberOfTimeSteps_default;
 
-   m_deltaTime_min=0;
+   m_deltaTime_min = 0;
    //m_deltaTime_max;
-   m_deltaTime_default=0.01;
-   m_deltaTime=m_deltaTime_default;
+   m_deltaTime_default = 0.01;
+   m_deltaTime = m_deltaTime_default;
 
-   m_regularizationType_values.push_back("Gaussian");
-   m_regularizationType_values.push_back("Directly Manipulated");
-   m_regularizationType_default=getRegularizationTypeFlag(m_regularizationType_values[1]);
-   m_regularizationType=m_regularizationType_default;
+   m_regularizationType_values << "Gauss" << "DMFFD"; 
+   m_regularizationType_default = m_regularizationType_values[0];
+   m_regularizationType = m_regularizationType_default;
 
-   m_gradientFieldSigma_min=0;
+   m_gradientFieldSigma_min = 0;
    //m_gradientFieldSigma_max;
-   m_gradientFieldSigma_default=3;
-   m_gradientFieldSigma=m_gradientFieldSigma_default;
+   m_gradientFieldSigma_default = 3;
+   m_gradientFieldSigma = m_gradientFieldSigma_default;
 
-   m_deformationFieldSigma_min=0;
+   m_deformationFieldSigma_min = 0;
    //m_deformationFieldSigma_max;
-   m_deformationFieldSigma_default=0;
-   m_deformationFieldSigma=m_deformationFieldSigma_default;
+   m_deformationFieldSigma_default = 0;
+   m_deformationFieldSigma = m_deformationFieldSigma_default;
 
    m_usingMask_default = false; 
    m_usingMask = m_usingMask_default; 
@@ -115,10 +108,10 @@ bool AntsParameters::isBetween(double value, double min, double max)
 }
 
 
-bool AntsParameters::isIn(QString item, std::vector<QString> vector)
+bool AntsParameters::isIn(QString item, QStringList list)
 {
-   std::vector<QString>::iterator it; 
-   for(it=vector.begin(); it!=vector.end(); ++it)
+   QStringList::iterator it; 
+   for(it=list.begin(); it!=list.end(); ++it)
    {
       if(item.compare(*it, Qt::CaseInsensitive))
       {
@@ -129,31 +122,40 @@ bool AntsParameters::isIn(QString item, std::vector<QString> vector)
 }
 
 
+bool AntsParameters::checkImageMetric(QString imageMetric)
+{
+   return isIn(imageMetric, m_imageMetric_values);
+}
+QStringList AntsParameters::getImageMetricValues()
+{
+   return m_imageMetric_values; 
+}
+
 
 void AntsParameters::setImageMetric1(QString imageMetric1)
 {
    m_imageMetric1=getImageMetricFlag(imageMetric1);
 }
-bool AntsParameters::checkImageMetric1(QString imageMetric1)
-{
-   return isIn(imageMetric1, m_imageMetric_values);
-}
 QString AntsParameters::getImageMetric1()
 {
    return m_imageMetric1;
+}
+int AntsParameters::getImageMetric1Index()
+{
+   return m_imageMetric_values.indexOf(m_imageMetric1);
 }
 
 void AntsParameters::setImageMetric2(QString imageMetric2)
 {
    m_imageMetric2=getImageMetricFlag(imageMetric2);
 }
-bool AntsParameters::checkImageMetric2(QString imageMetric2)
-{
-   return isIn(imageMetric2, m_imageMetric_values);
-}
 QString AntsParameters::getImageMetric2()
 {
    return m_imageMetric2;
+}
+int AntsParameters::getImageMetric2Index()
+{
+   return m_imageMetric_values.indexOf(m_imageMetric2);
 }
 
 
@@ -275,6 +277,14 @@ QString AntsParameters::getTransformationType()
 {
    return m_transformationType;
 }
+int AntsParameters::getTransformationTypeIndex()
+{
+   return m_transformationType_values.indexOf(m_transformationType);
+}
+QStringList AntsParameters::getTransformationTypeValues()
+{
+   return m_transformationType_values; 
+}
 
 void AntsParameters::setGradientStepLength(double gradientStepLength)
 {
@@ -338,6 +348,14 @@ bool AntsParameters::checkRegularizationType(QString regularizationType)
 QString AntsParameters::getRegularizationType()
 {
    return m_regularizationType;
+}
+int AntsParameters::getRegularizationTypeIndex()
+{
+   return m_regularizationType_values.indexOf(m_regularizationType);
+}
+QStringList AntsParameters::getRegularizationTypeValues()
+{
+   return m_regularizationType_values; 
 }
 
 void AntsParameters::setGradientFieldSigma(double gradientFieldSigma)

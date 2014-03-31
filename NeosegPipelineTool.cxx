@@ -2,11 +2,16 @@
 
 NeosegPipelineTool::NeosegPipelineTool()
 {
-   m_pipeline.setPipelineParameters(&m_parameters); 
+   m_pipeline = new::Pipeline();
+   m_pipeline->setPipelineParameters(&m_parameters); 
 
    m_thread = new MainScriptThread(); 
 }
 
+void NeosegPipelineTool::setProgramPath(QString programPath)
+{
+   m_parameters.setProgramPath(programPath);
+}
 void NeosegPipelineTool::setOutput(QString output)
 {
    if(m_parameters.checkOutput(output))
@@ -59,14 +64,29 @@ void NeosegPipelineTool::setParametersFile(QString xmlFile)
    }
 }
 
-void NeosegPipelineTool::setExecutablesFile(QString xmlFile) 
+void NeosegPipelineTool::setExecutablesFile(QString xml_CLI) 
 {
-   if(!xmlFile.isEmpty())
+   XmlReader m_xmlReader;
+   m_xmlReader.setPipelineParameters(&m_parameters);
+
+   if(!xml_CLI.isEmpty())
    {
-      XmlReader m_xmlReader;
-      m_xmlReader.setPipelineParameters(&m_parameters);
-      m_xmlReader.readExecutablesConfigurationFile(xmlFile); 
+      m_xmlReader.readExecutablesConfigurationFile(xml_CLI); 
    }
+   else
+   {
+      QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+      QString xml_ENV = env.value("NEOSEG_PIPELINE_EXECUTABLES", QString::null);
+
+      if(!xml_ENV.isEmpty())
+      {
+         m_xmlReader.readExecutablesConfigurationFile(xml_ENV);
+      }
+   }
+}
+void NeosegPipelineTool::setDebug(bool debug)
+{
+   m_parameters.setDebug(debug); 
 }
 
 void NeosegPipelineTool::launch(int argc, char *argv[], bool gui)
@@ -77,7 +97,7 @@ void NeosegPipelineTool::launch(int argc, char *argv[], bool gui)
 
 	   DerivedWindow window;
       window.setPipelineParameters(&m_parameters); 
-      window.setPipeline(&m_pipeline);
+      window.setPipeline(m_pipeline);
       window.setMainScriptThread(m_thread);
 	   window.show();
 
@@ -86,7 +106,7 @@ void NeosegPipelineTool::launch(int argc, char *argv[], bool gui)
    }
    else
    {
-      m_pipeline.runPipeline();
+      m_pipeline->runPipeline();
    }   
 }
 	 

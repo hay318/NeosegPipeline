@@ -7,7 +7,8 @@
 
 // Qt Librairies
 #include <QString>
-#include <QMap>
+#include <QStringList>
+
 
 class NeosegParameters
 {
@@ -23,19 +24,29 @@ class NeosegParameters
    bool isBetween(int value, int min, int max);
    bool isBetween(double value, double min, double max);
    
-   bool isIn(QString item, QMap<QString, int> vector);
+   bool isIn(QString item, QStringList list);
 
    // Reference image 
    bool checkReferenceImage(QString referenceImage);
    void setReferenceImage(QString referenceImage);
    QString getReferenceImage();
    int getReferenceImageIndex();
+   QStringList getReferenceImageValues();
+
+   // Using FA
+   void setUsingFA(bool usingFA);
+   bool getUsingFA();
+
+   // Using AD
+   void setUsingAD(bool usingAD);
+   bool getUsingAD();
    
    // Filter method 
    void setFilterMethod(QString filterMethod);
    bool checkFilterMethod(QString filterMethod);
    QString getFilterMethod();
    int getFilterMethodIndex();
+   QStringList getFilterMethodValues();
 
    // Number of iterations
    bool checkNumberOfIterations(int filterIterations);
@@ -95,7 +106,20 @@ class NeosegParameters
 
    private:
 
-   QMap<QString, int> m_filterMethod_values; 
+   // Reference Image 
+   QStringList m_referenceImage_values; 
+   QString m_referenceImage_default;
+   QString m_referenceImage;
+
+   // Using FA
+   bool m_usingFA_default; 
+   bool m_usingFA; 
+
+   // Using AD
+   bool m_usingAD_default; 
+   bool m_usingAD; 
+
+   QStringList m_filterMethod_values; 
    QString m_filterMethod_default;
    QString m_filterMethod;
 
@@ -108,11 +132,6 @@ class NeosegParameters
    double m_filterTimeStep_max;
    double m_filterTimeStep_default;   
    double m_filterTimeStep;
-
-   QMap<QString, int> m_referenceImage_values; 
-   QString m_referenceImage_default;
-   QString m_referenceImage;
-
 
    double m_priorThreshold_min;
    double m_priorThreshold_max;

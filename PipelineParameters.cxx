@@ -2,28 +2,31 @@
 
 PipelineParameters::PipelineParameters()
 {  
+   m_forbiddenCharacters << "\\" << "/" << ":" << "*" << "?" << "\"" << "<" << ">" << "|" << " ";
    m_prefix = "neo";
    m_suffix = "NP";
 
    m_newAtlas_default = true; 
    m_newAtlas = m_newAtlas_default;
 
-   m_smoothing_values.push_back("gaussian");
-   m_smoothing_values.push_back("curve evolution");
-   m_smoothing_default=m_smoothing_values[0];
-   m_smoothing=m_smoothing_default;
+   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+   m_atlasPopulationDirectory_default = env.value("NEOSEG_PIPELINE_ATLAS_POPULATION_DIRECTORY", QString::null);   
+   m_atlasPopulationDirectory = m_atlasPopulationDirectory_default; 
 
-   m_smoothingSize_min=0;
-   m_smoothingSize_max=6;
-   m_smoothingSize_default=1;
-   m_smoothingSize=m_smoothingSize_default;
+   m_smoothing_values << "gaussian" << "curve evolution";
+   m_smoothing_default = m_smoothing_values[0];
+   m_smoothing = m_smoothing_default;
+
+   m_smoothingSize_min = 0;
+   m_smoothingSize_max = 6;
+   m_smoothingSize_default = 1;
+   m_smoothingSize = m_smoothingSize_default;
 
    m_computingWeights_default=1;
    m_computingWeights=m_computingWeights_default;
 
-   m_weightsModality_values.push_back("T1");
-   m_weightsModality_values.push_back("T2");
-   m_weightsModality_default=m_weightsModality_values[0];
+   m_weightsModality_values << "T1" << "T2";
+   m_weightsModality_default = m_weightsModality_values[0];
    m_weightsModality=m_weightsModality_default;
 
    m_weightsRadius_min=0;
@@ -31,36 +34,56 @@ PipelineParameters::PipelineParameters()
    m_weightsRadius_default=3;
    m_weightsRadius=m_weightsRadius_default;
 
-   m_usingFA_default = false; 
-   m_usingFA = m_usingFA_default;
+   m_weightsRadiusUnit_values << "mm" << "pixels";
+   m_weightsRadiusUnit_default = m_weightsRadiusUnit_values[0];
+   m_weightsRadiusUnit = m_weightsRadiusUnit_default;
 
-   m_usingAD_default = true; 
-   m_usingAD = m_usingAD_default;
+   // Including FA 
+   m_includingFA_default = true; 
+   m_includingFA = m_includingFA_default; 
 
+   // FA Weight
+   m_FAWeight_default = 1.5; 
+   m_FAWeight = m_FAWeight_default; 
+
+   // FA Smoothing Size 
+   m_FASmoothingSize_default = 1; 
+   m_FASmoothingSize = m_FASmoothingSize_default; 
+   
+   // Computing 3-labels Seg 
    m_computing3LabelsSeg_default = true; 
    m_computing3LabelsSeg = m_computing3LabelsSeg_default;
 
-   m_overwriting_default=0;
-   m_overwriting=m_overwriting_default;
+   // Overwritting
+   m_overwriting_default = 0;
+   m_overwriting = m_overwriting_default;
 
-   m_cleaningUp_default=1;
-   m_cleaningUp=m_cleaningUp_default;
+   // Clening-Up
+   m_cleaningUp_default = 1;
+   m_cleaningUp = m_cleaningUp_default;
 
-   m_computingSystem_values.push_back("local");
-   m_computingSystem_values.push_back("killdevil");
-   m_computingSystem_default=m_computingSystem_values[0];
-   m_computingSystem=m_computingSystem_default;
+   // Stopping If Error 
+   m_stoppingIfError_default = true; 
+   m_stoppingIfError = m_stoppingIfError_default; 
 
-   m_numberOfCores_min=0;
-   m_numberOfCores_max=20;
-   m_numberOfCores_default=1;
-   m_numberOfCores=m_numberOfCores_default;
+   // Computing System
+   m_computingSystem_values << "local" << "killdevil";
+   m_computingSystem_default = m_computingSystem_values[0];
+   m_computingSystem = m_computingSystem_default;
 
-   m_antsParameters=new AntsParameters(); 
+   m_numberOfCores_min = 0;
+   m_numberOfCores_max = 20;
+   m_numberOfCores_default = 1;
+   m_numberOfCores = m_numberOfCores_default;
 
-   m_neosegParameters=new NeosegParameters(); 
+   m_debug_default = false; 
+   m_debug = m_debug_default; 
 
-   m_executablePaths=new ExecutablePaths(); 
+   m_antsParameters = new AntsParameters(); 
+
+   m_neosegParameters = new NeosegParameters(); 
+
+   m_executablePaths = new ExecutablePaths(); 
 
    m_executablePaths->setDefaultExecutablePath("SegPostProcessCLP");
    m_executablePaths->setDefaultExecutablePath("N4ITKBiasFieldCorrection");
@@ -99,10 +122,10 @@ bool PipelineParameters::isBetween(double value, double min, double max)
 }
 
 
-bool PipelineParameters::isIn(QString item, std::vector<QString> vector)
+bool PipelineParameters::isIn(QString item, QStringList list)
 {
-   std::vector<QString>::iterator it; 
-   for(it=vector.begin(); it!=vector.end(); ++it)
+   QStringList::iterator it; 
+   for(it=list.begin(); it!=list.end(); ++it)
    {
       if(item.compare(*it, Qt::CaseInsensitive))
       {
@@ -122,7 +145,31 @@ QFileInfoList PipelineParameters::find(QDir* dir, QString name)
 } 
 
 
-// Prefix 
+bool PipelineParameters::checkPrefixSuffix(QString string)
+{
+   QStringList::iterator it; 
+   for(it = m_forbiddenCharacters.begin(); it != m_forbiddenCharacters.end(); ++it)
+   {
+      if(string.contains(*it))
+      {
+         return false; 
+      }
+   }
+   return true; 
+}
+
+// Program Path
+void PipelineParameters::setProgramPath(QString programPath)
+{
+   m_programPath = programPath; 
+   m_executablePaths->setProgramPath(programPath); 
+}
+QString PipelineParameters::getProgramPath()
+{
+   return m_programPath;  
+}
+
+// Prefix
 void PipelineParameters::setPrefix(QString prefix) 
 {
    m_prefix = prefix;
@@ -140,6 +187,11 @@ void PipelineParameters::setSuffix(QString suffix)
 QString PipelineParameters::getSuffix() 
 {
    return m_suffix;
+}
+
+QString PipelineParameters::getForbiddenCharacters()
+{
+   return m_forbiddenCharacters.join(" ");
 }
 
 // Output
@@ -424,6 +476,14 @@ QString PipelineParameters::getSmoothing()
 {
    return m_smoothing;
 } 
+int PipelineParameters::getSmoothingIndex()
+{
+   return m_smoothing_values.indexOf(m_smoothing);
+}
+QStringList PipelineParameters::getSmoothingValues()
+{
+   return m_smoothing_values; 
+}
 
 // Smoothing Size
 bool PipelineParameters::checkSmoothingSize(double smoothingSize)
@@ -462,6 +522,14 @@ QString PipelineParameters::getWeightsModality()
 {
    return m_weightsModality;
 }
+int PipelineParameters::getWeightsModalityIndex()
+{
+   return m_weightsModality_values.indexOf(m_weightsModality);
+}
+QStringList PipelineParameters::getWeightsModalityValues()
+{
+   return m_weightsModality_values;
+}
 
 // Weights Radius 
 bool PipelineParameters::checkWeightsRadius(double weightsRadius)
@@ -477,6 +545,28 @@ double PipelineParameters::getWeightsRadius()
    return m_weightsRadius;
 }
 
+// Weights Radius Unit
+bool PipelineParameters::checkWeightsRadiusUnit(QString weightsRadiusUnit)
+{
+   return isIn(weightsRadiusUnit, m_weightsRadiusUnit_values);
+}
+void PipelineParameters::setWeightsRadiusUnit(QString weightsRadiusUnit)
+{
+   m_weightsRadiusUnit = weightsRadiusUnit;
+}
+QString PipelineParameters::getWeightsRadiusUnit()
+{
+   return m_weightsRadiusUnit;
+}
+int PipelineParameters::getWeightsRadiusUnitIndex()
+{
+   return m_weightsRadiusUnit_values.indexOf(m_weightsRadiusUnit);
+}
+QStringList PipelineParameters::getWeightsRadiusUnitValues()
+{
+   return m_weightsRadiusUnit_values;
+}
+
 // Including FA
 void PipelineParameters::setIncludingFA(bool includingFA)
 {
@@ -487,26 +577,25 @@ bool PipelineParameters::getIncludingFA()
    return m_includingFA;
 }
 
-// Using FA
-void PipelineParameters::setUsingFA(bool usingFA)
+// FA Weight 
+void PipelineParameters::setFAWeight(double FAWeight)
 {
-   m_usingFA = usingFA; 
+   m_FAWeight = FAWeight; 
 }
-bool PipelineParameters::getUsingFA()
+double PipelineParameters::getFAWeight()
 {
-   return m_usingFA; 
-}
-
-// Using AD
-void PipelineParameters::setUsingAD(bool usingAD)
-{
-   m_usingAD = usingAD; 
-}
-bool PipelineParameters::getUsingAD()
-{
-   return m_usingAD; 
+   return m_FAWeight; 
 }
 
+// FA Smoothing Size
+void PipelineParameters::setFASmoothingSize(double FASmoothingSize)
+{
+   m_FASmoothingSize = FASmoothingSize; 
+}
+double PipelineParameters::getFASmoothingSize()
+{
+   return m_FASmoothingSize; 
+}
 
 // Computing 3-Labels Segmentation
 void PipelineParameters::setComputing3LabelsSeg(bool computing3LabelsSeg)
@@ -538,6 +627,16 @@ bool PipelineParameters::getCleaningUp()
    return m_cleaningUp;
 }
 
+// Stopping If Error
+void PipelineParameters::setStoppingIfError(bool stoppingIfError)
+{
+   m_stoppingIfError = stoppingIfError; 
+}
+bool PipelineParameters::getStoppingIfError()
+{
+   return m_stoppingIfError; 
+}
+
 // Computing System
 bool PipelineParameters::checkComputingSystem(QString computingSystem)
 {
@@ -550,6 +649,14 @@ void PipelineParameters::setComputingSystem(QString computingSystem)
 QString PipelineParameters::getComputingSystem()
 {
    return m_computingSystem;
+}
+int PipelineParameters::getComputingSystemIndex()
+{
+   return m_computingSystem_values.indexOf(m_computingSystem); 
+}
+QStringList PipelineParameters::getComputingSystemValues()
+{
+   return m_computingSystem_values; 
 }
 
 // Number Of Cores 
@@ -564,6 +671,16 @@ void PipelineParameters::setNumberOfCores(int numberOfCores)
 int PipelineParameters::getNumberOfCores()
 {
    return m_numberOfCores;
+}
+
+// Debug 
+void PipelineParameters::setDebug(bool debug)
+{
+   m_debug = debug;
+}
+bool PipelineParameters::getDebug()
+{
+   return m_debug;
 }
 
 // ANTS Parameters
@@ -585,13 +702,16 @@ ExecutablePaths* PipelineParameters::getExecutablePaths()
 }
 
 // Segmentation
-void PipelineParameters::setSegmentation(QString segmentation) 
-{
-   m_segmentation=segmentation;
-}
 QString PipelineParameters::getSegmentation()
 {
-   return m_segmentation;
+   if(m_computing3LabelsSeg)
+   {
+      return m_neo.seg3Labels;
+   }
+   else
+   {
+      return m_neo.seg4Labels;
+   }
 }
 
 

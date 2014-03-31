@@ -5,6 +5,11 @@ Pipeline::Pipeline()
    m_processing_name = "Processing";
 }
 
+Pipeline::~Pipeline()
+{
+
+}
+
 void Pipeline::setPipelineParameters(PipelineParameters* parameters)
 {
    m_parameters = parameters; 
@@ -41,19 +46,21 @@ void Pipeline::writePreProcessingData()
    QString directory_path = createModuleDirectory(directory_name);
 
    QString module_name = "preProcessingData";
-   PreProcessingData preProcessingData(module_name);
+   m_preProcessingData = new::PreProcessingData(module_name);
    
-   preProcessingData.setNeo(m_parameters->getNeo()); 
-   preProcessingData.setModuleDirectory(directory_path);
-   preProcessingData.setProcessingDirectory(m_processing_path);
-   preProcessingData.setExecutablePaths(m_parameters->getExecutablePaths());
-   preProcessingData.setSuffix(m_parameters->getSuffix()); 
+   m_preProcessingData->setNeo(m_parameters->getNeo()); 
+   m_preProcessingData->setModuleDirectory(directory_path);
+   m_preProcessingData->setProcessingDirectory(m_processing_path);
+   m_preProcessingData->setExecutablePaths(m_parameters->getExecutablePaths());
+   m_preProcessingData->setOverwriting(m_parameters->getOverwriting());    
+   m_preProcessingData->setSuffix(m_parameters->getSuffix()); 
+   m_preProcessingData->setStoppingIfError(m_parameters->getStoppingIfError());
 
-   preProcessingData.update(); 
+   m_preProcessingData->update(); 
    m_importingModules += "import " + module_name + "\n"; 
    m_runningModules += module_name + ".run()\n"; 
 
-   m_parameters->setNeo(preProcessingData.getOutput());
+   m_parameters->setNeo(m_preProcessingData->getOutput());
 }
 
 void Pipeline::writeDTIRegistration()
@@ -62,44 +69,63 @@ void Pipeline::writeDTIRegistration()
    QString directory_path = createModuleDirectory(directory_name);
 
    QString module_name = "DTIRegistration";
-   DtiRegistration dtiRegistration(module_name);
+   m_dtiRegistration = new::DtiRegistration(module_name);
 
-   dtiRegistration.setNeo(m_parameters->getNeo());
-   dtiRegistration.setModuleDirectory(directory_path);
-   dtiRegistration.setProcessingDirectory(m_processing_path);
-   dtiRegistration.setExecutablePaths(m_parameters->getExecutablePaths());
-   dtiRegistration.setSuffix(m_parameters->getSuffix()); 
+   m_dtiRegistration->setNeo(m_parameters->getNeo());
+   m_dtiRegistration->setModuleDirectory(directory_path);
+   m_dtiRegistration->setProcessingDirectory(m_processing_path);
+   m_dtiRegistration->setExecutablePaths(m_parameters->getExecutablePaths());
+   m_dtiRegistration->setSuffix(m_parameters->getSuffix()); 
+   m_dtiRegistration->setOverwriting(m_parameters->getOverwriting()); 
+   m_dtiRegistration->setStoppingIfError(m_parameters->getStoppingIfError());
 
-   dtiRegistration.update();
+   m_dtiRegistration->update();
    m_importingModules += "import " + module_name + "\n"; 
    m_runningModules += module_name + ".run()\n"; 
 
-   m_parameters->setNeo(dtiRegistration.getOutput());
+   m_parameters->setNeo(m_dtiRegistration->getOutput());
 }
 
 void Pipeline::writeAtlasRegistration()
 {
+   QString module_name = "atlasRegistration";
+   m_atlasRegistration = new::AtlasRegistration(module_name); 
+
+   m_atlasRegistration->setNeo(m_parameters->getNeo());
+   m_atlasRegistration->setSuffix(m_parameters->getSuffix()); 
+   m_atlasRegistration->setProcessingDirectory(m_processing_path);
+   m_atlasRegistration->setAntsParameters(m_parameters->getAntsParameters()); 
+   m_atlasRegistration->setExecutablePaths(m_parameters->getExecutablePaths());
+   m_atlasRegistration->setOverwriting(m_parameters->getOverwriting());
+   m_atlasRegistration->setStoppingIfError(m_parameters->getStoppingIfError());
+
+   m_atlasRegistration->update(); 
+}
+
+void Pipeline::writeAtlasPopulationRegistration()
+{
    QString directory_name = "3.AtlasRegistration";
    QString directory_path = createModuleDirectory(directory_name);
 
-   QString module_name = "atlasRegistration";
-   AtlasRegistration atlasRegistration(module_name); 
+   QString module_name = "atlasPopulationRegistration";
+   m_atlasPopulationRegistration = new::AtlasPopulationRegistration(module_name); 
 
-   atlasRegistration.setNeo(m_parameters->getNeo());
-   atlasRegistration.setAtlasPopulation(m_parameters->getAtlasPopulation());
-   atlasRegistration.setModuleDirectory(directory_path);
-   atlasRegistration.setProcessingDirectory(m_processing_path);
-   atlasRegistration.setComputingSystem(m_parameters->getComputingSystem());
-   atlasRegistration.setNumberOfCores(m_parameters->getNumberOfCores());
-   atlasRegistration.setAntsParameters(m_parameters->getAntsParameters());
-   atlasRegistration.setExecutablePaths(m_parameters->getExecutablePaths());
-   atlasRegistration.setSuffix(m_parameters->getSuffix()); 
+   m_atlasPopulationRegistration->setNeo(m_parameters->getNeo());
+   m_atlasPopulationRegistration->setAtlasPopulation(m_parameters->getAtlasPopulation());
+   m_atlasPopulationRegistration->setModuleDirectory(directory_path);
+   m_atlasPopulationRegistration->setProcessingDirectory(m_processing_path);
+   m_atlasPopulationRegistration->setComputingSystem(m_parameters->getComputingSystem());
+   m_atlasPopulationRegistration->setNumberOfCores(m_parameters->getNumberOfCores());
+   m_atlasPopulationRegistration->setExecutablePaths(m_parameters->getExecutablePaths());
+   m_atlasPopulationRegistration->setSuffix(m_parameters->getSuffix()); 
+   m_atlasPopulationRegistration->setOverwriting(m_parameters->getOverwriting()); 
+   m_atlasPopulationRegistration->setStoppingIfError(m_parameters->getStoppingIfError());
 
-   atlasRegistration.update();
+   m_atlasPopulationRegistration->update();
    m_importingModules += "import " + module_name + "\n"; 
    m_runningModules += module_name + ".run()\n"; 
    
-   m_parameters->setAtlasPopulation(atlasRegistration.getOutput());
+   m_parameters->setAtlasPopulation(m_atlasPopulationRegistration->getOutput());
 }
 
 void Pipeline::writeAtlasGeneration()
@@ -108,25 +134,31 @@ void Pipeline::writeAtlasGeneration()
    QString directory_path = createModuleDirectory(directory_name);
 
    QString module_name = "atlasGeneration";
-   AtlasGeneration atlasGeneration(module_name);
+   m_atlasGeneration = new::AtlasGeneration(module_name);
 
-   atlasGeneration.setNeo(m_parameters->getNeo());
-   atlasGeneration.setAtlasPopulation(m_parameters->getAtlasPopulation());
-   atlasGeneration.setModuleDirectory(directory_path);
-   atlasGeneration.setProcessingDirectory(m_processing_path);
-   atlasGeneration.setSmoothing(m_parameters->getSmoothing());
-   atlasGeneration.setSmoothingSize(m_parameters->getSmoothingSize());
-   atlasGeneration.setIncludingFA(m_parameters->getIncludingFA());
-   atlasGeneration.setComputingWeights(m_parameters->getComputingWeights());
-   atlasGeneration.setNeightborhoodRadius(m_parameters->getWeightsRadius());
-   atlasGeneration.setExecutablePaths(m_parameters->getExecutablePaths());
-   atlasGeneration.setSuffix(m_parameters->getSuffix()); 
+   m_atlasGeneration->setNeo(m_parameters->getNeo());
+   m_atlasGeneration->setAtlasPopulation(m_parameters->getAtlasPopulation());
+   m_atlasGeneration->setModuleDirectory(directory_path);
+   m_atlasGeneration->setProcessingDirectory(m_processing_path);
+   m_atlasGeneration->setSmoothing(m_parameters->getSmoothing());
+   m_atlasGeneration->setSmoothingSize(m_parameters->getSmoothingSize());
+   m_atlasGeneration->setIncludingFA(m_parameters->getIncludingFA());
+   m_atlasGeneration->setComputingWeights(m_parameters->getComputingWeights());
+   m_atlasGeneration->setNeightborhoodRadius(m_parameters->getWeightsRadius());
+   m_atlasGeneration->setNeightborhoodRadiusUnit(m_parameters->getWeightsRadiusUnit());
+   m_atlasGeneration->setIncludingFA(m_parameters->getIncludingFA());
+   m_atlasGeneration->setFAWeight(m_parameters->getFAWeight());
+   m_atlasGeneration->setFASmoothingSize(m_parameters->getFASmoothingSize());
+   m_atlasGeneration->setExecutablePaths(m_parameters->getExecutablePaths());
+   m_atlasGeneration->setSuffix(m_parameters->getSuffix()); 
+   m_atlasGeneration->setOverwriting(m_parameters->getOverwriting()); 
+   m_atlasGeneration->setStoppingIfError(m_parameters->getStoppingIfError());
 
-   atlasGeneration.update();
+   m_atlasGeneration->update();
    m_importingModules += "import " + module_name + "\n"; 
    m_runningModules += module_name + ".run()\n"; 
 
-   m_parameters->setAtlas(atlasGeneration.getOutput());
+   m_parameters->setAtlas(m_atlasGeneration->getOutput());
 }
 
 void Pipeline::writeNeosegExecution()
@@ -135,27 +167,24 @@ void Pipeline::writeNeosegExecution()
    QString directory_path = createModuleDirectory(directory_name);
 
    QString module_name = "neosegExecution";
-   NeosegExecution neosegExecution(module_name);
+   m_neosegExecution = new::NeosegExecution(module_name);
 
-   std::cout<<"using FA:"<<m_parameters->getUsingFA()<<std::endl; 
-   std::cout<<"using AD:"<<m_parameters->getUsingAD()<<std::endl; 
+   m_neosegExecution->setNeo(m_parameters->getNeo());
+   m_neosegExecution->setModuleDirectory(directory_path);
+   m_neosegExecution->setProcessingDirectory(m_processing_path);
+   m_neosegExecution->setAtlas(m_parameters->getAtlas());
+   m_neosegExecution->setComputing3LabelsSeg(m_parameters->getComputing3LabelsSeg());
+   m_neosegExecution->setNeosegParameters(m_parameters->getNeosegParameters());
+   m_neosegExecution->setExecutablePaths(m_parameters->getExecutablePaths());
+   m_neosegExecution->setSuffix(m_parameters->getSuffix());
+   m_neosegExecution->setOverwriting(m_parameters->getOverwriting());
+   m_neosegExecution->setStoppingIfError(m_parameters->getStoppingIfError());
 
-   neosegExecution.setNeo(m_parameters->getNeo());
-   neosegExecution.setModuleDirectory(directory_path);
-   neosegExecution.setProcessingDirectory(m_processing_path);
-   neosegExecution.setAtlas(m_parameters->getAtlas());
-   neosegExecution.setUsingFA(m_parameters->getUsingFA());
-   neosegExecution.setUsingAD(m_parameters->getUsingAD());
-   neosegExecution.setComputing3LabelsSeg(m_parameters->getComputing3LabelsSeg());
-   neosegExecution.setNeosegParameters(m_parameters->getNeosegParameters());
-   neosegExecution.setExecutablePaths(m_parameters->getExecutablePaths());
-   neosegExecution.setSuffix(m_parameters->getSuffix());
-
-   neosegExecution.update();
+   m_neosegExecution->update();
    m_importingModules += "import " + module_name +"\n"; 
    m_runningModules += module_name + ".run()\n"; 
 
-   m_parameters->setNeo(neosegExecution.getOutput());
+   m_parameters->setNeo(m_neosegExecution->getOutput());
 }
 
 void Pipeline::initializeMainScript()
@@ -168,6 +197,7 @@ void Pipeline::initializeMainScript()
    m_script += "import logging\n";
    m_script += "import subprocess\n";
    m_script += "import shutil\n\n";
+
 }
 
 void Pipeline::defineSignalHandler()
@@ -190,18 +220,30 @@ void Pipeline::initializeLogging()
    m_script += "log = \"" + log + "\"\n";
    m_script += "logFile = open(log, \"w\") \n\n";
 
-   m_script += "logging.basicConfig(level=logging.DEBUG, filename=log)\n";
+   m_script += "logger = logging.getLogger('NeosegPipeline')\n"; 
+   m_script += "logger.setLevel(logging.DEBUG)\n";
 
-   m_script += "rootLogger = logging.getLogger()\n";
+   m_script += "fileHandler = logging.FileHandler(log)\n";
+   m_script += "fileHandler.setLevel(logging.DEBUG)\n";
    m_script += "fileFormatter = logging.Formatter('%(message)s')\n";
-   m_script += "((rootLogger.handlers)[0]).setFormatter(fileFormatter)\n\n";
+   m_script += "fileHandler.setFormatter(fileFormatter)\n\n";
 
    m_script += "consoleHandler = logging.StreamHandler()\n";
-   m_script += "consoleHandler.setLevel(logging.INFO)\n";
+
+   if(m_parameters->getDebug())
+   {
+      m_script += "consoleHandler.setLevel(logging.DEBUG)\n";     
+   }
+   else
+   {
+      m_script += "consoleHandler.setLevel(logging.INFO)\n";
+   }
+
    m_script += "consoleFormatter = logging.Formatter('[%(levelname)s]  %(message)s')\n";
    m_script += "consoleHandler.setFormatter(consoleFormatter)\n";
 
-   m_script += "rootLogger.addHandler(consoleHandler)\n";
+   m_script += "logger.addHandler(fileHandler)\n";
+   m_script += "logger.addHandler(consoleHandler)\n";
 }
 
 void Pipeline::copySegmentations()
@@ -263,15 +305,56 @@ void Pipeline::executeMainScript()
       command = "bsub -n 1 python " +  m_main_path;      
    }   
 
-   m_mainScriptProcess = new QProcess();
+   m_mainScriptProcess = new QProcess;
    m_mainScriptProcess->setProcessChannelMode(QProcess::ForwardedChannels);
+
+   connect(m_mainScriptProcess, SIGNAL(finished(int)), this, SLOT(evaluateTime()));
+
    m_mainScriptProcess->start(command);
+   m_timer.start();
 
    while (!m_mainScriptProcess->waitForFinished())
    {
    }
 
-   std::cout<<"pipeline done"<<std::endl; 
+   cleanUp();
+}
+
+void Pipeline::evaluateTime()
+{
+   int time = m_timer.elapsed(); 
+
+   std::cout<<"time "<<time<<std::endl; 
+
+   int hours = time/(60*60*1000);
+   std::cout<<"hours "<<hours<<std::endl;
+
+   time -= hours*(60*60*1000); 
+   std::cout<<"time "<<time<<std::endl; 
+
+   int minutes = time/(60*1000); 
+   std::cout<<"minutes "<<minutes<<std::endl;
+
+   time -= minutes*(60*1000);
+   std::cout<<"time "<<time<<std::endl; 
+
+   int seconds = time/(1000); 
+   std::cout<<"seconds "<<seconds<<std::endl;
+
+   time -= seconds*1000;
+   std::cout<<"time "<<time<<std::endl; 
+
+   std::cout<<"Pipeline took "<<hours<<" hour(s), "<<minutes<<" minute(s)"<<" and "<<seconds<<" second(s)"<<std::endl; 
+}
+
+void Pipeline::cleanUp()
+{
+   m_preProcessingData->cleanUp();
+   m_dtiRegistration->cleanUp();
+   m_atlasRegistration->cleanUp(); 
+   m_atlasPopulationRegistration->cleanUp();
+   m_atlasGeneration->cleanUp(); 
+   m_neosegExecution->cleanUp();  
 }
 
 void Pipeline::runPipeline()
@@ -289,6 +372,7 @@ void Pipeline::runPipeline()
    if (m_parameters->getNewAtlas()==true)
    {
       writeAtlasRegistration();
+      writeAtlasPopulationRegistration();
       writeAtlasGeneration();
    }
 
@@ -298,4 +382,6 @@ void Pipeline::runPipeline()
 
    executeMainScript();
 }
+
+
 

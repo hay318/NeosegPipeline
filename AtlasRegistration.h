@@ -30,35 +30,16 @@ class AtlasRegistration : public Script
    AtlasRegistration(QString module);
 
    // Set // 
-   void setAtlasPopulation(std::vector<Atlas> atlasPopulation);  
-   void setComputingSystem(QString computingSystem);
-   void setNumberOfCores(int nbCores); 
    void setAntsParameters(AntsParameters* ANTSParamaters);
 
-   // Define Outputs //
-   Atlas defineRegisteredAtlas(Atlas atlas);
-   std::vector<Atlas> defineRegisteredAtlasPopulation();
-
-   // Creating directories //
-   void createDirectory();
-   void createAtlasDirectories();
-
    // Scripts //
-   void initializeScript(QString &script);
-   void implementExecute(QString &script);
+   void initializeScript();
+   void initializeLogging();
 
    // Register Atlas Script // 
-   void implementRegisterAtlas(QString &script, bool probabilistic);
+   void implementRegisterAtlas(bool probabilistic);
    void writeRegisterAtlas();
    void writeRegisterProbabilisticAtlas();
-
-   // Register Atlas Population Script // 
-   void implementTestRegistrationDone(QString &script);
-   void defineRegisterAtlasParameters(QString &script, Atlas atlas);
-   void submitRegisterAtlasJob(QString &script);
-   void executeRegisterAtlasProcess(QString &script, Atlas atlas, int i);
-   void implementRegisterAtlasPopulation(QString &script);
-   void writeRegisterAtlasPopulation();
 
    // Output //
    void update();
@@ -68,11 +49,7 @@ class AtlasRegistration : public Script
    private:
 
    // Input // 
-   std::vector<Atlas>      m_atlasPopulation;
    AntsParameters*         m_parameters;
-   QString                 m_computingSystem;
-   int                     m_nbCores;
-   
 };
 
 #endif 
