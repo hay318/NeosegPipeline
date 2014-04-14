@@ -349,15 +349,15 @@ void NeosegExecution::implementRun()
    m_script += "\tsignal.signal(signal.SIGINT, stop)\n";
    m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
 
-   m_script += "\tlogger.debug('')\n\n";
    m_script += "\tlogger.info('=== Neoseg Execution ===')\n";
-   m_script += "\tlogger.debug('')\n\n";
 
    QString seg3Labels_name = m_prefix + "seg-3Labels" + m_suffix + ".nrrd";
    QString seg3Labels_path = m_module_dir->filePath(seg3Labels_name); 
 
    m_outputs.insert("finalSeg", seg3Labels_path); 
    checkFinalOutputs();
+
+   m_script += "\tlogger.debug('')\n\n";
 
    m_script += "\t# Write XML File #\n";
    writeXMLFile();

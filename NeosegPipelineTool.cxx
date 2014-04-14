@@ -84,10 +84,6 @@ void NeosegPipelineTool::setExecutablesFile(QString xml_CLI)
       }
    }
 }
-void NeosegPipelineTool::setDebug(bool debug)
-{
-   m_parameters.setDebug(debug); 
-}
 
 void NeosegPipelineTool::launch(int argc, char *argv[], bool gui)
 {
@@ -106,6 +102,7 @@ void NeosegPipelineTool::launch(int argc, char *argv[], bool gui)
    }
    else
    {
+      m_pipeline->writePipeline(); 
       m_pipeline->runPipeline();
    }   
 }

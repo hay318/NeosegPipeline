@@ -6,13 +6,6 @@
    <version>1.1 | Compiled ${TODAY}</version>
    <parameters>
       <boolean>
-         <name>debug</name>
-         <longflag>debug</longflag>
-         <description>If you need to display all debug information in the console</description>
-         <label>debug</label>
-         <default>false</default>
-      </boolean>      
-      <boolean>
          <name>noGUI</name>
          <longflag>noGui</longflag>
          <description>If you do not need the GUI</description>

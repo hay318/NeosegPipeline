@@ -23,8 +23,6 @@ int main(int argc, char *argv[])
    tool.setParametersFile(QString::fromStdString(parameters));
    tool.setExecutablesFile(QString::fromStdString(executables));
 
-   tool.setDebug(debug);
-
    tool.launch(argc, argv, !noGUI);
 
    return 0;

@@ -18,6 +18,8 @@
 #include "XmlWriter.h"
 #include "MainScriptThread.h"
 #include "ExecutablePaths.h" 
+#include "About.h" 
+
 
 
 class DerivedWindow : public QMainWindow , public Ui_Window
@@ -68,6 +70,9 @@ class DerivedWindow : public QMainWindow , public Ui_Window
 
    public slots :
 
+   // About 
+   void about(); 
+
    // Output
    void selectOuput();
    void enterOutput();
@@ -97,12 +102,12 @@ class DerivedWindow : public QMainWindow , public Ui_Window
 
    // Parameters
    void selectParameters(); 
-   void enterParameters();
+   //void enterParameters();
    void saveParameters();  
 
    // Executables
    void selectExecutables(); 
-   void enterExecutables(); 
+   //void enterExecutables(); 
    void saveExecutables(); 
 
    // Executables 
@@ -114,6 +119,19 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    // Run Pipeline
    void runPipeline();
 
+   // Logging
+   void initializePipelineLogging();
+   void initializeRegistrationsLogging();
+
+   void printPipelineLog(QString log_path);    
+   void printRegistrationLog(QString file_name); 
+
+   void selectLog();
+   void changeExecutionPlainTextEdit(int index);
+
+   // Enable widgets 
+   void setParametersWidgetEnabled(bool enabled);
+   
    // Stop Pipeline
    void stopPipeline(); 
 
@@ -152,15 +170,25 @@ class DerivedWindow : public QMainWindow , public Ui_Window
 
    bool m_parametersSet;
    bool m_executablesSet;
+   bool m_pipelineWriten; 
 
    MainScriptThread* m_thread; 
-
 
    QMap<QString, Image> m_images_map; 
    QMap<QString, Executable> m_executables_map; 
 
+   struct Logging
+   {
+      QTextStream* textStream;
+      QPlainTextEdit* plainTextEdit; 
+   };
 
+   QTextStream* m_log_textStream; 
 
+   QMap<QString, Logging> m_registrationLoggings; 
+
+   About* m_about; 
+   
 
 };
 

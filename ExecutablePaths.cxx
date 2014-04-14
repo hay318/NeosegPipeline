@@ -51,3 +51,22 @@ QString ExecutablePaths::getExecutablePath(QString name)
    return m_executables[name];
 }
 
+QString ExecutablePaths::checkExecutables()
+{
+   QString errors;
+
+   QMap<QString, QString>::iterator it; 
+   for(it = m_executables.begin(); it != m_executables.end(); ++it)
+   {
+      QString name = it.key();
+      QString path = it.value(); 
+
+      if(path.isEmpty())
+      {
+         errors += name + " path is empty\n";
+      }      
+   }
+
+   return errors;
+
+}

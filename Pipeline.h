@@ -16,6 +16,7 @@
 #include <QStringList>
 #include <QProcess>
 #include <QTime>
+#include <QPlainTextEdit>
 
 // My Specific Librairies
 #include "PipelineParameters.h"
@@ -29,7 +30,6 @@
 
 class Pipeline : public QObject
 {
-	Q_OBJECT
 
    public:
 
@@ -39,6 +39,7 @@ class Pipeline : public QObject
 
    // Parameters
    void setPipelineParameters(PipelineParameters* parameters);
+   void setPlainTextEdit(QPlainTextEdit* plainTextEdit); 
 
    // Process
    QProcess* getMainScriptProcess();
@@ -46,12 +47,11 @@ class Pipeline : public QObject
    // Save Configuration //
    void saveConfiguration(QString xml_path);  // to delete
 
+   // Write Pipeline 
+   void writePipeline(); 
+
    // Run Pipeline
    void runPipeline();
-
-
-   public slots:
-   void evaluateTime();
 
    private: 
 
@@ -93,6 +93,9 @@ class Pipeline : public QObject
    // QProcess
    QProcess* m_mainScriptProcess;
 
+   // PlainTextEdit
+   QPlainTextEdit* m_plainTextEdit; 
+ 
    // Timer
    QTime m_timer; 
 };

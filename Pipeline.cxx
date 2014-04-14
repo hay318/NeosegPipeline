@@ -14,6 +14,10 @@ void Pipeline::setPipelineParameters(PipelineParameters* parameters)
 {
    m_parameters = parameters; 
 }
+void Pipeline::setPlainTextEdit(QPlainTextEdit* plainTextEdit)
+{
+   m_plainTextEdit = plainTextEdit; 
+}
 
 QProcess* Pipeline::getMainScriptProcess()
 {
@@ -59,6 +63,7 @@ void Pipeline::writePreProcessingData()
    m_preProcessingData->update(); 
    m_importingModules += "import " + module_name + "\n"; 
    m_runningModules += module_name + ".run()\n"; 
+
 
    m_parameters->setNeo(m_preProcessingData->getOutput());
 }
@@ -196,8 +201,8 @@ void Pipeline::initializeMainScript()
    m_script += "import signal\n";
    m_script += "import logging\n";
    m_script += "import subprocess\n";
+   m_script += "import datetime\n";
    m_script += "import shutil\n\n";
-
 }
 
 void Pipeline::defineSignalHandler()
@@ -215,13 +220,13 @@ void Pipeline::defineSignalHandler()
 void Pipeline::initializeLogging()
 {
    QDir* output_dir = new QDir(m_parameters->getOutput());
-   QString log = output_dir->filePath((m_parameters->getNeo()).prefix + ".log"); 
+   QString log_path = output_dir->filePath((m_parameters->getNeo()).prefix + ".log");   
 
-   m_script += "log = \"" + log + "\"\n";
+   m_script += "log = \"" + log_path + "\"\n";
    m_script += "logFile = open(log, \"w\") \n\n";
 
    m_script += "logger = logging.getLogger('NeosegPipeline')\n"; 
-   m_script += "logger.setLevel(logging.DEBUG)\n";
+   m_script += "logger.setLevel(logging.DEBUG)\n\n";
 
    m_script += "fileHandler = logging.FileHandler(log)\n";
    m_script += "fileHandler.setLevel(logging.DEBUG)\n";
@@ -229,21 +234,12 @@ void Pipeline::initializeLogging()
    m_script += "fileHandler.setFormatter(fileFormatter)\n\n";
 
    m_script += "consoleHandler = logging.StreamHandler()\n";
-
-   if(m_parameters->getDebug())
-   {
-      m_script += "consoleHandler.setLevel(logging.DEBUG)\n";     
-   }
-   else
-   {
-      m_script += "consoleHandler.setLevel(logging.INFO)\n";
-   }
-
-   m_script += "consoleFormatter = logging.Formatter('[%(levelname)s]  %(message)s')\n";
-   m_script += "consoleHandler.setFormatter(consoleFormatter)\n";
+   m_script += "consoleHandler.setLevel(logging.DEBUG)\n";     
+   m_script += "consoleFormatter = logging.Formatter('%(message)s')\n";
+   m_script += "consoleHandler.setFormatter(consoleFormatter)\n\n";
 
    m_script += "logger.addHandler(fileHandler)\n";
-   m_script += "logger.addHandler(consoleHandler)\n";
+   m_script += "logger.addHandler(consoleHandler)\n\n";
 }
 
 void Pipeline::copySegmentations()
@@ -271,80 +267,42 @@ void Pipeline::copySegmentations()
 
 void Pipeline::writeMainScript()
 {
-   QDir* processing_dir = new QDir(m_processing_path); 
-   m_main_path = processing_dir->filePath("main.py");
-
-   std::ofstream* script_stream = new std::ofstream((m_main_path.toStdString()).c_str(), std::ios::out | std::ios::trunc);
+   initializeMainScript();
 
    m_script += m_importingModules; 
    defineSignalHandler();
    initializeLogging();
 
-   m_script += m_runningModules; 
+   m_script += "start = datetime.datetime.now()\n\n";
+
+   m_script += m_runningModules + "\n"; 
 
    copySegmentations();
 
-   *script_stream << m_script.toStdString() << std::endl; 
-   
+   m_script += "end = datetime.datetime.now()\n\n";
+
+   m_script += "elapsedTime = (end - start).seconds\n";
+
+   m_script += "hours = elapsedTime/(60*60)\n";
+   m_script += "elapsedTime -= hours*(60*60)\n\n"; 
+
+   m_script += "minutes = elapsedTime/60\n";
+   m_script += "elapsedTime -= minutes*60\n\n"; 
+
+   m_script += "seconds = elapsedTime\n\n";
+
+   m_script += "logger.info('Pipeline took %s hour(s), %s minute(s) and %s second(s)', hours, minutes, seconds)\n"; 
+
+   QDir* processing_dir = new QDir(m_processing_path); 
+   m_main_path = processing_dir->filePath("main.py");
+
+   std::ofstream* script_stream = new std::ofstream((m_main_path.toStdString()).c_str());
+   *script_stream << m_script.toStdString() << std::endl;
+
    script_stream->close();
 
    chmod((m_main_path.toStdString()).c_str(), 0755);
-}
 
-void Pipeline::executeMainScript()
-{
-   QString command; 
-
-   if (!(m_parameters->getComputingSystem()).compare("local", Qt::CaseInsensitive))
-   {
-      command = m_main_path;
-   }
-
-   if (!(m_parameters->getComputingSystem()).compare("killdevil", Qt::CaseInsensitive))
-   {
-      command = "bsub -n 1 python " +  m_main_path;      
-   }   
-
-   m_mainScriptProcess = new QProcess;
-   m_mainScriptProcess->setProcessChannelMode(QProcess::ForwardedChannels);
-
-   connect(m_mainScriptProcess, SIGNAL(finished(int)), this, SLOT(evaluateTime()));
-
-   m_mainScriptProcess->start(command);
-   m_timer.start();
-
-   while (!m_mainScriptProcess->waitForFinished())
-   {
-   }
-
-   cleanUp();
-}
-
-void Pipeline::evaluateTime()
-{
-   int time = m_timer.elapsed(); 
-
-   std::cout<<"time "<<time<<std::endl; 
-
-   int hours = time/(60*60*1000);
-   std::cout<<"hours "<<hours<<std::endl;
-
-   time -= hours*(60*60*1000); 
-   std::cout<<"time "<<time<<std::endl; 
-
-   int minutes = time/(60*1000); 
-   std::cout<<"minutes "<<minutes<<std::endl;
-
-   time -= minutes*(60*1000);
-   std::cout<<"time "<<time<<std::endl; 
-
-   int seconds = time/(1000); 
-   std::cout<<"seconds "<<seconds<<std::endl;
-
-   time -= seconds*1000;
-   std::cout<<"time "<<time<<std::endl; 
-
-   std::cout<<"Pipeline took "<<hours<<" hour(s), "<<minutes<<" minute(s)"<<" and "<<seconds<<" second(s)"<<std::endl; 
 }
 
 void Pipeline::cleanUp()
@@ -357,14 +315,15 @@ void Pipeline::cleanUp()
    m_neosegExecution->cleanUp();  
 }
 
-void Pipeline::runPipeline()
+void Pipeline::writePipeline()
 {
+   m_importingModules = ""; 
+   m_runningModules = ""; 
+
    createProcessingDirectory();
 
    m_parameters->initializeNeo(); 
    m_parameters->initializeAtlasPopulation(); 
-
-   initializeMainScript();
 
    writePreProcessingData();
    writeDTIRegistration(); 
@@ -379,9 +338,35 @@ void Pipeline::runPipeline()
    writeNeosegExecution();
 
    writeMainScript();
-
-   executeMainScript();
 }
 
+void Pipeline::runPipeline()
+{
+   QString command; 
+
+   if (!(m_parameters->getComputingSystem()).compare("local", Qt::CaseInsensitive))
+   {
+      command = m_main_path;
+   }
+
+   if (!(m_parameters->getComputingSystem()).compare("killdevil", Qt::CaseInsensitive))
+   {
+      command = "bsub -n 1 python " +  m_main_path;      
+   }   
+
+   m_mainScriptProcess = new QProcess;
+   //m_mainScriptProcess->setProcessChannelMode(QProcess::ForwardedChannels);
+   m_mainScriptProcess->start(command);
+
+   m_mainScriptProcess->waitForStarted();   
+   m_timer.start();
+
+   while (!m_mainScriptProcess->waitForFinished())
+   {
+      sleep(1);
+   }
+
+   cleanUp();
+}
 
 

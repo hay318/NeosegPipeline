@@ -118,11 +118,6 @@ class AntsParameters
    bool checkDeformationFieldSigma(double deformationFieldSigma);
    double getDeformationFieldSigma();
 
-   // Image metric flag 
-   QString getImageMetricFlag(QString imageMetric);
-   QString getTransformationTypeFlag(QString transformationType); 
-   QString getRegularizationTypeFlag(QString regularizationType); 
-
    // Using mask 
    void setUsingMask(bool usingMask); 
    bool getUsingMask(); 

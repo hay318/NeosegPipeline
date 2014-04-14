@@ -48,7 +48,7 @@ NeosegParameters::NeosegParameters()
    m_prior3_default = 1;
    m_prior3 = m_prior3_default;
 
-   m_prior4_default = 1;
+   m_prior4_default = 0.6;
    m_prior4 = m_prior4_default;
 
    m_prior5_default = 1;

@@ -16,8 +16,11 @@ include(${SlicerExecutionModel_USE_FILE})
 FIND_PACKAGE(GenerateCLP REQUIRED)
 INCLUDE(${GenerateCLP_USE_FILE})
 
+
+QT4_ADD_RESOURCES(RESOURCES resources.qrc)
+
 # MotherWindow.h generation
-QT4_WRAP_UI(UI_SOURCES Window.ui)
+QT4_WRAP_UI(UI_SOURCES Window.ui About.ui)
 
 # Meta Object Compiler
 QT4_WRAP_CPP(MOC_SOURCES DerivedWindow.h MainScriptThread.h Pipeline.h)
@@ -47,6 +50,7 @@ SET(NeosegPipeline_SOURCE  main.cxx
 
 SET(NeosegPipeline_HEADERS NeosegPipelineTool.h
                            DerivedWindow.h
+                           About.h
                            XmlReader.h
                            XmlWriter.h
                            Pipeline.h
@@ -67,6 +71,6 @@ SET(NeosegPipeline_HEADERS NeosegPipelineTool.h
                            TemplateImage.h
                            MainScriptThread.h)
 
-add_executable(NeosegPipeline ${NeosegPipeline_SOURCE} ${NeosegPipeline_HEADERS} ${MOC_SOURCES} ${UI_SOURCES} ${NeosegPipeline_CLP})
+add_executable(NeosegPipeline ${NeosegPipeline_SOURCE} ${NeosegPipeline_HEADERS} ${MOC_SOURCES} ${UI_SOURCES} ${NeosegPipeline_CLP} ${RESOURCES})
 
 TARGET_LINK_LIBRARIES(NeosegPipeline ${QT_LIBRARIES})

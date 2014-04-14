@@ -214,6 +214,10 @@ void AtlasGeneration::generateWeightedAveragedLabels()
    m_outputs.insert(m_csf.output, csfAverage);
    m_argumentsList << "WeightedLabelsAverage" << "parameters_path";
    execute(); 
+   m_unnecessaryFiles << m_XML_path;
+   m_unnecessaryFiles << whiteAverage; 
+   m_unnecessaryFiles << grayAverage; 
+   m_unnecessaryFiles << csfAverage; 
 }
 
 void AtlasGeneration::extractWMFromFA()
@@ -231,6 +235,7 @@ void AtlasGeneration::extractWMFromFA()
    m_argumentsList << "ImageMath" << "FA" << "'-rescale'"<< "'0,255'" << "'-outfile'" << "rescaledFA";
    m_log = "- Rescaling the FA between 0 and 255";
    execute();
+   m_unnecessaryFiles << rescaledFA; 
 
    // Spreading FA
    QString spreadFA = FA_dir->filePath(m_prefix + "FA" + "-spread" + m_suffix + ".nrrd");
@@ -239,6 +244,7 @@ void AtlasGeneration::extractWMFromFA()
    m_argumentsList << "SpreadFA" << "rescaledFA" << "spreadFA";
    m_log = "- Spreading the FA...";
    execute();
+   m_unnecessaryFiles << spreadFA; 
 
    // Smoothing FA
    QString smoothedFA = FA_dir->filePath(m_prefix + "FA" + "-smoothed" + m_suffix + ".nrrd");
@@ -247,6 +253,7 @@ void AtlasGeneration::extractWMFromFA()
    m_argumentsList << "ImageMath" << "spreadFA" << "'-smooth'"<< "'-gauss'" << "'-size'" << "'" + QString::number(m_FASmoothingSize) + "'" << "'-type'" << "'float'" << "'-outfile'" << "smoothedFA";
    m_log = "- Smoothing the FA (type=gauss, size=1)";
    execute();
+   m_unnecessaryFiles << smoothedFA; 
 
    // Eroding brain mask
    m_script += "\tmask = '" + m_neo.mask + "'\n"; 
@@ -256,6 +263,7 @@ void AtlasGeneration::extractWMFromFA()
    m_argumentsList << "ImageMath" << "mask" << "'-erode'"<< "'2,1'" << "'-outfile'" << "erodedMask";
    m_log = "- Eroding the brain mask (radius=2)";
    execute();
+   m_unnecessaryFiles << erodedMask; 
 
    // Masking FA
    QString maskedFA = FA_dir->filePath(m_prefix + "FA" + "-masked" + m_suffix + ".nrrd");
@@ -263,6 +271,7 @@ void AtlasGeneration::extractWMFromFA()
    m_argumentsList << "ImageMath" << "smoothedFA" << "'-mask'"<< "erodedMask" << "'-type'" << "'float'" << "'-outfile'" << "maskedFA";
    m_log = "- Masking the FA with the eroded brain mask"; 
    execute();
+   m_unnecessaryFiles << maskedFA; 
   
    // Multiplying FA 
    QString weightedFA = FA_dir->filePath(m_prefix + "FA" + "-weighted" + m_suffix + ".nrrd");
@@ -270,6 +279,7 @@ void AtlasGeneration::extractWMFromFA()
    m_argumentsList << "ImageMath" << "maskedFA" << "'-constOper'" << "'2," + QString::number(m_FAWeight) + "'" << "'-type'" << "'float'" << "'-outfile'" << "weightedFA";
    m_log = "- Multiplying the FA by 1.5";  
    execute(); 
+   m_unnecessaryFiles << weightedFA; 
 
    // Adding FA
    m_white.input = m_white.output; 
@@ -280,6 +290,7 @@ void AtlasGeneration::extractWMFromFA()
    m_argumentsList << "ImageMath" << m_white.input << "'-add'" << "weightedFA" << "'-type'" << "'float'" << "'-outfile'" << m_white.output;
    m_log = "- Adding the FA to the white average...";
    execute();
+   m_unnecessaryFiles << whitePlusFA;
 }
 
 void AtlasGeneration::generatePriorProbability(PriorProbability& priorProbability)
@@ -296,6 +307,7 @@ void AtlasGeneration::generatePriorProbability(PriorProbability& priorProbabilit
    m_argumentsList << "ImageMath" << priorProbability.input << "'-smooth'" << smoothing << "'-size'" << smoothingSize << "'-type'" << "'float'" << "'-outfile'" << priorProbability.output;
    m_outputs.insert(priorProbability.output, probability); 
    execute();
+   m_unnecessaryFiles << probability;
 
    // Masking probability
    priorProbability.input = priorProbability.output;
@@ -306,6 +318,7 @@ void AtlasGeneration::generatePriorProbability(PriorProbability& priorProbabilit
    m_outputs.insert(priorProbability.output, maskedProbability);
    m_argumentsList << "ImageMath" << priorProbability.input << "'-mask'"<< "mask" << "'-type'" << "'float'" << "'-outfile'" << priorProbability.output;
    execute();
+   m_unnecessaryFiles << maskedProbability;
 }
 
 void AtlasGeneration::preNormalizePriorProbability(PriorProbability& priorProbability)
@@ -319,6 +332,7 @@ void AtlasGeneration::preNormalizePriorProbability(PriorProbability& priorProbab
    m_argumentsList_1 << "unu" << "'2op'" << "'/'" << priorProbability.input << "sumProbabilities" << "'-t'" << "'float'";
    m_argumentsList_2 << "unu" << "'save'" << "'-e'" << "'gzip'" << "'-f'" << "'nrrd'" << "'-o'" << priorProbability.output;
    executePipe();
+   m_unnecessaryFiles << preNormalizedProbability;
 
    priorProbability.input = priorProbability.output;
    priorProbability.output = priorProbability.name + "_rescaledProbability";
@@ -328,6 +342,7 @@ void AtlasGeneration::preNormalizePriorProbability(PriorProbability& priorProbab
    m_outputs.insert(priorProbability.output, rescaledProbability);
    m_argumentsList << "ImageMath" << priorProbability.input << "'-constOper'"<< "'2,255'" << "'-outfile'" << priorProbability.output;
    execute(); 
+   m_unnecessaryFiles << rescaledProbability;
 }
 
 void AtlasGeneration::computeSumProbabilities()
@@ -344,6 +359,8 @@ void AtlasGeneration::computeSumProbabilities()
    m_argumentsList_1 << "unu" << "'2op'" << "'if'" << "sumProbabilities" << "'1'" << "'-t'" << "'float'";
    m_argumentsList_2 << "unu" << "'save'" << "'-e'" << "'gzip'" << "'-f'" << "'nrrd'" << "'-o'" << "sumProbabilities";
    executePipe(); 
+
+   m_unnecessaryFiles << sumProbabilities;
 }
 
 void AtlasGeneration::computeRest()
@@ -375,8 +392,11 @@ void AtlasGeneration::computeRest()
 
    m_argumentsList << "ImageMath" << m_templateT1.output << "'-normalizeEMS'"<< "'3'" << "'-EMSfile'" << "priorProbabilities" << "'-type'" << "'float'" << "'-extension'" << "'.nrrd'" << "'-outbase'" << "outbase";
    m_log = "- Computing the rest probability";
-
    execute();
+   m_unnecessaryFiles << label1;
+   m_unnecessaryFiles << label2;
+   m_unnecessaryFiles << label3;
+   m_unnecessaryFiles << label4;
 
    // Dilating brain mask 
    QString dilatedMask = m_priorProbabilities_dir->filePath(m_prefix + "mask" + "-dilated" + m_suffix + ".nrrd");
@@ -385,8 +405,8 @@ void AtlasGeneration::computeRest()
    m_outputs.insert("dilatedMask", dilatedMask);
    m_log = "- Dilating the brain mask (radius=5)";
    m_argumentsList << "ImageMath" << "brainMask" << "'-dilate'"<< "'5,1'" << "'-outfile'" << "dilatedMask";
-
    execute(); 
+   m_unnecessaryFiles << dilatedMask;
 
    // Masking rest
    m_rest.input = m_rest.output; 
@@ -398,6 +418,7 @@ void AtlasGeneration::computeRest()
    m_argumentsList << "ImageMath" << m_rest.input << "'-mask'"<< "dilatedMask" << "'-outfile'" << m_rest.output;
    m_log = "- Masking the rest with the dilated mask";
    execute();
+   m_unnecessaryFiles << restMasked;
 }
 
 void AtlasGeneration::copyFinalPriorProbability(PriorProbability& priorProbability)
@@ -410,6 +431,7 @@ void AtlasGeneration::copyFinalPriorProbability(PriorProbability& priorProbabili
 
    m_argumentsList << "ResampleVolume2" << priorProbability.input << priorProbability.output;
    execute(); 
+   m_unnecessaryFiles << finalProbability;
 } 
 
 void AtlasGeneration::implementRun()
@@ -419,9 +441,7 @@ void AtlasGeneration::implementRun()
    m_script += "\tsignal.signal(signal.SIGINT, stop)\n";
    m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
 
-   m_script += "\tlogger.debug('')\n";
    m_script += "\tlogger.info('=== Atlas Generation ===')\n";
-   m_script += "\tlogger.debug('')\n";
 
    QString finalTemplateT1_path = m_module_dir->filePath(m_templateT1.name + ".nrrd");  
    QString finalTemplateT2_path = m_module_dir->filePath(m_templateT2.name + ".nrrd");  
@@ -438,6 +458,8 @@ void AtlasGeneration::implementRun()
    m_outputs.insert("finalrest", finalRest_path); 
    
    checkFinalOutputs(); 
+
+   m_script += "\tlogger.debug('')\n";
 
    m_script += "\tmask = '" + m_neo.mask + "'\n";  
 
@@ -536,6 +558,16 @@ QString AtlasGeneration::getOutput()
 
 void AtlasGeneration::cleanUp()
 {
-   m_module_dir->rmpath("temp");
+   for (int i = 0; i < m_unnecessaryFiles.size(); ++i)
+   {
+      QFile(m_unnecessaryFiles.at(i)).remove();
+   }
+
+   m_module_dir->rmpath("temp/templates/templateT1");
+   m_module_dir->rmpath("temp/templates/templateT2");
+   m_module_dir->rmpath("temp/priorProbabilities/white/FA");
+   m_module_dir->rmpath("temp/priorProbabilities/gray");
+   m_module_dir->rmpath("temp/priorProbabilities/csf");
+   m_module_dir->rmpath("temp/priorProbabilities/rest");
 }
 

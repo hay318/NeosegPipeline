@@ -6,6 +6,27 @@ DerivedWindow::DerivedWindow() : Ui_Window()
 
    m_parametersSet = false; 
    m_executablesSet = false; 
+   m_pipelineWriten = false; 
+
+   // Parameters Configuration 
+   connect(loadParametersConfiguration_action, SIGNAL(triggered()), this, SLOT(selectParameters()));
+   connect(saveParametersConfiguration_action, SIGNAL(triggered()), this, SLOT(saveParameters()));
+
+   // Executables Configuration
+   connect(loadSoftwaresConfiguration_action, SIGNAL(triggered()), this, SLOT(selectExecutables()));
+   connect(saveSoftwaresConfiguration_action, SIGNAL(triggered()), this, SLOT(saveExecutables()));
+
+   // Quit
+   connect(quit_action, SIGNAL(triggered()), this, SLOT(close())); 
+
+   // Help
+   connect(about_action, SIGNAL(triggered()), this, SLOT(about())); 
+
+   // Toolbar 
+   QWidget* spacer = new QWidget();
+   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+   toolBar->addWidget(spacer);
+   toolBar->addAction(about_action);
 
    // Select Image Signal Mapper
    QSignalMapper* selectImage_signalMapper = new QSignalMapper(this);
@@ -84,25 +105,15 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    connect(existingAtlas_button, SIGNAL(clicked()), this, SLOT(selectExistingAtlas()));
    connect(existingAtlas_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterExistingAtlas()));      
    
-   //Load Parameters Configuration
-   connect(loadParameters_button,  SIGNAL(clicked()), this, SLOT(selectParameters()));
-   connect(loadParameters_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterParameters()));
-
-   //Load Executables Configuration
-   connect(loadExecutables_button,  SIGNAL(clicked()), this, SLOT(selectExecutables()));
-   connect(loadExecutables_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterExecutables()));
-
-   // Save Parameters
-   connect(saveParameters_button, SIGNAL(clicked()), this, SLOT(saveParameters()));
-
-   // Save Executables
-   connect(saveExecutables_button, SIGNAL(clicked()), this, SLOT(saveExecutables()));
-
    // Reset all executables 
    connect(resetAllExecutables_button, SIGNAL(clicked()), this, SLOT(resetAllExecutables()));
 
    // Run Pipeline
    connect(runPipeline_button, SIGNAL(clicked()), this, SLOT(runPipeline()));
+
+   // Logging 
+   connect(pipeline_radioButton, SIGNAL(clicked()), this, SLOT(selectLog())); 
+   connect(registrations_radioButton, SIGNAL(clicked()), this, SLOT(selectLog())); 
 
    // Stop Pipeline
    connect(stopPipeline_button, SIGNAL(clicked()), this, SLOT(stopPipeline()));
@@ -113,13 +124,19 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    newAtlas_radioButton->setChecked(true);
    existingAtlas_widget->hide();
 
-   runPipeline_progressBar->setEnabled(false); 
+   runPipeline_progressBar->hide(); 
+
    displayResults_button->setEnabled(false);
    stopPipeline_button->setEnabled(false);
+
+   pipeline_radioButton->setEnabled(false);  
+   registrations_radioButton->setEnabled(false);
+   registrations_comboBox->setEnabled(false); 
 
    //QApplication::sendPostedEvents(this, QEvent::LayoutRequest);  
    //tabs->adjustSize();
    this->adjustSize();
+
 }
 
 void DerivedWindow::setPipelineParameters(PipelineParameters* parameters)
@@ -193,6 +210,13 @@ void DerivedWindow::initializeExecutablesMap()
    m_executables_map.insert("InsightSNAP", InsightSNAP);
 }
 
+void DerivedWindow::about()
+{
+   m_about = new::About(); 
+   m_about->show();    
+}
+
+
 void DerivedWindow::selectImage(QString image_name)
 {
    Image image = m_images_map[image_name]; 
@@ -211,10 +235,19 @@ void DerivedWindow::enterImage(QString image_name)
 
    if(!image_path.isEmpty()) 
    {    
-      if(!m_parameters->checkT1(image_path))
+      if(QFileInfo(image_path).exists())
       {
-         (image.enter_lineEdit)->clear();
-         QMessageBox::critical(this, image_name, image_path + "\ndoes not exist, enter a new file path");
+         if(!QFileInfo(image_path).isFile())
+         {
+            (image.enter_lineEdit)->clear(); 
+            QMessageBox::critical(this, image_name, image_path + " is not a file,\nPlease enter a new file path");
+         }
+      }
+      else
+      {
+         (image.enter_lineEdit)->clear(); 
+         QMessageBox::critical(this, image_name, image_path + " does not exist,\nPlease enter a new file path");
+
       }
    }
 }
@@ -467,41 +500,17 @@ void DerivedWindow::enterExistingAtlas()
 void DerivedWindow::selectParameters()
 {
 	QString parameters=QFileDialog::getOpenFileName(this, "Open file", m_data_path,"XML (*.xml)");
-   loadParameters_lineEdit->setText(parameters);
+   //loadParameters_lineEdit->setText(parameters);
 }
-void DerivedWindow::enterParameters()
-{
-   QString parameters=loadParameters_lineEdit->text();
 
-   if(!parameters.isEmpty()) 
-   {
-      if(!QFile(parameters).exists())
-      {
-         loadParameters_lineEdit->clear();
-         QMessageBox::critical(this, "Parameters Configuration File", parameters + "\ndoes not exist, enter a new file path");
-      }
-   }
-}
 
 //***** Executables Configuration File *****//
 void DerivedWindow::selectExecutables()
 {
 	QString executables = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", m_data_path,"XML (*.xml)");
-   loadExecutables_lineEdit->setText(executables);
+   //loadExecutables_lineEdit->setText(executables);
 }
-void DerivedWindow::enterExecutables()
-{
-   QString executables=loadExecutables_lineEdit->text();
 
-   if(!executables.isEmpty()) 
-   {
-      if(!QFile(executables).exists())
-      {
-         loadExecutables_lineEdit->clear();
-         QMessageBox::critical(this, "Executables Configuration File", executables + "\ndoes not exist, enter a new file path");
-      }
-   }
-}
 
 // Executables 
 void DerivedWindow::selectExecutable(QString executable_name)
@@ -653,6 +662,8 @@ void DerivedWindow::initializeParameters()
    gradientFieldSigma_spinBox->setValue(m_antsParameters->getGradientFieldSigma());
    deformationFieldSigma_spinBox->setValue(m_antsParameters->getDeformationFieldSigma());
 
+   usingMask_checkBox->setChecked(m_antsParameters->getUsingMask());
+   usingSmoothedMask_checkBox->setChecked(m_antsParameters->getUsingSmoothedMask());
 
    //Neoseg 
    referenceModality_comboBox->insertItems(0, m_neosegParameters->getReferenceImageValues());
@@ -689,54 +700,23 @@ void DerivedWindow::initializeParameters()
    ResampleVolume2_lineEdit->setText(m_executables->getExecutablePath("ResampleVolume2"));
    ImageMath_lineEdit->setText(m_executables->getExecutablePath("ImageMath"));
    InsightSNAP_lineEdit->setText(m_executables->getExecutablePath("InsightSNAP"));
+
 }
 
 
 void DerivedWindow::setParameters()
 {
    // Input
-   if(!(T1_lineEdit->text()).isEmpty())
-   {
-      m_parameters->setT1(T1_lineEdit->text());
-   }
-   
-   if(!(T2_lineEdit->text()).isEmpty())
-   {
-      m_parameters->setT2(T2_lineEdit->text());
-   }
-
-   if(!(mask_lineEdit->text()).isEmpty())
-   {
-      m_parameters->setMask(mask_lineEdit->text());
-   }   
-
-   if(!(DWI_lineEdit->text()).isEmpty())
-   {
-      m_parameters->setDWI(DWI_lineEdit->text());
-   }  
-
-   if(!(b0_lineEdit->text()).isEmpty())
-   {
-      m_parameters->setb0(b0_lineEdit->text());
-   }  
-
-
+   m_parameters->setT1(T1_lineEdit->text());
+   m_parameters->setT2(T2_lineEdit->text());
+   m_parameters->setMask(mask_lineEdit->text());
+   m_parameters->setDWI(DWI_lineEdit->text());
+   m_parameters->setb0(b0_lineEdit->text());
+ 
    // Output
-   if(!(prefix_lineEdit->text()).isEmpty())
-   {
-      m_parameters->setPrefix(prefix_lineEdit->text()); 
-   }
-
-   if(!(suffix_lineEdit->text()).isEmpty())
-   {
-      m_parameters->setSuffix(suffix_lineEdit->text()); 
-   }
-
-   if(!(output_lineEdit->text()).isEmpty())
-   {
-      m_parameters->setOutput(output_lineEdit->text()); 
-   }
-
+   m_parameters->setPrefix(prefix_lineEdit->text()); 
+   m_parameters->setSuffix(suffix_lineEdit->text()); 
+   m_parameters->setOutput(output_lineEdit->text()); 
 
    //Atlas Population 
    if (newAtlas_radioButton->isChecked()) 
@@ -774,7 +754,7 @@ void DerivedWindow::setParameters()
    m_parameters->setStoppingIfError(stoppingIfError_checkBox->isChecked()); 
    m_parameters->setComputingSystem(computingSystem_comboBox->currentText());
    m_parameters->setNumberOfCores(numberOfCores_spinBox->value());
-   m_parameters->setDebug(debug_checkBox->isChecked());   
+   //m_parameters->setDebug(debug_checkBox->isChecked());   
 
    
    //ANTS parameters 
@@ -801,7 +781,6 @@ void DerivedWindow::setParameters()
 
    m_antsParameters->setUsingMask(usingMask_checkBox->isChecked());
    m_antsParameters->setUsingSmoothedMask(usingSmoothedMask_checkBox->isChecked());
-
 
    // Neoseg parameters 
    m_neosegParameters->setReferenceImage(referenceModality_comboBox->currentText()); 
@@ -874,34 +853,288 @@ void DerivedWindow::saveExecutables()
    executables->writeExecutablesConfiguration(executables_path);
 }
 
-void DerivedWindow::runPipeline()
+void DerivedWindow::setParametersWidgetEnabled(bool enabled)
 {
-   if(!m_parametersSet)
+   // Menu 
+   loadParametersConfiguration_action->setEnabled(enabled); 
+   saveParametersConfiguration_action->setEnabled(enabled); 
+   loadSoftwaresConfiguration_action->setEnabled(enabled); 
+   saveSoftwaresConfiguration_action->setEnabled(enabled); 
+
+   // Data 
+   inputs_groupBox->setEnabled(enabled);
+   outputs_groupBox->setEnabled(enabled);
+
+   // Atlas
+   newAtlas_radioButton->setEnabled(enabled);
+   existingAtlas_radioButton->setEnabled(enabled);
+   existingAtlas_groupBox->setEnabled(enabled);
+   atlasPopulation_groupBox->setEnabled(enabled); 
+
+   // Atlas Registration
+   numberOfRegistrations_groupBox->setEnabled(enabled);
+   ANTSParameters_groupBox->setEnabled(enabled);
+
+   // Atlas Generation
+   computingCCWeights_groupBox->setEnabled(enabled);
+   includingFA_groupBox->setEnabled(enabled);
+   smoothingProbabilities_groupBox->setEnabled(enabled);
+
+   // Neoseg 
+   neosegModalities_groupBox->setEnabled(enabled);
+   neosegParameters_groupBox->setEnabled(enabled);
+   mergedSegmentation_groupBox->setEnabled(enabled);
+
+   // Softwares
+   QMap<QString, Executable>::iterator it_exec; 
+   for(it_exec = m_executables_map.begin(); it_exec != m_executables_map.end(); ++it_exec)
    {
-      setParameters();
+      QString name = it_exec.key(); 
+      Executable executable = it_exec.value();  
+
+      executable.select_button->setEnabled(enabled); 
+      executable.enter_lineEdit->setEnabled(enabled);
+      executable.reset_button->setEnabled(enabled);   
    }
 
-   m_thread->setPipeline(m_pipeline);
-   m_thread->start();
+   resetAllExecutables_button->setEnabled(enabled);   
 
-   runPipeline_button->setEnabled(false);
+   // Computing 
+   overwriting_checkBox->setEnabled(enabled);
+   stoppingIfError_checkBox->setEnabled(enabled);
+   cleaningUp_checkBox->setEnabled(enabled);
+   computingSystem_label->setEnabled(enabled);
+   computingSystem_comboBox->setEnabled(enabled);   
+} 
 
-   runPipeline_progressBar->setEnabled(true);
-   stopPipeline_button->setEnabled(true); 
 
+void DerivedWindow::runPipeline()
+{
+   setParameters();
+
+   QString imagesErrors = m_parameters->checkImages(); 
+   QString executablesErrors = m_executables->checkExecutables(); 
+
+   if(imagesErrors.isEmpty() && executablesErrors.isEmpty())
+   {
+      m_pipeline->writePipeline();
+
+      initializePipelineLogging();
+      initializeRegistrationsLogging();
+
+      m_pipeline->setPlainTextEdit(m_log_plainTextEdit); 
+      m_thread->setPipeline(m_pipeline);
+      m_thread->start();
+
+      setParametersWidgetEnabled(false);
+      runPipeline_button->setEnabled(false);
+      stopPipeline_button->setEnabled(true); 
+      displayResults_button->setEnabled(false);
+      tabs->setCurrentWidget(execution_tab);   
+
+      runPipeline_progressBar->setTextVisible(false);
+      runPipeline_progressBar->show();
+      runPipeline_progressBar->setMinimum(0);
+      runPipeline_progressBar->setMaximum(0); 
+   }
+   else
+   {
+      QMessageBox::critical(this, "Errors", imagesErrors + executablesErrors);
+   }
 }
+
+void DerivedWindow::initializePipelineLogging()
+{
+   Logging logging; 
+
+   // Radio Button
+   pipeline_radioButton->setEnabled(true); 
+   pipeline_radioButton->setChecked(true); 
+
+   // Plain Text Edit
+   m_log_plainTextEdit->show();
+   m_log_plainTextEdit->clear();
+   m_log_plainTextEdit->setMaximumBlockCount(500);
+
+   // Log path
+   QDir* output_dir = new QDir(m_parameters->getOutput());
+   QString log_path = output_dir->filePath(m_parameters->getPrefix() + ".log");
+
+   // Log File 
+   QFile* log_file = new::QFile(log_path); 
+   log_file->open(QIODevice::ReadWrite);    
+   m_log_textStream = new::QTextStream(log_file); 
+
+   // QFileSystemWatcher
+   QFileSystemWatcher* log_watcher = new::QFileSystemWatcher(this); 
+   log_watcher->addPath(log_path); 
+   connect(log_watcher, SIGNAL(fileChanged(QString)), this, SLOT(printPipelineLog(QString)));
+}
+
+void DerivedWindow::initializeRegistrationsLogging()
+{
+   QStringList selectedAtlases = m_parameters->getSelectedAtlases(); 
+
+   QDir output_dir(m_parameters->getOutput());
+   QString atlasRegistration_path = output_dir.filePath("3.AtlasRegistration");
+   QDir atlasRegistration_dir(atlasRegistration_path);
+
+   Logging logging; 
+
+   QStringList::iterator it; 
+   for(it = selectedAtlases.begin(); it != selectedAtlases.end(); ++it)
+   {
+      // Existing QPlainTextEdit
+      if(m_registrationLoggings.contains(*it))
+      {
+         delete (m_registrationLoggings[*it]).plainTextEdit;
+      }
+
+      // QPlainTextEdit   
+      QPlainTextEdit* log_plainTextEdit = new::QPlainTextEdit(execution_widget); 
+
+      QFont font("Courier 10 Pitch", 9);
+      log_plainTextEdit->setFont(font);  
+
+      QLayout* execution_layout = execution_widget->layout(); 
+      execution_layout->addWidget(log_plainTextEdit);
+
+      log_plainTextEdit->setMaximumBlockCount(500);
+
+      log_plainTextEdit->hide(); 
+
+      // Atlas Directory 
+      QString atlas_path = atlasRegistration_dir.filePath(*it);
+      QDir atlas_dir(atlas_path); 
+
+      // Log File
+      QString log_name = *it + "_to_neo.log";
+      QString log_path = atlas_dir.filePath(log_name); 
+      QFile* log_file = new::QFile(log_path); 
+      log_file->open(QIODevice::ReadWrite);
+      QTextStream* log_textStream = new::QTextStream(log_file); 
+      
+      // QFileSystemWatcher
+      QFileSystemWatcher* log_watcher = new::QFileSystemWatcher(this); 
+      log_watcher->addPath(log_path); 
+      connect(log_watcher, SIGNAL(fileChanged(QString)), this, SLOT(printRegistrationLog(QString)));
+
+      logging.textStream = log_textStream;
+      logging.plainTextEdit = log_plainTextEdit; 
+
+      m_registrationLoggings.insert(*it, logging); 
+   }
+
+   // Radio Button
+   registrations_radioButton->setEnabled(true);
+
+   // Combo Box 
+   registrations_comboBox->clear();
+   registrations_comboBox->setEnabled(true); 
+   registrations_comboBox->insertItems(0, selectedAtlases); 
+   connect(registrations_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeExecutionPlainTextEdit(int)));
+}
+
+void DerivedWindow::printPipelineLog(QString log_path)
+{  
+   QScrollBar *scrollBar = m_log_plainTextEdit->verticalScrollBar();
+
+   if(scrollBar->value() == scrollBar->maximum())
+   {
+      m_log_plainTextEdit->insertPlainText((m_log_textStream->readAll()));
+      scrollBar->setValue(scrollBar->maximum());
+   }
+   else
+   {
+      m_log_plainTextEdit->insertPlainText((m_log_textStream->readAll()));
+   }
+}
+
+void DerivedWindow::printRegistrationLog(QString log_path)
+{  
+   QString atlas_name = (QFileInfo(log_path).absoluteDir()).dirName(); 
+   Logging logging = m_registrationLoggings[atlas_name];
+   QTextStream* log_textStream = logging.textStream;
+   QPlainTextEdit* log_plainTextEdit = logging.plainTextEdit; 
+
+   QScrollBar *scrollBar = log_plainTextEdit->verticalScrollBar();
+
+   if(scrollBar->value() == scrollBar->maximum())
+   {
+      log_plainTextEdit->insertPlainText((m_log_textStream->readAll()));
+      scrollBar->setValue(scrollBar->maximum());
+   }
+   else
+   {
+      log_plainTextEdit->insertPlainText((m_log_textStream->readAll()));
+   }
+}
+
+void DerivedWindow::selectLog()
+{
+   QString registration = registrations_comboBox->currentText();   
+   Logging logging = m_registrationLoggings[registration];
+
+   if(pipeline_radioButton->isChecked())
+   {
+      m_log_plainTextEdit->show();
+      logging.plainTextEdit->hide(); 
+   }
+
+   if(registrations_radioButton->isChecked())
+   {
+      m_log_plainTextEdit->hide();
+      logging.plainTextEdit->show();     
+   }
+}
+
+void DerivedWindow::changeExecutionPlainTextEdit(int index)
+{
+   QString atlas_name = registrations_comboBox->currentText(); 
+   
+   QMap <QString, Logging>::iterator it; 
+   QString name; 
+   Logging logging; 
+   for(it = m_registrationLoggings.begin(); it != m_registrationLoggings.end(); ++it)
+   {
+      name = it.key(); 
+      logging = it.value(); 
+
+      if(name == atlas_name && registrations_radioButton->isChecked())
+      {
+         logging.plainTextEdit->show();
+      }
+      else
+      {
+         logging.plainTextEdit->hide();
+      }   
+   }   
+}
+
 
 void DerivedWindow::stopPipeline()
 {
    m_thread->terminate(); 
+
+   setParametersWidgetEnabled(true); 
    runPipeline_button->setEnabled(true);
-   runPipeline_progressBar->setEnabled(false);
    stopPipeline_button->setEnabled(false); 
+
+   runPipeline_progressBar->hide();
 }
 
 void DerivedWindow::enableDisplayButton()
 {
-   displayResults_button->setEnabled(true);   
+   if(QFile(m_parameters->getSegmentation()).exists())
+   {   
+      displayResults_button->setEnabled(true); 
+   }
+
+   setParametersWidgetEnabled(true); 
+   runPipeline_button->setEnabled(true);
+   stopPipeline_button->setEnabled(false); 
+
+   runPipeline_progressBar->hide();
 }
 
 void DerivedWindow::displayResults()
@@ -909,14 +1142,12 @@ void DerivedWindow::displayResults()
    QProcess insightSNAP_process;
 
    QString command = m_executables->getExecutablePath("InsightSNAP") + " -g " + m_parameters->getT1() + " -s " + m_parameters->getSegmentation(); 
-
-   std::cout<<command.toStdString()<<std::endl; 
-
    insightSNAP_process.start(command);
 
    while (!insightSNAP_process.waitForFinished())
    {
-   }   
+   } 
+ 
 }
 
 void DerivedWindow::closeEvent(QCloseEvent *event)
@@ -947,6 +1178,8 @@ void DerivedWindow::closeEvent(QCloseEvent *event)
       }
    }
 }
+
+
 
 
 

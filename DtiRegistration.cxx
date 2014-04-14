@@ -36,7 +36,7 @@ void DtiRegistration::upsample(QString image)
    QString grid_name = m_prefix + image + m_grid_suffix + m_suffix + ".nrrd";
    QString grid_path = m_module_dir->filePath(grid_name); 
 
-   m_log = "- Computing grid of the image upsampled";
+   m_log = "- Computing grid of the " + image + " upsampled";
    m_outputs.insert("grid" + image, grid_path); 
    m_argumentsList << "ITKTransformTools" << "'size'" << image << "'-'" << "'--grid'" << "grid" + image << "'--spacing'" << "'1'" << "'1'" << "'1'"; 
    execute();
@@ -47,7 +47,7 @@ void DtiRegistration::upsample(QString image)
    QString upsampledImage_name = m_prefix + image + m_upsampling_suffix + m_suffix + ".nrrd";
    QString upsampledImage_path = m_module_dir->filePath(upsampledImage_name); 
 
-   m_log = "- Upsampling image";
+   m_log = "- Upsampling " + image;
    m_outputs.insert("upsampled" + image, upsampledImage_path); 
    m_argumentsList << "ResampleVolume2" << "'-R'" << "grid" + image << "'-i'" << "'linear'" << image << "upsampled" + image; 
    execute();
@@ -60,7 +60,7 @@ void DtiRegistration::generateDTI()
    QString DTI_name = m_prefix + "DTI" + m_suffix + ".nrrd";
    QString DTI_path = m_module_dir->filePath(DTI_name); 
 
-   m_log = "Generating DTI";
+   m_log = "- Generating DTI";
    m_outputs.insert("DTI", DTI_path);
    m_argumentsList << "dtiestim" << "'--dwi_image'" << "DWI" << "'--B0'" << "b0" << "'--tensor_output'" << "DTI"; 
    execute(); 
@@ -108,7 +108,7 @@ void DtiRegistration::skullStripDTI()
    QString strippedDTI_name = m_prefix + "DTI" + m_stripping_suffix + m_suffix + ".nrrd";
    QString strippedDTI_path = m_module_dir->filePath(strippedDTI_name); 
 
-   m_log = "Skull-stripping DTI";
+   m_log = "- Skull-stripping DTI";
    m_outputs.insert("strippedDTI", strippedDTI_path); 
    m_argumentsList << "ImageMath" << "DTI" << "'-mask'" << "b0Mask" << "'-outfile'" << "strippedDTI"; 
    execute(); 
@@ -122,7 +122,7 @@ void DtiRegistration::generateFA()
    QString FA_name = m_prefix + "FA" + m_suffix + ".nrrd"; 
    QString FA_path = m_module_dir->filePath(FA_name); 
 
-   m_log = "Generating FA";
+   m_log = "- Generating FA";
    m_outputs.insert("FA", FA_path);
    m_argumentsList << "dtiprocess" << "'--dti_image'" << "strippedDTI" << "'--fa_output'" << "FA"; 
    execute();
@@ -136,7 +136,7 @@ void DtiRegistration::generateAD()
    QString AD_name = m_prefix + "AD" + m_suffix + ".nrrd";
    QString AD_path = m_module_dir->filePath(AD_name); 
 
-   m_log = "Generating AD"; 
+   m_log = "- Generating AD"; 
    m_outputs.insert("AD", AD_path); 
    m_argumentsList << "dtiprocess" << "'--dti_image'" << "strippedDTI" << "'--lambda1_output'" << "AD"; 
    execute();
@@ -172,6 +172,7 @@ void DtiRegistration::calculateTransformations()
    execute(); 
 
    m_unnecessaryFiles << affine_path;
+   m_unnecessaryFiles << affine_path + "~";
    m_unnecessaryFiles << warp_path;
    m_unnecessaryFiles << inverseWarp_path;
 
@@ -210,7 +211,6 @@ void DtiRegistration::implementRun()
    m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
 
    m_script += "\tlogger.info('=== DTI Registration ===')\n";
-   m_script += "\tlogger.debug('')\n";
 
    QString registeredAD_name = m_prefix + "AD" + m_registering_suffix + m_suffix + ".nrrd";
    QString registeredAD_path = m_module_dir->filePath(registeredAD_name); 
@@ -222,22 +222,20 @@ void DtiRegistration::implementRun()
    m_outputs.insert("finalFA", registeredFA_path); 
    checkFinalOutputs(); 
 
+   m_script += "\tlogger.info('')\n";
+
    m_script += "\tT1 = '" + m_neo.T1 + "'\n";
    m_script += "\tT2 = '" + m_neo.T2 + "'\n";
    m_script += "\tDWI = '" + m_neo.DWI + "'\n";
    m_script += "\tb0 = '" + m_neo.b0 + "'\n";
 
    m_script += "\n\t# Upsample b0 #\n";
-   m_script += "\tlogger.info('Upsampling the b0 :')\n";
-   m_script += "\tlogger.debug('')\n";
    upsample("b0"); 
-   m_script += "\tlogger.debug('')\n";
 
    m_script += "\n\t# Generate DTI #\n";
    generateDTI(); 
 
    m_script += "\n\t# Skull-Strip b0 #\n";
-   m_script += "\tlogger.info('Skull-stripping the b0 :')\n";
    skullStripb0(); 
 
    m_script += "\n\t# Skull-Strip DTI #\n";
@@ -247,25 +245,20 @@ void DtiRegistration::implementRun()
    generateFA(); 
 
    m_script += "\n\t# Upsample FA #\n";
-   m_script += "\tlogger.info('Upsampling the FA :')\n";
-   m_script += "\tlogger.debug('')\n";
-   upsample("FA");
-   m_script += "\tlogger.debug('')\n"; 
+   upsample("FA"); 
 
    m_script += "\n\t# Generate AD #\n"; 
    generateAD(); 
 
    m_script += "\n\t# Upsample AD #\n";
-   m_script += "\tlogger.info('Upsampling the AD :')\n";
-   m_script += "\tlogger.debug('')\n"; 
    upsample("AD"); 
-   m_script += "\tlogger.debug('')\n";
 
    m_script += "\n\t# Registering FA and AD #\n";
-   m_script += "\tlogger.info('Registering the FA and the AD :')\n";
    calculateTransformations(); 
    applyTransformations("FA"); 
    applyTransformations("AD"); 
+
+   m_script += "\tlogger.info('')\n";
 }
 
 void DtiRegistration::update()

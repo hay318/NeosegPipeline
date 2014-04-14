@@ -67,7 +67,7 @@ AntsParameters::AntsParameters()
    m_usingMask_default = false; 
    m_usingMask = m_usingMask_default; 
 
-   m_usingSmoothedMask_default = false; 
+   m_usingSmoothedMask_default = true; 
    m_usingSmoothedMask = m_usingSmoothedMask_default; 
 }
 
@@ -134,7 +134,7 @@ QStringList AntsParameters::getImageMetricValues()
 
 void AntsParameters::setImageMetric1(QString imageMetric1)
 {
-   m_imageMetric1=getImageMetricFlag(imageMetric1);
+   m_imageMetric1=imageMetric1;
 }
 QString AntsParameters::getImageMetric1()
 {
@@ -147,7 +147,7 @@ int AntsParameters::getImageMetric1Index()
 
 void AntsParameters::setImageMetric2(QString imageMetric2)
 {
-   m_imageMetric2=getImageMetricFlag(imageMetric2);
+   m_imageMetric2 = imageMetric2;
 }
 QString AntsParameters::getImageMetric2()
 {
@@ -267,7 +267,7 @@ int AntsParameters::getIterationsL()
 
 void AntsParameters::setTransformationType(QString transformationType)
 {
-   m_transformationType=getTransformationTypeFlag(transformationType);
+   m_transformationType = transformationType;
 }
 bool AntsParameters::checkTransformationType(QString transformationType)
 {
@@ -339,7 +339,7 @@ double AntsParameters::getDeltaTimeMin()
 
 void AntsParameters::setRegularizationType(QString regularizationType)
 {
-   m_regularizationType=getRegularizationTypeFlag(regularizationType);
+   m_regularizationType = regularizationType;
 }
 bool AntsParameters::checkRegularizationType(QString regularizationType)
 {
@@ -408,72 +408,5 @@ void AntsParameters::setUsingSmoothedMask(bool usingSmoothedMask)
 bool AntsParameters::getUsingSmoothedMask()
 {
    return m_usingSmoothedMask; 
-}
-
-QString AntsParameters::getImageMetricFlag(QString imageMetric)
-{
-   if(imageMetric.compare("CC", Qt::CaseInsensitive) || imageMetric.compare("Cross-Correlation", Qt::CaseInsensitive) || imageMetric.compare("Cross Correlation", Qt::CaseInsensitive))
-   {
-      return "CC";
-   }
-
-   if(imageMetric.compare("MI", Qt::CaseInsensitive) || imageMetric.compare("Mutual Information", Qt::CaseInsensitive))
-   {
-      return "MI";
-   }
-
-   if(imageMetric.compare("PR", Qt::CaseInsensitive) || imageMetric.compare("Probability Mapping", Qt::CaseInsensitive))
-   {
-      return "PR";
-   }
-
-   if(imageMetric.compare("MSD", Qt::CaseInsensitive) || imageMetric.compare("Mean Square Difference", Qt::CaseInsensitive))
-   {
-      return "MSD";
-   }
-
-   return NULL;
-} 
-
-
-QString AntsParameters::getTransformationTypeFlag(QString transformationType)
-{
-   if(transformationType.compare("SyN", Qt::CaseInsensitive) || transformationType.compare("Symmetric Normalization", Qt::CaseInsensitive))
-   {
-      return "SyN";
-   }
-
-   if(transformationType.compare("Diff", Qt::CaseInsensitive) || transformationType.compare("Diffeomorphic", Qt::CaseInsensitive))
-   {
-      return "Diff";
-   }
-
-   if(transformationType.compare("Elast", Qt::CaseInsensitive) || transformationType.compare("Elastic", Qt::CaseInsensitive))
-   {
-      return "Elast";
-   }
-
-   if(transformationType.compare("Exp", Qt::CaseInsensitive) || transformationType.compare("Exponential Diff", Qt::CaseInsensitive))
-   {
-      return "Exp";
-   }
-   
-   return NULL;
-}
-
-
-QString AntsParameters::getRegularizationTypeFlag(QString regularizationType)
-{
-   if(regularizationType.compare("Gauss", Qt::CaseInsensitive) || regularizationType.compare("Gaussian", Qt::CaseInsensitive))
-   {
-      return "Gauss";
-   }
-
-   if(regularizationType.compare("DMFFD", Qt::CaseInsensitive) || regularizationType.compare("Directly Manipulated", Qt::CaseInsensitive))
-   {
-      return "DMFFD";
-   }
-   
-   return NULL;
 }
 

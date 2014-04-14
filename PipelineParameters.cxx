@@ -76,9 +76,6 @@ PipelineParameters::PipelineParameters()
    m_numberOfCores_default = 1;
    m_numberOfCores = m_numberOfCores_default;
 
-   m_debug_default = false; 
-   m_debug = m_debug_default; 
-
    m_antsParameters = new AntsParameters(); 
 
    m_neosegParameters = new NeosegParameters(); 
@@ -211,7 +208,7 @@ QString PipelineParameters::getOutput()
 // T1
 bool PipelineParameters::checkT1(QString T1) 
 {
-   return (QFile(T1)).exists();
+   return (QFileInfo(T1)).isFile();
 }
 void PipelineParameters::setT1(QString T1)
 {
@@ -406,6 +403,8 @@ bool PipelineParameters::checkAtlas(QString atlas)
 }
 void PipelineParameters::initializeAtlasPopulation() 
 {
+   m_atlasPopulation.clear(); 
+
    QStringList::const_iterator it;
 
    for (it = m_selectedAtlases.constBegin(); it != m_selectedAtlases.constEnd(); ++it) 
@@ -436,6 +435,8 @@ void PipelineParameters::initializeAtlasPopulation()
          atlas.csf=(atlasFiles["csf"])[0].filePath();
          atlas.probabilistic=1;
       }
+
+      //atlas.log = QDir(atlas_path).filePath(atlas.name + ".log");
 
       m_atlasPopulation.push_back(atlas);
    } 
@@ -673,16 +674,6 @@ int PipelineParameters::getNumberOfCores()
    return m_numberOfCores;
 }
 
-// Debug 
-void PipelineParameters::setDebug(bool debug)
-{
-   m_debug = debug;
-}
-bool PipelineParameters::getDebug()
-{
-   return m_debug;
-}
-
 // ANTS Parameters
 AntsParameters* PipelineParameters::getAntsParameters()
 {
@@ -714,6 +705,57 @@ QString PipelineParameters::getSegmentation()
    }
 }
 
+QString PipelineParameters::checkImages()
+{
+   QString errors; 
 
+   if(m_T1.isEmpty())
+   {
+      errors += "You cannot run the pipeline without a T1\n";
+   }
+
+   if(m_T2.isEmpty())
+   {
+      errors += "You cannot run the pipeline without a T2\n";
+   }
+
+   if(m_mask.isEmpty())
+   {
+      errors += "You cannot run the pipeline without a mask\n"; 
+   }
+
+   if(m_DWI.isEmpty())
+   {
+      if(m_includingFA)
+      {
+         errors += "You cannot include the FA in the probability maps without a DWI\n"; 
+      }
+      if(m_neosegParameters->getUsingFA())
+      {
+         errors += "You cannot use the FA in Neoseg without a DWI\n"; 
+      }
+      if(m_neosegParameters->getUsingAD())
+      {
+         errors += "You cannot use the AD in Neoseg without a DWI\n"; 
+      }      
+   }
+
+   if(m_b0.isEmpty())
+   {
+      if(m_includingFA)
+      {
+         errors += "You cannot include the FA in the probability maps without a b0\n"; 
+      }
+      if(m_neosegParameters->getUsingFA())
+      {
+         errors += "You cannot use the FA in Neoseg without a b0\n"; 
+      }
+      if(m_neosegParameters->getUsingAD())
+      {
+         errors += "You cannot use the AD in Neoseg without a b0\n"; 
+      }      
+   }
+   return errors;
+}
 
 

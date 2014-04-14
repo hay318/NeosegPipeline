@@ -181,10 +181,6 @@ class PipelineParameters
    void setNumberOfCores(int NumberOfCores); 
    int getNumberOfCores();
 
-   // Debug 
-   void setDebug(bool debug);
-   bool getDebug();
-
    // ANTS Parameters 
    AntsParameters* getAntsParameters();  
 
@@ -197,6 +193,8 @@ class PipelineParameters
    // Segmentation
    QString getSegmentation(); 
 
+
+   QString checkImages();
 
    private:
 
@@ -302,10 +300,6 @@ class PipelineParameters
    int m_numberOfCores_max;
    int m_numberOfCores_default;
    int m_numberOfCores;
-
-   // Debug 
-   bool m_debug_default; 
-   bool m_debug; 
    
    // ANTS Parameters 
    AntsParameters* m_antsParameters;

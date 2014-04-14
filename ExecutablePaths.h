@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <vector>
-#include <map>
 
 #include <QString>
 #include <QDir>
@@ -11,8 +10,8 @@
 #include <QFileInfo>
 #include <QFileInfoListIterator>
 #include <QProcessEnvironment>
+#include <QMap>
 
-//#include <itksys/SystemTools.hxx> // for findProgramm
 
 class ExecutablePaths
 {
@@ -32,11 +31,13 @@ class ExecutablePaths
 
    QString findExecutablePath(QStringList splitPath, QString executableName);
   
+   QString checkExecutables();
+
    private: 
 
    QString m_currentDirectory; 
 
-   std::map<QString, QString> m_executables; 
+   QMap<QString, QString> m_executables; 
 
    QStringList m_splitPath;
 };

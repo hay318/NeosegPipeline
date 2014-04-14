@@ -81,33 +81,27 @@ void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
    m_script += "\tinitializeLogging(log)\n";
    m_script += "\tinitializeParallelLogging(log)\n\n";
 
-   m_log = "' + name + ' Registration"; 
-
-   QString finalT1 = "' + outbase + '-T1.nrrd";
-   QString finalT2 = "' + outbase + '-T2.nrrd";
-
-   m_outputs.insert("finalT1", finalT1); 
-   m_outputs.insert("finalT2", finalT2);
+   m_script += "\tfinalT1 = outbase + '-T1.nrrd'\n";
+   m_script += "\tfinalT2 = outbase + '-T2.nrrd'\n";
 
    if(probabilistic)
    {
-      QString finalWhite = "' + outbase + '-white.nrrd";
-      QString finalGray = "' + outbase + '-gray.nrrd";
-      QString finalCsf = "' + outbase + '-csf.nrrd";
-
-      m_outputs.insert("finalWhite", finalWhite);
-      m_outputs.insert("finalGray", finalGray);
-      m_outputs.insert("finalCsf", finalCsf);
+      m_script += "\tfinalWhite = outbase + '-white.nrrd'\n";
+      m_script += "\tfinalGray = outbase + '-gray.nrrd'\n";
+      m_script += "\tfinalCsf = outbase + '-csf.nrrd'\n";
+      m_script += "\tif checkFileExistence(finalT1)==True or checkFileExistence(finalT2) or checkFileExistence(finalWhite) or checkFileExistence(finalGray) or checkFileExistence(finalCsf) :\n";
    }
    else
    {
-      QString finalSeg = "' + outbase + '-seg.nrrd";
-      m_outputs.insert("finalSeg", finalSeg);
+      m_script += "\tfinalSeg = outbase + '-csf.nrrd'\n";
+      m_script += "\tif checkFileExistence(finalT1)==True or checkFileExistence(finalT2) or checkFileExistence(finalSeg) :\n";
    }
 
-   checkFinalOutputs();
+   m_script += "\t\tprint( name + ' Registration -> Skipped')\n";
+   m_script += "\t\treturn\n";
 
-   m_script += "\tlogger.info(' - ' + name + ' Registration')\n\n";   
+
+   m_script += "\tprint( name + ' Registration...')\n\n";   
 
    m_script += "\tT1 = '" + m_neo.T1 + "'\n";
    m_script += "\tT2 = '" + m_neo.T2 + "'\n";  
