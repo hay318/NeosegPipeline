@@ -67,6 +67,7 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void checkSelectedAtlases();
 
    // Parameter
+   void setData();
    void setParameters(); 
    void setExecutables();
 

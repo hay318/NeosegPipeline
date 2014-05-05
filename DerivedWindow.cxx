@@ -122,6 +122,7 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    connect(displayResults_button, SIGNAL(clicked()), this, SLOT(displayResults())); 
    
 
+   stopPipeline_action->setEnabled(false);
 
    newAtlas_radioButton->setChecked(true);
    existingAtlas_widget->hide();
@@ -313,10 +314,10 @@ void DerivedWindow::createOutput(QString output)
          }
          break;
       case QMessageBox::No:
-         output_lineEdit->clear();
+         //output_lineEdit->clear();
          break;
       case QMessageBox::Cancel:
-         output_lineEdit->clear();
+         //output_lineEdit->clear();
          break;
    }
 }
@@ -756,7 +757,7 @@ void DerivedWindow::initializeParameters()
 }
 
 
-void DerivedWindow::setParameters()
+void DerivedWindow::setData()
 {
    // Input
    m_parameters->setT1(T1_lineEdit->text());
@@ -773,8 +774,10 @@ void DerivedWindow::setParameters()
       createOutput(output_lineEdit->text()); 
    }
    m_parameters->setOutput(output_lineEdit->text()); 
+}
 
-
+void DerivedWindow::setParameters()
+{
    //Atlas Population 
    if (newAtlas_radioButton->isChecked()) 
    {
@@ -864,7 +867,11 @@ void DerivedWindow::setParameters()
    m_neosegParameters->setInitialParzenKernelWidth(initialParzenKernelWidth_spinBox->value());
 
    m_parameters->setComputing3LabelsSeg(computing3LabelsSeg_checkBox->isChecked());
+   m_parametersSet = true;
+}
 
+void DerivedWindow::setExecutables()
+{
    // Executables
    m_executables->setExecutablePath("SegPostProcessCLP", SegPostProcessCLP_lineEdit->text()); 
    m_executables->setExecutablePath("N4ITKBiasFieldCorrection", N4ITKBiasFieldCorrection_lineEdit->text()); 
@@ -876,21 +883,12 @@ void DerivedWindow::setParameters()
    m_executables->setExecutablePath("ResampleVolume2", ResampleVolume2_lineEdit->text()); 
    m_executables->setExecutablePath("ImageMath", ImageMath_lineEdit->text()); 
    m_executables->setExecutablePath("InsightSNAP", InsightSNAP_lineEdit->text()); 
-
-   m_parametersSet = true;
-}
-
-void DerivedWindow::setExecutables()
-{
    m_executablesSet = true;
 }
 
 void DerivedWindow::saveParameters()
 {
-   if(!m_parametersSet)
-   {
-      setParameters();
-   }
+   setParameters();
 
    QString parameters_path = QFileDialog::getSaveFileName(this, "Save file", "parameters.xml", "XML files (*.xml)");
 
@@ -901,10 +899,7 @@ void DerivedWindow::saveParameters()
 
 void DerivedWindow::saveExecutables()
 {
-   if(!m_executablesSet)
-   {
-      setExecutables();
-   }
+   setExecutables();
 
    QString executables_path = QFileDialog::getSaveFileName(this, "Save file", "executables.xml", "XML files (*.xml)");
 
@@ -970,7 +965,9 @@ void DerivedWindow::setParametersWidgetEnabled(bool enabled)
 
 void DerivedWindow::runPipeline()
 {
+   setData();
    setParameters();
+   setExecutables();
 
    QString imagesErrors = m_parameters->checkImages(); 
    QString executablesErrors = m_executables->checkExecutables(); 
@@ -1114,6 +1111,7 @@ void DerivedWindow::printPipelineLog(QString log_path)
 
 void DerivedWindow::printRegistrationLog(QString log_path)
 {  
+
    QString atlas_name = (QFileInfo(log_path).absoluteDir()).dirName(); 
    Logging logging = m_registrationLoggings[atlas_name];
    QTextStream* log_textStream = logging.textStream;
@@ -1123,12 +1121,12 @@ void DerivedWindow::printRegistrationLog(QString log_path)
 
    if(scrollBar->value() == scrollBar->maximum())
    {
-      log_plainTextEdit->insertPlainText((m_log_textStream->readAll()));
+      log_plainTextEdit->insertPlainText((log_textStream->readAll()));
       scrollBar->setValue(scrollBar->maximum());
    }
    else
    {
-      log_plainTextEdit->insertPlainText((m_log_textStream->readAll()));
+      log_plainTextEdit->insertPlainText((log_textStream->readAll()));
    }
 }
 

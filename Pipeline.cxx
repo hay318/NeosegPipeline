@@ -99,6 +99,7 @@ void Pipeline::writeAtlasRegistration()
    m_atlasRegistration->setNeo(m_parameters->getNeo());
    m_atlasRegistration->setSuffix(m_parameters->getSuffix()); 
    m_atlasRegistration->setProcessingDirectory(m_processing_path);
+   m_atlasRegistration->setLog(m_log_path);
    m_atlasRegistration->setAntsParameters(m_parameters->getAntsParameters()); 
    m_atlasRegistration->setExecutablePaths(m_parameters->getExecutablePaths());
    m_atlasRegistration->setOverwriting(m_parameters->getOverwriting());
@@ -223,10 +224,7 @@ void Pipeline::defineSignalHandler()
 
 void Pipeline::initializeLogging()
 {
-   QDir* output_dir = new QDir(m_parameters->getOutput());
-   QString log_path = output_dir->filePath((m_parameters->getNeo()).prefix + ".log");   
-
-   m_script += "log = \"" + log_path + "\"\n";
+   m_script += "log = \"" + m_log_path + "\"\n";
    m_script += "logFile = open(log, \"w\") \n\n";
 
    m_script += "logger = logging.getLogger('NeosegPipeline')\n"; 
@@ -329,6 +327,9 @@ void Pipeline::writePipeline()
    m_parameters->initializeNeo(); 
    m_parameters->initializeAtlasPopulation(); 
 
+   QDir* output_dir = new QDir(m_parameters->getOutput());
+   m_log_path = output_dir->filePath((m_parameters->getNeo()).prefix + ".log"); 
+
    writePreProcessingData();
    writeDTIRegistration(); 
 
@@ -337,7 +338,6 @@ void Pipeline::writePipeline()
       writeAtlasRegistration();
       writeAtlasPopulationRegistration();
       writeAtlasGeneration();
-      std::cout<<"6"<<std::endl;
    }
 
    writeNeosegExecution();
@@ -371,7 +371,10 @@ void Pipeline::runPipeline()
       sleep(1);
    }
 
-   cleanUp();
+   if(m_mainScriptProcess->exitCode()==0)
+   {
+      cleanUp();
+   }
 }
 
 

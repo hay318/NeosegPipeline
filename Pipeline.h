@@ -11,7 +11,6 @@
 #include <sys/stat.h>
 
 // Qt Librairies
-#include <QObject>
 #include <QDir>
 #include <QStringList>
 #include <QProcess>
@@ -28,13 +27,15 @@
 #include "NeosegExecution.h"
 
 
-class Pipeline : public QObject
+class Pipeline
 {
 
    public:
 
    // Constructor
    Pipeline();
+
+   // Destructor
    ~Pipeline(); 
 
    // Parameters
@@ -44,9 +45,6 @@ class Pipeline : public QObject
    // Process
    QProcess* getMainScriptProcess();
 
-   // Save Configuration //
-   void saveConfiguration(QString xml_path);  // to delete
-
    // Write Pipeline 
    void writePipeline(); 
 
@@ -55,23 +53,33 @@ class Pipeline : public QObject
 
    private: 
 
+   // Create Directories
    void createProcessingDirectory();
    QString createModuleDirectory(QString directory_name);
 
-   void initializeMainScript();
-   void initializeLogging();
-   void defineSignalHandler();
+   // Write Neoseg Pipeline Steps
    void writePreProcessingData();
    void writeAtlasRegistration();
    void writeAtlasPopulationRegistration();
    void writeDTIRegistration();   
    void writeAtlasGeneration();
    void writeNeosegExecution();
+
+   // Write Main Script 
+   void initializeMainScript();
+   void initializeLogging();
+   void defineSignalHandler();
    void writeMainScript();
    void executeMainScript();
    void copySegmentations();
+   
+   // Clean-Up
    void cleanUp(); 
 
+
+
+
+   // Neoseg Pipeline Steps
    PreProcessingData* m_preProcessingData;
    DtiRegistration* m_dtiRegistration; 
    AtlasRegistration* m_atlasRegistration; 
@@ -89,6 +97,8 @@ class Pipeline : public QObject
    QString m_runningModules;
 
    QString m_main_path;
+
+   QString m_log_path; 
 
    // QProcess
    QProcess* m_mainScriptProcess;

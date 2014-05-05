@@ -30,6 +30,7 @@ class AtlasRegistration : public Script
    AtlasRegistration(QString module);
 
    // Set // 
+   void setLog(QString log_path); 
    void setAntsParameters(AntsParameters* ANTSParamaters);
 
    // Scripts //
@@ -47,6 +48,9 @@ class AtlasRegistration : public Script
 
 
    private:
+
+   // Log Path 
+   QString m_log_path; 
 
    // Input // 
    AntsParameters*         m_parameters;

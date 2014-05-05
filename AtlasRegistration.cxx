@@ -6,6 +6,10 @@ AtlasRegistration::AtlasRegistration(QString module) : Script(module)
 }
 
 // SET // 
+void AtlasRegistration::setLog(QString log_path)
+{
+   m_log_path = log_path; 
+}
 void AtlasRegistration::setAntsParameters(AntsParameters* parameters) 
 {
    m_parameters=parameters;
@@ -20,7 +24,6 @@ void AtlasRegistration::initializeScript()
    defineExecutable("ResampleVolume2");
  
    m_script += "logger = None\n";
-   m_script += "parallelLogger = None\n";
 
    m_script += "runningProcess = None\n";  
    m_script += "logFile = None\n\n";  
@@ -28,39 +31,18 @@ void AtlasRegistration::initializeScript()
 
 void AtlasRegistration::initializeLogging()
 {
-   m_script += "def initializeParallelLogging(log):\n";
-
-   m_script += "\tglobal parallelLogger\n";   
-   m_script += "\tparallelLogger = logging.getLogger('NeosegPipelineRegistrations')\n"; 
-   m_script += "\tparallelLogger.setLevel(logging.DEBUG)\n";
-
-   m_script += "\tfileHandler = logging.FileHandler(log)\n";
-   m_script += "\tfileHandler.setLevel(logging.DEBUG)\n";
-   m_script += "\tfileFormatter = logging.Formatter('%(message)s')\n";
-   m_script += "\tfileHandler.setFormatter(fileFormatter)\n";
-
-   m_script += "\tparallelLogger.addHandler(fileHandler)\n\n";
-
-   m_logger_execute = "parallelLogger";
-
    m_script += "def initializeLogging(log):\n";
 
    m_script += "\tglobal logger\n";   
-   m_script += "\tlogger = logging.getLogger('NeosegPipeline')\n"; 
+   m_script += "\tlogger = logging.getLogger('NeosegPipelineRegistrations')\n"; 
    m_script += "\tlogger.setLevel(logging.DEBUG)\n";
 
    m_script += "\tfileHandler = logging.FileHandler(log)\n";
    m_script += "\tfileHandler.setLevel(logging.DEBUG)\n";
    m_script += "\tfileFormatter = logging.Formatter('%(message)s')\n";
    m_script += "\tfileHandler.setFormatter(fileFormatter)\n";
-   
-   m_script += "\tconsoleHandler = logging.StreamHandler()\n";
-   m_script += "\tconsoleHandler.setLevel(logging.INFO)\n";
-   m_script += "\tconsoleFormatter = logging.Formatter('[%(levelname)s]  %(message)s')\n";
-   m_script += "\tconsoleHandler.setFormatter(consoleFormatter)\n";
 
-   m_script += "\tlogger.addHandler(fileHandler)\n";
-   m_script += "\tlogger.addHandler(consoleHandler)\n\n";
+   m_script += "\tlogger.addHandler(fileHandler)\n\n";
 }
 
 void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
@@ -79,7 +61,6 @@ void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
 
    m_script += "\tlogFile = open(log, \"w\")\n";
    m_script += "\tinitializeLogging(log)\n";
-   m_script += "\tinitializeParallelLogging(log)\n\n";
 
    m_script += "\tfinalT1 = outbase + '-T1.nrrd'\n";
    m_script += "\tfinalT2 = outbase + '-T2.nrrd'\n\n";
@@ -97,11 +78,14 @@ void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
       m_script += "\tif checkFileExistence(finalT1)==True or checkFileExistence(finalT2) or checkFileExistence(finalSeg) :\n";
    }
 
-   m_script += "\t\tprint( name + ' Registration -> Skipped')\n";
-   m_script += "\t\treturn\n";
+   m_script += "\t\tmainLog = open('" + m_log_path + "','w')\n"; 
+   m_script += "\t\tmainLog.write(name + ' Registration -> Skipped\\n')\n"; 
+   m_script += "\t\tmainLog.close()\n";  
+   m_script += "\t\treturn\n"; 
 
-
-   m_script += "\tprint( name + ' Registration...')\n\n";   
+   m_script += "\tmainLog = open('" + m_log_path + "','a')\n"; 
+   m_script += "\tmainLog.write(name + ' Registration...\\n')\n"; 
+   m_script += "\tmainLog.close()\n";  
 
    m_script += "\tT1 = '" + m_neo.T1 + "'\n";
    m_script += "\tT2 = '" + m_neo.T2 + "'\n";  

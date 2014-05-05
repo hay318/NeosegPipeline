@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>762</width>
-    <height>870</height>
+    <width>717</width>
+    <height>882</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -242,7 +242,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabs">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="Data">
        <attribute name="title">
@@ -2405,7 +2405,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>762</width>
+     <width>717</width>
      <height>22</height>
     </rect>
    </property>
