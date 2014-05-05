@@ -21,7 +21,7 @@ class ExecutablePaths
 
    void setProgramPath(QString programPath);
 
-   bool checkExecutablePath(QString path);
+   bool checkExecutablePath(QString name, QString path);
 
    void setExecutablePath(QString name, QString path); 
    QString getExecutablePath(QString name); 
@@ -40,6 +40,12 @@ class ExecutablePaths
    QMap<QString, QString> m_executables; 
 
    QStringList m_splitPath;
+
+   QStringList m_executables_withVersionLongFlag; 
+   QStringList m_executables_withVersionShortFlag; 
+   QStringList m_executables_withVersionArgument; 
+   QStringList m_executables_withoutVersionFlag; 
+
 };
 
 #endif

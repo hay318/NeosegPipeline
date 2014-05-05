@@ -699,7 +699,7 @@ QString XmlReader::readExecutablesConfigurationFile(QString file_path)
                QString name = (stream->name()).toString(); 
                QString path = (attributes.value("path")).toString(); 
 
-               if(m_executablePaths->checkExecutablePath(path))
+               if(m_executablePaths->checkExecutablePath(name, path))
                {
                   m_executablePaths->setExecutablePath(name, path);    
                }
