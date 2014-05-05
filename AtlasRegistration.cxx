@@ -82,7 +82,7 @@ void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
    m_script += "\tinitializeParallelLogging(log)\n\n";
 
    m_script += "\tfinalT1 = outbase + '-T1.nrrd'\n";
-   m_script += "\tfinalT2 = outbase + '-T2.nrrd'\n";
+   m_script += "\tfinalT2 = outbase + '-T2.nrrd'\n\n";
 
    if(probabilistic)
    {
@@ -105,7 +105,7 @@ void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
 
    m_script += "\tT1 = '" + m_neo.T1 + "'\n";
    m_script += "\tT2 = '" + m_neo.T2 + "'\n";  
-
+   
    QString modality1 = "CC[' + T1 + ',' + T1Atlas + '," + QString::number(m_parameters->getWeight1()) + "," + QString::number(m_parameters->getRadius1()) + "]";
    QString modality2 = "CC[' + T2 + ',' + T2Atlas + '," + QString::number(m_parameters->getWeight2()) + "," + QString::number(m_parameters->getRadius2()) + "]";
    QString iterations = QString::number(m_parameters->getIterationsJ()) + "x" + QString::number(m_parameters->getIterationsK()) + "x" + QString::number(m_parameters->getIterationsL());
@@ -118,8 +118,10 @@ void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
 
    m_log = "Calculating transformations";
    m_inputs.insert("mask", m_neo.mask);
-   m_inputs.insert("modality1", modality1);
-   m_inputs.insert("modality2", modality2);
+   m_inputs.insert("modality1", modality1); 
+   m_inputsTests.insert("modality1", "T1Atlas");
+   m_inputs.insert("modality2", modality2); 
+   m_inputsTests.insert("modality2", "T2Atlas");
    m_inputs.insert("iterations", iterations); 
    m_inputs.insert("transformation", transformation);
    m_inputs.insert("regularization", regularization);  
@@ -127,6 +129,15 @@ void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
    m_outputs.insert("affine", affine);
    m_outputs.insert("warp", warp);  
    m_argumentsList << "ANTS" << "'3'" << "'-m'" << "modality1" << "'-m'" << "modality2" << "'-o'" << "output" << "'-i'" << "iterations" << "'-t'" << "transformation" << "'-r'" << "regularization" << "'-x'" << "mask"; 
+
+   QStringList argsTests_T1; 
+   argsTests_T1 << "ANTS" << "'3'" << "'-m'" << "modality2" << "'-o'" << "output" << "'-i'" << "iterations" << "'-t'" << "transformation" << "'-r'" << "regularization" << "'-x'" << "mask"; 
+   m_argsTests.insert("T1Atlas", argsTests_T1); 
+
+   QStringList argsTests_T2; 
+   argsTests_T2 << "ANTS" << "'3'" << "'-m'" << "modality1" << "'-o'" << "output" << "'-i'" << "iterations" << "'-t'" << "transformation" << "'-r'" << "regularization" << "'-x'" << "mask"; 
+   m_argsTests.insert("T2Atlas", argsTests_T2); 
+
    execute(); 
 
    // Normalizing affine file
@@ -138,6 +149,7 @@ void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
    QString T1Reg = "' + outbase + '-T1.nrrd";
 
    m_log = "Applying transformations to T1";
+   m_test = "T1Atlas";
    m_outputs.insert("T1Reg", T1Reg); 
    m_argumentsList << "ResampleVolume2" << "T1Atlas" << "T1Reg" << "'--Reference'" << "T2" << "'-i'" << "'bs'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
    execute();
@@ -146,6 +158,7 @@ void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
    QString T2Reg = "' + outbase + '-T2.nrrd";
 
    m_log = "Applying transformations to T2";
+   m_test = "T2Atlas";
    m_outputs.insert("T2Reg", T2Reg); 
    m_argumentsList << "ResampleVolume2" << "T2Atlas" << "T2Reg" << "'--Reference'" << "T2" << "'-i'" << "'bs'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
    execute(); 

@@ -8,6 +8,14 @@ void NeosegExecution::setAtlas(QString atlas)
 {
    m_atlas = atlas;
 }
+void NeosegExecution::setUsingFA(bool usingFA)
+{
+   m_usingFA = usingFA;
+}
+void NeosegExecution::setUsingAD(bool usingAD)
+{
+   m_usingAD = usingAD;
+}
 void NeosegExecution::setNeosegParameters(NeosegParameters* parameters)
 {
    m_parameters = parameters;
@@ -16,26 +24,13 @@ void NeosegExecution::setComputing3LabelsSeg(bool computing3LabelsSeg)
 {
    m_computing3LabelsSeg = computing3LabelsSeg;
 }
-
-void NeosegExecution::defineSegmentation()
+void NeosegExecution::setReassigningWhiteMatter(bool reassigningWhiteMatter)
 {
-   QFileInfo* T2 = new QFileInfo(m_neo.T2);
-   QString segmentation_name = T2->baseName() + "_EMonly_labels_" + m_prefix + ".nrrd"; 
-   m_segmentation = m_module_dir->filePath(segmentation_name);
+   m_reassigningWhiteMatter = reassigningWhiteMatter;
 }
-
-bool NeosegExecution::checkSegmentation()
+void NeosegExecution::setSizeThreshold(int sizeThreshold)
 {
-   QFile* segmentation_file = new QFile (m_segmentation);
-   
-   if ( segmentation_file->exists() )
-   {
-      return true;
-   }  
-   else
-   {
-      return false; 
-   }
+   m_sizeThreshold = sizeThreshold;
 }
 
 void NeosegExecution::initializeScript()
@@ -46,6 +41,7 @@ void NeosegExecution::initializeScript()
   
    defineExecutable("ImageMath");
    defineExecutable("neoseg");
+   defineExecutable("ReassignWhiteMatter"); 
 
    m_script += "logger = logging.getLogger('NeosegPipeline')\n\n";
 
@@ -115,14 +111,14 @@ void NeosegExecution::writeXMLFile()
    addSubElement(m_script,"T1", "T1File", "FILE", m_neo.T1);   
    addSubElement(m_script,"T1", "T1Orientation", "ORIENTATION", "RAI");
  
-   if(m_parameters->getUsingFA())
+   if(m_usingFA)
    {
       m_script += "\t\tFA = SubElement(segmentationParameters, 'IMAGE')\n";
       addSubElement(m_script,"FA", "FAFile", "FILE", m_neo.FA);   
       addSubElement(m_script,"FA", "FAOrientation", "ORIENTATION", "RAI"); 
    }
 
-   if(m_parameters->getUsingAD())
+   if(m_usingAD)
    {
       m_script += "\t\tAD = SubElement(segmentationParameters, 'IMAGE')\n";
       addSubElement(m_script,"AD", "ADFile", "FILE", m_neo.AD);   
@@ -204,7 +200,7 @@ void NeosegExecution::writeAffineTranformationFiles()
    m_script += "\tif checkFileExistence(T2ToT1)==False:\n";  
    m_script += "\t\twriteAffineTransformationFile(T2ToT1)\n\n";
 
-   if(m_parameters->getUsingFA())
+   if(m_usingFA)
    {
       QString FA_name = (QFileInfo(m_neo.FA)).baseName(); 
 
@@ -216,7 +212,7 @@ void NeosegExecution::writeAffineTranformationFiles()
       m_script += "\t\twriteAffineTransformationFile(T2ToFA)\n\n";
    }
 
-   if(m_parameters->getUsingAD())
+   if(m_usingAD)
    {
       QString AD_name = (QFileInfo(m_neo.AD)).baseName(); 
 
@@ -342,6 +338,59 @@ void NeosegExecution::mergeWhiteMatters()
    m_neo.seg3Labels = seg3Labels_path;
 }
 
+void NeosegExecution::reassignWhiteMatter()
+{
+   QString m_XML_path = m_module_dir->filePath("parameters_reassignWhiteMatter.xml");
+   m_script += "\tparameters_path = \"" + m_XML_path + "\"\n"; 
+
+   m_script += "\tif checkFileExistence(parameters_path)==False:\n";   
+   m_script += "\t\tlogger.info('- Writing the XML file...')\n";
+
+   m_script += "\t\tparameters = Element('REASSIGN-WHITE-MATTER-PARAMETERS')\n";
+
+   addSubElement(m_script, "parameters", "Input", "INPUT", m_neo.seg3Labels);
+
+   addSubElement(m_script, "parameters", "Threshold", "THRESHOLD", QString::number(m_sizeThreshold));
+
+   m_script += "\t\tprobabilityMaps = SubElement(parameters, 'PROBABILITY-MAPS')\n";
+   QString white = QDir(m_atlas).filePath("white.nrrd");
+   addSubElement(m_script, "probabilityMaps", "white", "WHITE", white);
+   QString gray = QDir(m_atlas).filePath("gray.nrrd");
+   addSubElement(m_script, "probabilityMaps", "gray", "GRAY", gray);
+   QString csf = QDir(m_atlas).filePath("csf.nrrd");
+   addSubElement(m_script, "probabilityMaps", "csf", "CSF", csf);
+
+   QString output_name; 
+   if(m_computing3LabelsSeg)
+   {
+      output_name = m_prefix + "seg-3labels-WMReassigned" + m_suffix + ".nrrd"; 
+   }
+   else
+   {
+      output_name = m_prefix + "seg-4labels-WMReassigned" + m_suffix + ".nrrd"; 
+   }
+   QString output = m_module_dir->filePath(output_name); 
+   addSubElement(m_script, "parameters", "Output", "OUTPUT", output);
+
+   m_script += "\t\tXML = xml.dom.minidom.parseString(ElementTree.tostring(parameters))\n";
+   m_script += "\t\tpretty_xml_as_string = XML.toprettyxml()\n";
+
+   m_script += "\t\tparameters = open(parameters_path, 'w')\n";
+   m_script += "\t\tparameters.write(pretty_xml_as_string)\n";  
+   m_script += "\t\tparameters.close()\n";
+   
+   m_script += "\telse:\n";
+   m_script += "\t\tlogger.info('- Writing the XML file : Done ')\n";
+
+
+   m_log = "- Reassigning white matter";
+   m_outputs.insert("seg_WMReassigned", output);
+   m_argumentsList << "ReassignWhiteMatter" << "parameters_path";
+   execute(); 
+   m_unnecessaryFiles << m_XML_path;
+
+}
+
 void NeosegExecution::implementRun()
 {
    m_script += "def run():\n";
@@ -350,11 +399,23 @@ void NeosegExecution::implementRun()
    m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
 
    m_script += "\tlogger.info('=== Neoseg Execution ===')\n";
+   
+   QString seg_name;  
+   if(m_computing3LabelsSeg && m_reassigningWhiteMatter)
+   {
+      seg_name = m_prefix + "3Labels-WMReassigned" + m_suffix + ".nrrd";
+   }
+   if(m_computing3LabelsSeg && !m_reassigningWhiteMatter)
+   {
+      seg_name = m_prefix + "3Labels" + m_suffix + ".nrrd";
+   }
+   if(!m_computing3LabelsSeg && m_reassigningWhiteMatter)
+   {
+      seg_name = m_prefix + "WMReassigned" + m_suffix + ".nrrd";
+   }
+   QString seg_path = m_module_dir->filePath(seg_name); 
 
-   QString seg3Labels_name = m_prefix + "seg-3Labels" + m_suffix + ".nrrd";
-   QString seg3Labels_path = m_module_dir->filePath(seg3Labels_name); 
-
-   m_outputs.insert("finalSeg", seg3Labels_path); 
+   m_outputs.insert("finalSeg", seg_path); 
    checkFinalOutputs();
 
    m_script += "\tlogger.debug('')\n\n";
@@ -373,6 +434,13 @@ void NeosegExecution::implementRun()
       m_script += "\t# Merge White Matters #\n";
       mergeWhiteMatters();
    }
+
+   if(m_reassigningWhiteMatter)
+   {
+      m_script += "\t# Reassign White Matter #\n";
+      reassignWhiteMatter(); 
+   }
+
 } 
 
 void NeosegExecution::update()

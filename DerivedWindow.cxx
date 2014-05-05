@@ -121,20 +121,22 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    // Display Results  
    connect(displayResults_button, SIGNAL(clicked()), this, SLOT(displayResults())); 
    
+
+
    newAtlas_radioButton->setChecked(true);
    existingAtlas_widget->hide();
 
    runPipeline_progressBar->hide(); 
 
    displayResults_button->setEnabled(false);
+   displayResults_action->setEnabled(false);
+
    stopPipeline_button->setEnabled(false);
 
    pipeline_radioButton->setEnabled(false);  
    registrations_radioButton->setEnabled(false);
    registrations_comboBox->setEnabled(false); 
 
-   //QApplication::sendPostedEvents(this, QEvent::LayoutRequest);  
-   //tabs->adjustSize();
    this->adjustSize();
 
 }
@@ -157,6 +159,11 @@ void DerivedWindow::setMainScriptThread(MainScriptThread* thread)
 {
    m_thread = thread;
    connect(m_thread, SIGNAL(finished()), this, SLOT(enableDisplayButton()));
+}
+
+void DerivedWindow::printErrors(QString errors)
+{
+   QMessageBox::critical(this, "Errors in XML file(s)", errors);   
 }
 
 void DerivedWindow::initializeImagesMap()
@@ -221,7 +228,16 @@ void DerivedWindow::selectImage(QString image_name)
 {
    Image image = m_images_map[image_name]; 
 
-	QString image_path = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
+   QString image_path = (image.enter_lineEdit)->text();
+
+   QString dir_path = ""; 
+   if(!(image_path.isEmpty()))
+   {
+      dir_path = (QFileInfo(image_path).dir()).absolutePath(); 
+   }
+
+	image_path = QFileDialog::getOpenFileName(this, "Open file", dir_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
+
    if(!image_path.isEmpty())
    {
       (image.enter_lineEdit)->setText(image_path);
@@ -255,9 +271,11 @@ void DerivedWindow::enterImage(QString image_name)
 //***** Ouput *****//
 void DerivedWindow::selectOuput()
 {
-   QString output = QFileDialog::getExistingDirectory (0, "Open Directory",m_tests_path , QFileDialog::ShowDirsOnly);
-   output_lineEdit->setText(output);
-
+   QString output = QFileDialog::getExistingDirectory (this, "Open Directory",m_tests_path , QFileDialog::ShowDirsOnly);
+   if(!(output.isEmpty()))
+   {
+      output_lineEdit->setText(output);
+   }
 }
 void DerivedWindow::enterOutput()
 {
@@ -267,34 +285,39 @@ void DerivedWindow::enterOutput()
    {
       if(!m_parameters->checkOutput(output))
       {
-         QMessageBox messageBox;
-
-         messageBox.setText(output + "does not exist,");
-         messageBox.setInformativeText("Do you want to create it?");
-         messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-         messageBox.setDefaultButton(QMessageBox::Yes);
-
-         QString output_path = QFileInfo(output).absoluteFilePath();
-         bool result;
-
-         int answer = messageBox.exec();
-         switch (answer)
-         {
-            case QMessageBox::Yes:
-               result = (QDir::root()).mkpath(output_path);
-               if(!result)
-               {
-                  QMessageBox::critical(this, "Output directory", output_path + "\n can not be created,\n Please enter a new directory path");             
-               }
-               break;
-            case QMessageBox::No:
-               output_lineEdit->clear();
-               break;
-            case QMessageBox::Cancel:
-               output_lineEdit->clear();
-               break;
-         }
+         createOutput(output); 
       }
+   }
+}
+
+void DerivedWindow::createOutput(QString output)
+{
+   QMessageBox messageBox(this);
+
+   messageBox.setText(output + " does not exist,");
+   messageBox.setInformativeText("Do you want to create it?");
+   messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+   messageBox.setDefaultButton(QMessageBox::Yes);
+
+   QString output_path = QFileInfo(output).absoluteFilePath();
+   bool result;
+
+   int answer = messageBox.exec();
+   switch (answer)
+   {
+      case QMessageBox::Yes:
+         result = (QDir::root()).mkpath(output_path);
+         if(!result)
+         {
+            QMessageBox::critical(this, "Output directory", output_path + "\n can not be created,\n Please enter a new directory path");             
+         }
+         break;
+      case QMessageBox::No:
+         output_lineEdit->clear();
+         break;
+      case QMessageBox::Cancel:
+         output_lineEdit->clear();
+         break;
    }
 }
 
@@ -357,7 +380,7 @@ void DerivedWindow::selectNewOrExistingAtlas()
 //***** Atlas Population Directory *****//
 void DerivedWindow::selectAtlasPopulationDirectory()
 {
-   QString atlasPopulationDirectory = QFileDialog::getExistingDirectory (0, "Open Directory", m_parameters->getAtlasPopulationDirectory(), QFileDialog::ShowDirsOnly);
+   QString atlasPopulationDirectory = QFileDialog::getExistingDirectory (this, "Open Directory", atlasPopulationDirectory_lineEdit->text(), QFileDialog::ShowDirsOnly);
    atlasPopulationDirectory_lineEdit->setText(atlasPopulationDirectory);
    checkAtlases();
    displayAtlases();
@@ -499,8 +522,18 @@ void DerivedWindow::enterExistingAtlas()
 //***** Parameters Configuration File *****//
 void DerivedWindow::selectParameters()
 {
-	QString parameters=QFileDialog::getOpenFileName(this, "Open file", m_data_path,"XML (*.xml)");
-   //loadParameters_lineEdit->setText(parameters);
+	QString parameters = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"XML (*.xml)");
+   if(!parameters.isEmpty())
+   {
+      XmlReader xmlReader;
+      xmlReader.setPipelineParameters(m_parameters);
+      QString parametersErrors = xmlReader.readParametersConfigurationFile(parameters); 
+
+      parametersErrors = "Errors in the parameters configuration :\n" + parametersErrors; 
+      parametersErrors += "\n";
+      parametersErrors += "All the parameters that are nor valid, are left to their default value\n";
+      QMessageBox::critical(this, "Errors in XML file", parametersErrors);   
+   }
 }
 
 
@@ -508,7 +541,17 @@ void DerivedWindow::selectParameters()
 void DerivedWindow::selectExecutables()
 {
 	QString executables = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", m_data_path,"XML (*.xml)");
-   //loadExecutables_lineEdit->setText(executables);
+   if(!executables.isEmpty())
+   {
+      XmlReader xmlReader;
+      xmlReader.setPipelineParameters(m_parameters);
+      QString executablesErrors = xmlReader.readParametersConfigurationFile(executables); 
+
+      executablesErrors = "Errors in the parameters configuration :\n" + executablesErrors; 
+      executablesErrors += "\n";
+      executablesErrors += "All the parameters that are nor valid, are left to their default value\n";
+      QMessageBox::critical(this, "Errors in XML file", executablesErrors);  
+   }
 }
 
 
@@ -517,7 +560,15 @@ void DerivedWindow::selectExecutable(QString executable_name)
 {   
    Executable executable = m_executables_map[executable_name];
 
-	QString executable_path = QFileDialog::getOpenFileName(this, "Select executable", m_data_path);
+   QString executable_path = (executable.enter_lineEdit)->text(); 
+   QString dir_path = ""; 
+
+   if(!(executable_path.isEmpty()))
+   {
+      dir_path = (QFileInfo(executable_path).dir()).absolutePath(); 
+   }
+
+	executable_path = QFileDialog::getOpenFileName(this, "Select executable", dir_path);
    if(!executable_path.isEmpty())
    {
       if(QFileInfo(executable_path).isExecutable())
@@ -557,13 +608,11 @@ void DerivedWindow::enterExecutable(QString executable_name)
 void DerivedWindow::resetExecutable(QString executable_name)
 {
    Executable executable = m_executables_map[executable_name]; 
-
-   QString defaultPath = m_executables->getDefaultExecutablePath(executable_name);
    (executable.enter_lineEdit)->setText(m_executables->getExecutablePath(executable_name));
 }
 void DerivedWindow::resetAllExecutables()
 {
-   /*resetExecutable("SegPostProcessCLP"); 
+   resetExecutable("SegPostProcessCLP"); 
    resetExecutable("N4ITKBiasFieldCorrection"); 
    resetExecutable("ITKTransformTools"); 
    resetExecutable("bet2"); 
@@ -572,7 +621,7 @@ void DerivedWindow::resetAllExecutables()
    resetExecutable("ANTS"); 
    resetExecutable("ResampleVolume2"); 
    resetExecutable("ImageMath"); 
-   resetExecutable("InsightSNAP");*/
+   resetExecutable("InsightSNAP");
 }
 
 void DerivedWindow::initializeParameters()
@@ -604,11 +653,11 @@ void DerivedWindow::initializeParameters()
   
    if(!(m_parameters->getSelectedAtlases()).empty())
    {
-      m_selectedAtlases=m_parameters->getSelectedAtlases();
+      m_selectedAtlases = m_parameters->getSelectedAtlases();
    }
    else
    {
-      m_selectedAtlases=m_goodAtlases;
+      m_selectedAtlases = m_goodAtlases;
    }
 
    checkSelectedAtlases(); 
@@ -627,6 +676,12 @@ void DerivedWindow::initializeParameters()
    includingFA_checkBox->setChecked(m_parameters->getIncludingFA()); 
    FAWeight_spinBox->setValue(m_parameters->getFAWeight());
    FASmoothingSize_spinBox->setValue(m_parameters->getFASmoothingSize());
+
+   usingFA_checkBox->setChecked(m_parameters->getUsingFA()); 
+   usingAD_checkBox->setChecked(m_parameters->getUsingAD()); 
+
+   reassigningWhite_checkBox->setChecked(m_parameters->getReassigningWhiteMatter());
+   whiteThreshold_spinBox->setValue(m_parameters->getSizeThreshold()); 
 
    overwriting_checkBox->setChecked(m_parameters->getOverwriting()); 
    cleaningUp_checkBox->setChecked(m_parameters->getCleaningUp()); 
@@ -668,9 +723,6 @@ void DerivedWindow::initializeParameters()
    //Neoseg 
    referenceModality_comboBox->insertItems(0, m_neosegParameters->getReferenceImageValues());
    referenceModality_comboBox->setCurrentIndex(m_neosegParameters->getReferenceImageIndex());
-
-   usingFA_checkBox->setChecked(m_neosegParameters->getUsingFA()); 
-   usingAD_checkBox->setChecked(m_neosegParameters->getUsingAD()); 
 
    filterMethod_comboBox->insertItems(0, m_neosegParameters->getFilterMethodValues()); 
    filterMethod_comboBox->setCurrentIndex(m_neosegParameters->getFilterMethodIndex()); 
@@ -716,7 +768,12 @@ void DerivedWindow::setParameters()
    // Output
    m_parameters->setPrefix(prefix_lineEdit->text()); 
    m_parameters->setSuffix(suffix_lineEdit->text()); 
+   if(!m_parameters->checkOutput(output_lineEdit->text()))
+   {
+      createOutput(output_lineEdit->text()); 
+   }
    m_parameters->setOutput(output_lineEdit->text()); 
+
 
    //Atlas Population 
    if (newAtlas_radioButton->isChecked()) 
@@ -740,6 +797,13 @@ void DerivedWindow::setParameters()
       m_parameters->setIncludingFA(includingFA_checkBox->isChecked()); 
       m_parameters->setFAWeight(FAWeight_spinBox->value()); 
       m_parameters->setFASmoothingSize(FASmoothingSize_spinBox->value()); 
+
+      m_parameters->setUsingFA(usingFA_checkBox->isChecked());
+      m_parameters->setUsingAD(usingAD_checkBox->isChecked());
+
+      // Reassigning White Matter
+      m_parameters->setReassigningWhiteMatter(reassigningWhite_checkBox->isChecked()); 
+      m_parameters->setSizeThreshold(whiteThreshold_spinBox->value());
    }
 
    else 
@@ -754,9 +818,8 @@ void DerivedWindow::setParameters()
    m_parameters->setStoppingIfError(stoppingIfError_checkBox->isChecked()); 
    m_parameters->setComputingSystem(computingSystem_comboBox->currentText());
    m_parameters->setNumberOfCores(numberOfCores_spinBox->value());
-   //m_parameters->setDebug(debug_checkBox->isChecked());   
 
-   
+
    //ANTS parameters 
    m_antsParameters->setImageMetric1(imageMetric1_comboBox->currentText());
    m_antsParameters->setWeight1(weight1_spinBox->value());
@@ -784,8 +847,6 @@ void DerivedWindow::setParameters()
 
    // Neoseg parameters 
    m_neosegParameters->setReferenceImage(referenceModality_comboBox->currentText()); 
-   m_neosegParameters->setUsingFA(usingFA_checkBox->isChecked());
-   m_neosegParameters->setUsingAD(usingAD_checkBox->isChecked());
 
    m_neosegParameters->setFilterMethod(filterMethod_comboBox->currentText()); 
    m_neosegParameters->setNumberOfIterations(numberOfIterations_spinBox->value());
@@ -818,7 +879,6 @@ void DerivedWindow::setParameters()
 
    m_parametersSet = true;
 }
-
 
 void DerivedWindow::setExecutables()
 {
@@ -855,12 +915,13 @@ void DerivedWindow::saveExecutables()
 
 void DerivedWindow::setParametersWidgetEnabled(bool enabled)
 {
-   // Menu 
+   // Actions 
    loadParametersConfiguration_action->setEnabled(enabled); 
    saveParametersConfiguration_action->setEnabled(enabled); 
    loadSoftwaresConfiguration_action->setEnabled(enabled); 
    saveSoftwaresConfiguration_action->setEnabled(enabled); 
-
+   runPipeline_action->setEnabled(enabled); 
+   
    // Data 
    inputs_groupBox->setEnabled(enabled);
    outputs_groupBox->setEnabled(enabled);
@@ -907,7 +968,6 @@ void DerivedWindow::setParametersWidgetEnabled(bool enabled)
    computingSystem_comboBox->setEnabled(enabled);   
 } 
 
-
 void DerivedWindow::runPipeline()
 {
    setParameters();
@@ -924,12 +984,14 @@ void DerivedWindow::runPipeline()
 
       m_pipeline->setPlainTextEdit(m_log_plainTextEdit); 
       m_thread->setPipeline(m_pipeline);
+
       m_thread->start();
 
       setParametersWidgetEnabled(false);
       runPipeline_button->setEnabled(false);
-      stopPipeline_button->setEnabled(true); 
+      stopPipeline_button->setEnabled(true);
       displayResults_button->setEnabled(false);
+      displayResults_action->setEnabled(false);
       tabs->setCurrentWidget(execution_tab);   
 
       runPipeline_progressBar->setTextVisible(false);
@@ -1111,14 +1173,17 @@ void DerivedWindow::changeExecutionPlainTextEdit(int index)
    }   
 }
 
-
 void DerivedWindow::stopPipeline()
 {
    m_thread->terminate(); 
 
    setParametersWidgetEnabled(true); 
+
    runPipeline_button->setEnabled(true);
+   runPipeline_action->setEnabled(true);
+
    stopPipeline_button->setEnabled(false); 
+   stopPipeline_action->setEnabled(false); 
 
    runPipeline_progressBar->hide();
 }
@@ -1128,11 +1193,16 @@ void DerivedWindow::enableDisplayButton()
    if(QFile(m_parameters->getSegmentation()).exists())
    {   
       displayResults_button->setEnabled(true); 
+      displayResults_action->setEnabled(true); 
    }
 
    setParametersWidgetEnabled(true); 
+
    runPipeline_button->setEnabled(true);
+   runPipeline_action->setEnabled(true);
+
    stopPipeline_button->setEnabled(false); 
+   stopPipeline_action->setEnabled(false); 
 
    runPipeline_progressBar->hide();
 }
@@ -1154,14 +1224,14 @@ void DerivedWindow::closeEvent(QCloseEvent *event)
 {
    if(m_thread->isRunning())
    {
-      QMessageBox messageBox;
+      QMessageBox* messageBox = new::QMessageBox(this);
 
-      messageBox.setText("The pipeline is still running,");
-      messageBox.setInformativeText("Do you want to terminate it?");
-      messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-      messageBox.setDefaultButton(QMessageBox::No);
+      messageBox->setText("The pipeline is still running,");
+      messageBox->setInformativeText("Do you want to terminate it?");
+      messageBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+      messageBox->setDefaultButton(QMessageBox::No);
 
-      int answer = messageBox.exec();
+      int answer = messageBox->exec();
       switch (answer)
       {
          case QMessageBox::Yes:
@@ -1173,7 +1243,7 @@ void DerivedWindow::closeEvent(QCloseEvent *event)
             this->hide();
             break;
          case QMessageBox::Cancel:
-            messageBox.close();
+            event->ignore();
             break;
       }
    }

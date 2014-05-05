@@ -15,6 +15,7 @@
 // My Specific Librairies
 #include "ui_Window.h"
 #include "Pipeline.h"
+#include "XmlReader.h"
 #include "XmlWriter.h"
 #include "MainScriptThread.h"
 #include "ExecutablePaths.h" 
@@ -49,6 +50,9 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void setPipelineParameters(PipelineParameters* parameters);
    void setMainScriptThread(MainScriptThread* thread);
 
+   // Print XML Errors
+   void printErrors(QString errors);
+
    // Initialization
    void initializeImagesMap();
    void initializeExecutablesMap();   
@@ -56,7 +60,6 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void initializeExecutables(); 
 
    // Connection 
-
 
    // Atlas Population
    void checkAtlases();
@@ -76,6 +79,7 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    // Output
    void selectOuput();
    void enterOutput();
+   void createOutput(QString output);
 
    // Prefix 
    void enterPrefix(); 

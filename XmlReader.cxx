@@ -1,10 +1,5 @@
 #include "XmlReader.h" 
 
-XmlReader::XmlReader()
-{
-   m_errors = ""; 
-}
-
 void XmlReader::setPipelineParameters(PipelineParameters* parameters) 
 {
    m_parameters=parameters;
@@ -26,13 +21,13 @@ bool XmlReader::isBoolean(int value)
 }
 
 
-void XmlReader::readParametersConfigurationFile(QString file_path)
+QString XmlReader::readParametersConfigurationFile(QString file_path)
 {
    QFile* file = new::QFile(file_path);
 
    if(!file->exists())
    {
-      std::cout<<file_path.toStdString()<<" does not exist"<<std::endl;  
+      return " - " + file_path + " does not exist\n";
    }
 
    else
@@ -41,6 +36,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
 
       QXmlStreamReader* stream = new::QXmlStreamReader(file);
 
+      QString errors; 
       bool ok; 
 
       while(!stream->atEnd())
@@ -58,9 +54,9 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                {
                   m_parameters->setNewAtlas(newAtlas);
                }
-               else 
+               else
                {
-                  m_errors += "'New-atlas-computation' is not correct";
+                  errors += " - 'New-atlas-computation' is not valid, it must be a boolean\n";
                }
             }
 
@@ -71,16 +67,32 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                {
                   m_parameters->setAtlasPopulationDirectory(atlasPopulationPath);
                } 
-               else 
+               else
                {
-                  m_errors += "'Atlas-population-directory' is not correct";
+                  errors += " - 'Atlas-population-directory' is not valid, it does not exist\n";
                }
             }
 
             else if (stream->name() == "Atlas")
             {
-                QString atlas = (attributes.value("name")).toString(); 
-                m_selectedAtlases += atlas;
+               QString atlas = (attributes.value("name")).toString();   
+
+               if(m_parameters->checkAtlasFiles(atlas))
+               {
+                  if(m_parameters->checkAtlasRange(atlas))
+                  {
+                     std::cout<<atlas.toStdString()<<" is valid"<<std::endl; 
+                     m_selectedAtlases += atlas;
+                  }
+                  else
+                  {
+                     errors += " - " + atlas + " is not a valid atlas, the probability maps have to range from 0 to 1\n";  
+                  }
+               }
+               else
+               {
+                  errors += " - " + atlas + " is not a valid atlas, it does not have all the files required\n";
+               }
             }
 
             else if (stream->name() == "Smoothing")
@@ -90,45 +102,34 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                {
                   m_parameters->setSmoothing(smoothing);
                }
-               else 
+               else if(!smoothing.isEmpty())
                {
-                  m_errors += "'Smoothing-type' is not correct";
+                  errors += " - 'Smoothing-type' is not valid, it must be one of the following : " + (m_parameters->getSmoothingValues()).join(", ") + "\n";
                }
 
-               double smoothingSize = ((attributes.value("size")).toString()).toDouble(&ok);
+               QString smoothingSize_QString = (attributes.value("size")).toString();
+               double smoothingSize = smoothingSize_QString.toDouble(&ok);
                if(ok || m_parameters->checkSmoothingSize(smoothingSize))
                {
                   m_parameters->setSmoothingSize(smoothingSize);
                }
-               else 
+               else if(!smoothingSize_QString.isEmpty())
                {
-                  m_errors += "'Smoothing-size' is not correct";
+                  errors += " - 'Smoothing-size' is not valid, it must be a positive number\n";
                }
             }
 
-            else if (stream->name() == "Weights-computation")
+            else if (stream->name() == "Computing-weights")
             {
-               bool computingWeights = ((attributes.value("bool")).toString()).toInt(&ok);
+               QString computingWeights_QString = (attributes.value("bool")).toString();
+               bool computingWeights = computingWeights_QString.toInt(&ok);
                if(ok && isBoolean(computingWeights))
                {
                   m_parameters->setComputingWeights(computingWeights);
                }
-               else 
+               else if(!computingWeights_QString.isEmpty())
                {
-                  m_errors += "'Weights-computation' is not correct";
-               }
-            }
-
-            else if (stream->name() == "Weights-parameters")
-            {
-               double weightsRadius = ((attributes.value("radius")).toString()).toDouble(&ok);
-               if(ok && m_parameters->checkWeightsRadius(weightsRadius))
-               {
-                  m_parameters->setWeightsRadius(weightsRadius);
-               }
-               else 
-               {
-                  m_errors += "'Weights-radius' is not correct";
+                  errors += " - 'Computing-weights' is not valid, it must be a boolean\n";
                }
 
                QString weightsModality = (attributes.value("modality")).toString(); 
@@ -136,49 +137,129 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                {
                   m_parameters->setWeightsModality(weightsModality);
                }
-               else 
+               else if(!weightsModality.isEmpty())
                {
-                  m_errors += "'Weights-modality' is not correct";
+                  errors += " - 'Weights-modality' is not valid, it must be one of the following : " + (m_parameters->getWeightsModalityValues()).join(", ") + "\n";
+               }
+
+               QString weightsRadius_QString = (attributes.value("radius")).toString();
+               double weightsRadius = weightsRadius_QString.toDouble(&ok);
+               if(ok && m_parameters->checkWeightsRadius(weightsRadius))
+               {
+                  m_parameters->setWeightsRadius(weightsRadius);
+               }
+               else if(!weightsRadius_QString.isEmpty())
+               {
+                  errors += " - 'Weights-radius' is not valid, it must be a positive number\n";
+               }
+
+               QString weightsRadiusUnit = (attributes.value("unit")).toString(); 
+               if(m_parameters->checkWeightsRadiusUnit(weightsRadiusUnit))
+               {
+                  m_parameters->setWeightsRadiusUnit(weightsRadiusUnit);
+               }
+               else if(!weightsRadiusUnit.isEmpty())
+               {
+                  errors += " - 'Weights-radius-unit' is not valid, it must be one of the following : " + (m_parameters->getWeightsRadiusUnitValues()).join(", ") + "\n";
                }
             }
 
             else if (stream->name() == "Including-FA")
             {
-               double includingFA = ((attributes.value("bool")).toString()).toInt(&ok);
+               QString includingFA_QString = (attributes.value("bool")).toString();
+               double includingFA = includingFA_QString.toInt(&ok);
                if(ok && isBoolean(includingFA))
                {
                   m_parameters->setIncludingFA(includingFA);
                }
-               else 
+               else if(!includingFA_QString.isEmpty())
                {
-                  m_errors += "'Including-FA' is not correct";
+                  errors += " - 'Including-FA' is not valid, it must be a boolean\n";
+               }
+
+               QString weight_QString = (attributes.value("weight")).toString();
+               double weight = weight_QString.toDouble(&ok);
+               if(ok && m_parameters->checkFAWeight(weight))
+               {
+                  m_parameters->setFAWeight(weight);
+               }
+               else if(!weight_QString.isEmpty())
+               {
+                  errors += " - 'FA-weight' is not valid, it must be a positive number\n";
+               }
+
+               QString smoothingSize_QString = (attributes.value("smoothing-size")).toString();
+               double smoothingSize = smoothingSize_QString.toDouble(&ok);
+               if(ok && m_parameters->checkFASmoothingSize(smoothingSize))
+               {
+                  m_parameters->setFASmoothingSize(smoothingSize);
+               }
+               else if(!smoothingSize_QString.isEmpty())
+               {
+                  errors += " - 'FA-smoothing' is not valid, it must be a positive number\n";
                }
             }
 
             else if (stream->name() == "Neoseg-images")
             {
-               std::cout<<"Neoseg-images"<<std::endl;
-
-               double usingFA = ((attributes.value("using-FA")).toString()).toInt(&ok);
+               QString usingFA_QString = (attributes.value("using-FA")).toString();
+               double usingFA = usingFA_QString.toInt(&ok);
                if(ok && isBoolean(usingFA))
                {
-                  std::cout<<"Using-FA :"<<usingFA<<std::endl;
-                  m_neosegParameters->setUsingFA(usingFA);
+                  m_parameters->setUsingFA(usingFA);
                }
-               else 
+               else if(!usingFA_QString.isEmpty())
                {
-                  m_errors += "'using-FA' is not correct";
+                  errors += " - 'Using-FA' is not valid, it must be a boolean\n";
                }
 
-               double usingAD = ((attributes.value("using-AD")).toString()).toInt(&ok);
+               QString usingAD_QString = (attributes.value("using-AD")).toString();
+               double usingAD = usingAD_QString.toInt(&ok);
                if(ok && isBoolean(usingAD))
                {
-                  std::cout<<"Using-AD :"<<usingAD<<std::endl;
-                  m_neosegParameters->setUsingAD(usingAD);
+                  m_parameters->setUsingAD(usingAD);
+               }
+               else if(!usingAD_QString.isEmpty())
+               {
+                  errors += " - 'Using-AD' is not valid, it must be a boolean\n";
+               }
+            }
+
+            else if (stream->name() == "Computing-3-labels-seg")
+            {
+               bool computing3LabelsSeg = ((attributes.value("bool")).toString()).toInt(&ok);
+               if(ok && isBoolean(computing3LabelsSeg))
+               {
+                  m_parameters->setComputing3LabelsSeg(computing3LabelsSeg);
                }
                else 
                {
-                  m_errors += "'using-AD' is not correct";
+                  errors += " - 'Computing-3-labels-seg' is not valid, it must be a boolean\n";
+               }
+            }
+
+            else if (stream->name() == "Reassigning-white-matter")
+            {
+               QString reassigningWhiteMatter_QString = (attributes.value("bool")).toString();
+               bool reassigningWhiteMatter = reassigningWhiteMatter_QString.toInt(&ok);
+               if(ok && isBoolean(reassigningWhiteMatter))
+               {
+                  m_parameters->setReassigningWhiteMatter(reassigningWhiteMatter);
+               }
+               else if(!reassigningWhiteMatter_QString.isEmpty())
+               {
+                  errors += " - 'Reassigning-white-matter' is not valid, it must be a boolean\n";
+               }
+
+               QString sizeThreshold_QString = (attributes.value("size-threshold")).toString();
+               int sizeThreshold = sizeThreshold_QString.toInt(&ok);
+               if(ok && m_parameters->checkSizeThreshold(sizeThreshold))
+               {
+                  m_parameters->setSizeThreshold(sizeThreshold);
+               }
+               else if(!sizeThreshold_QString.isEmpty())
+               {
+                  errors += " - 'Size-threshold' is not valid, it must be a positive integer\n";
                }
             }
 
@@ -191,7 +272,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                }
                else 
                {
-                  m_errors += "'Overwriting' is not correct";
+                  errors += " - 'Overwriting' is not valid, it must be a boolean\n";
                }
             }
 
@@ -204,7 +285,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                } 
                else 
                {
-                  m_errors += "'Cleaning-up' is not correct";
+                  errors += " - 'Cleaning-up' is not valid, it must be a boolean\n";
                }
             }
 
@@ -217,7 +298,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                }
                else 
                {
-                  m_errors += "'Computing-system' is not correct";
+                  errors += " - 'Computing-system' is not valid, it must be one of the following : " + (m_parameters->getComputingSystemValues()).join(", ") + "\n";
                }
             }
 
@@ -230,7 +311,7 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                }
                else 
                {
-                  m_errors += "'Number-of-cores' is not correct";
+                  errors += " - 'Number-of-cores' is not valid, it must be a positive number\n";
                }
             }
 
@@ -241,29 +322,31 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                {
                   m_antsParameters->setImageMetric1(imageMetric);
                }
-               else 
+               else if(!imageMetric.isEmpty())
                {
-                  m_errors += "'First-modality-metric' is not correct";
+                  errors += " - 'First-modality-metric' is not valid, it must be one of the following : " + (m_antsParameters->getImageMetricValues()).join(", ") +"\n";
                }
 
-               int radius = ((attributes.value("radius")).toString()).toInt(&ok);
+               QString radius_QString = (attributes.value("radius")).toString(); 
+               int radius = radius_QString.toInt(&ok);
                if(ok && m_antsParameters->checkRadius1(radius))
                {
                   m_antsParameters->setRadius1(radius);
                }
-               else 
+               else if(!radius_QString.isEmpty())
                {
-                  m_errors += "'First-modality-radius' is not correct";
+                  errors += " - 'First-modality-radius' is not valid, it must be a positive integer\n";
                }
       
-               double weight = ((attributes.value("weight")).toString()).toDouble(&ok); 
+               QString weight_QString = (attributes.value("weight")).toString();
+               double weight = weight_QString.toDouble(&ok); 
                if(ok && m_antsParameters->checkWeight1(weight))
                {
                   m_antsParameters->setWeight1(weight);
                }
-               else 
+               else if(!weight_QString.isEmpty())
                {
-                  m_errors += "'First-modality-weight' is not correct";
+                  errors += " - 'First-modality-weight' is not valid, it must be a positive number\n";
                }
             }
 
@@ -274,180 +357,184 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                {
                   m_antsParameters->setImageMetric2(imageMetric);
                }
-               else 
+               else if(!imageMetric.isEmpty())
                {
-                  m_errors += "'Second-modality-metric' is not correct";
+                  errors += " - 'Second-modality-metric' is not valid, it must be one of the following : " + (m_antsParameters->getImageMetricValues()).join(", ") +"\n";
                }
 
-               int radius = ((attributes.value("radius")).toString()).toInt(&ok);
+               QString radius_QString = (attributes.value("radius")).toString();
+               int radius = radius_QString.toInt(&ok);
                if(ok && m_antsParameters->checkRadius2(radius))
                {
                   m_antsParameters->setRadius2(radius);
                }
-               else 
+               else if(!radius_QString.isEmpty())
                {
-                  m_errors += "'Second-modality-radius' is not correct";
+                  errors += " - 'Second-modality-radius' is not valid, it must be a positive integer\n";
                }
-      
-               double weight = ((attributes.value("weights")).toString()).toDouble(&ok); 
+
+               QString weight_QString = (attributes.value("weight")).toString();
+               double weight = weight_QString.toDouble(&ok); 
                if(ok && m_antsParameters->checkWeight2(weight))
                {
                   m_antsParameters->setWeight2(weight);
                }
-               else 
+               else if(!weight_QString.isEmpty())
                {
-                  m_errors += "'Second-modality-weight' is not correct";
+                  errors += " - 'Second-modality-weight' is not valid, it must be a positive number\n";
                }
             }
 
             else if (stream->name() == "Iterations")
             {
-               int iterationsJ = ((attributes.value("J")).toString()).toInt(&ok);
+               QString iterationsJ_QString = (attributes.value("J")).toString();
+               int iterationsJ = iterationsJ_QString.toInt(&ok);
                if(ok && m_antsParameters->checkIterationsJ(iterationsJ))  
                {
                   m_antsParameters->setIterationsJ(iterationsJ); 
                }
-               else 
+               else if(!iterationsJ_QString.isEmpty())
                {
-                  m_errors += "'Iterations-J' is not correct";
+                  errors += " - 'Iterations-J' is not valid, it must be a positive integer\n";
                }
 
-               int iterationsK = ((attributes.value("K")).toString()).toInt(&ok);
+               QString iterationsK_QString = (attributes.value("K")).toString();
+               int iterationsK = iterationsK_QString.toInt(&ok);
                if(ok && m_antsParameters->checkIterationsK(iterationsK))
                {
                   m_antsParameters->setIterationsK(iterationsK);
                }
-               else 
+               else if(!iterationsK_QString.isEmpty())
                {
-                  m_errors += "'Iterations-K' is not correct";
+                  errors += " - 'Iterations-K' is not valid, it must be a positive integer\n";
                }
             
-               int iterationsL = ((attributes.value("L")).toString()).toInt(&ok);
+               QString iterationsL_QString = (attributes.value("L")).toString();
+               int iterationsL = iterationsL_QString.toInt(&ok);
                if(ok && m_antsParameters->checkIterationsL(iterationsL))
                {
                   m_antsParameters->setIterationsL(iterationsL);            
                }
-               else 
+               else if(!iterationsL_QString.isEmpty()) 
                {
-                  m_errors += "'Iterations-L' is not correct";
+                  errors += " - 'Iterations-L' is not valid, it must be a positive integer\n";
                }
             }
 
-            else if (stream->name() == "Transformation-type")
+            else if (stream->name() == "Transformation")
             {
-               QString type = (attributes.value("name")).toString(); 
+               QString type = (attributes.value("type")).toString(); 
                if(m_antsParameters->checkTransformationType(type))
                {             
                   m_antsParameters->setTransformationType(type);        
                }
-               else 
+               else if(!type.isEmpty())
                {
-                  m_errors += "'Transformation-type' is not correct";
+                  errors += " - 'Transformation-type' is not valid, it must be one of the following : " + (m_antsParameters->getTransformationTypeValues()).join(", ") + "\n";
                }
-            }
 
-            else if (stream->name() == "Transformation-parameters")
-            {
-               double gradientStepLength = ((attributes.value("gradient-step-length")).toString()).toDouble(&ok);
+               QString gradientStepLength_QString = (attributes.value("gradient-step-length")).toString(); 
+               double gradientStepLength = gradientStepLength_QString.toDouble(&ok);
                if(ok && m_antsParameters->checkGradientStepLength(gradientStepLength))
                {
                   m_antsParameters->setGradientStepLength(gradientStepLength);
                }
-               else 
+               else if(!gradientStepLength_QString.isEmpty())
                {
-                  m_errors += "'Transformation-gradient-step-length' is not correct";
+                  errors += " - 'Transformation-gradient-step-length' is not valid, it must be a positive number\n";
                }
 
-               double numberOfTimeSteps = ((attributes.value("number-of-time-steps")).toString()).toDouble(&ok);
+               QString numberOfTimeSteps_QString = (attributes.value("number-of-time-steps")).toString();
+               double numberOfTimeSteps = numberOfTimeSteps_QString.toDouble(&ok);
                if(ok && m_antsParameters->checkNumberOfTimeSteps(numberOfTimeSteps))
                {
                   m_antsParameters->setNumberOfTimeSteps(numberOfTimeSteps); 
                }
-               else 
+               else if(!numberOfTimeSteps_QString.isEmpty())
                {
-                  m_errors += "'Transformation-number-of-time-steps' is not correct";
+                  errors += " - 'Transformation-number-of-time-steps' is not valid, it must be a positive number\n";
                }
 
-               double deltaTime = ((attributes.value("delta-time")).toString()).toDouble(&ok);
+               QString deltaTime_QString = (attributes.value("delta-time")).toString();
+               double deltaTime = deltaTime_QString.toDouble(&ok);
                if(ok && m_antsParameters->checkDeltaTime(deltaTime))
                {
                   m_antsParameters->setDeltaTime(deltaTime);      
                }
-               else 
+               else if(!deltaTime_QString.isEmpty())
                {
-                  m_errors += "'Transformation-delta-time' is not correct";
+                  errors += " - 'Transformation-delta-time' is not valid, it must be a positive number\n";
                }
             }
 
-            else if (stream->name() == "Regularization-type")
-            {
-               QString type = (attributes.value("name")).toString();  
+            
+            else if (stream->name() == "Regularization")
+            { 
+               QString type = (attributes.value("type")).toString();  
                if(m_antsParameters->checkRegularizationType(type)) 
                {              
                   m_antsParameters->setRegularizationType(type);
                }    
-               else 
+               else if(!type.isEmpty())
                {
-                  m_errors += "'Regularization-type' is not correct";
-               }    
-            }   
-            
-            else if (stream->name() == "Regularization-parameters")
-            { 
-               double gradientFieldSigma = ((attributes.value("gradient-field-sigma")).toString()).toDouble(&ok);
+                  errors += " - 'Regularization-type' is not valid, it must be one of the following : " + (m_antsParameters->getRegularizationTypeValues()).join(", ") + "\n";
+               }  
+
+               QString gradientFieldSigma_QString = (attributes.value("gradient-field-sigma")).toString();
+               double gradientFieldSigma = gradientFieldSigma_QString.toDouble(&ok);
                if(ok && m_antsParameters->checkGradientFieldSigma(gradientFieldSigma))
                {
                   m_antsParameters->setGradientFieldSigma(gradientFieldSigma);
                }
-               else 
+               else if(!gradientFieldSigma_QString.isEmpty())
                {
-                  m_errors += "'Regularization-gradient-field-sigma' is not correct";
+                  errors += " - 'Regularization-gradient-field-sigma' is not valid, it must be a positive number\n";
                }   
 
-               double deformationFieldSigma = ((attributes.value("deformation-field-sigma")).toString()).toDouble(&ok);
+               QString deformationFieldSigma_QString = (attributes.value("deformation-field-sigma")).toString();
+               double deformationFieldSigma = deformationFieldSigma_QString.toDouble(&ok);
                if(ok && m_antsParameters->checkDeformationFieldSigma(deformationFieldSigma))
                {
                   m_antsParameters->setDeformationFieldSigma(deformationFieldSigma);             
                }
-               else 
+               else if(!deformationFieldSigma_QString.isEmpty())
                {
-                  m_errors += "'Regularization-deformation-field-sigma' is not correct";
+                  errors += " - 'Regularization-deformation-field-sigma' is not valid, it must be a positive number\n";
                }     
             }
 
-            else if (stream->name()=="Smoothing-type")
-            { 
-               QString type=(attributes.value("name")).toString(); 
+            else if (stream->name() == "Filtering")
+            {
+               QString type = (attributes.value("type")).toString(); 
                if(m_neosegParameters->checkFilterMethod(type))
                {  
                   m_neosegParameters->setFilterMethod(type);    
                }
-               else 
+               else if(!type.isEmpty())
                {
-                  m_errors += "'Smoothing-type' is not correct";
-               }   
-            }
+                  errors += " - 'Filtering-type' is not valid, it must be one of the following : " + (m_neosegParameters->getFilterMethodValues()).join(", ") + "\n";
+               }
 
-            else if (stream->name()=="Smoothing-parameters")
-            { 
-               int iterations=((attributes.value("iterations")).toString()).toInt(&ok);
+               QString iterations_QString = (attributes.value("iterations")).toString();
+               int iterations = iterations_QString.toInt(&ok);
                if(ok && m_neosegParameters->checkNumberOfIterations(iterations))
                { 
                   m_neosegParameters->setNumberOfIterations(iterations);   
                }             
-               else 
+               else if(!iterations_QString.isEmpty())
                {
-                  m_errors += "'Smoothing-iterations' is not correct";
+                  errors += " - 'Filtering-iterations' is not valid, it must be a positive integer\n";
                }   
 
-               double timeStep=((attributes.value("time-step")).toString()).toDouble(&ok);
+               QString timeStep_QString = (attributes.value("time-step")).toString();
+               double timeStep = timeStep_QString.toDouble(&ok);
                if(ok && m_neosegParameters->checkTimeStep(timeStep))
                {
                   m_neosegParameters->setTimeStep(timeStep);   
                } 
-               else 
+               else if(!timeStep_QString.isEmpty())
                {
-                  m_errors += "'Smoothing-time-step' is not correct";
+                  errors += " - 'Filtering-time-step' is not valid, it must be a positive number\n";
                }           
             }
 
@@ -458,143 +545,138 @@ void XmlReader::readParametersConfigurationFile(QString file_path)
                {
                   m_neosegParameters->setReferenceImage(referenceImage);    
                }
-               else 
+               else if(!referenceImage.isEmpty())
                {
-                  m_errors += "'Reference-image' is not correct";
+                  errors += " - 'Reference-image' is not valid, it must be one of the following :" + (m_neosegParameters->getReferenceImageValues()).join(", ") + "\n";
                }    
             }
 
             else if (stream->name()=="Prior-threshold")
             { 
-               double priorThreshold=(attributes.value("value")).toString().toDouble(&ok); 
+               QString priorThreshold_QString = (attributes.value("value")).toString();
+               double priorThreshold = priorThreshold_QString.toDouble(&ok); 
                if(ok && m_neosegParameters->checkPriorThreshold(priorThreshold))
                {
                   m_neosegParameters->setPriorThreshold(priorThreshold);    
                }
-               else 
+               else if(!priorThreshold_QString.isEmpty())
                {
-                  m_errors += "'Prior-threshold' is not correct";
+                  errors += " - 'Prior-threshold' is not valid, it must be a positive number between 0 and 1\n";
                }   
             }
 
             else if (stream->name()=="Max-bias-degree")
             { 
-               int maxBiasDegree=(attributes.value("value")).toString().toInt(&ok); 
+               QString maxBiasDegree_QString = (attributes.value("value")).toString();
+               int maxBiasDegree = maxBiasDegree_QString.toInt(&ok); 
                if(ok && m_neosegParameters->checkMaxBiasDegree(maxBiasDegree))
                {
                   m_neosegParameters->setMaxBiasDegree(maxBiasDegree);    
                }
-               else 
+               else if(!maxBiasDegree_QString.isEmpty())
                {
-                  m_errors += "'Max-bias-degree' is not correct";
+                  errors += " - 'Max-bias-degree' is not valid, it must be a positive integer\n";
                }   
             }
 
             else if (stream->name()=="Priors")
             { 
-               double prior1=(attributes.value("prior1")).toString().toDouble(&ok);
+               QString prior1_QString = (attributes.value("prior1")).toString();
+               double prior1 = prior1_QString.toDouble(&ok);
                if(ok && m_neosegParameters->checkPrior1(prior1))
                {
                   m_neosegParameters->setPrior1(prior1);    
                }
-               else 
+               else if(!prior1_QString.isEmpty())
                {
-                  m_errors += "'Prior1' is not correct";
+                  errors += " - 'Prior1' is not valid, it must be a positive number between 0 and 1\n";
                }   
 
-               double prior2=(attributes.value("prior2")).toString().toDouble(&ok);
+               QString prior2_QString = (attributes.value("prior2")).toString();
+               double prior2 = prior2_QString.toDouble(&ok);
                if(ok && m_neosegParameters->checkPrior2(prior2))
                {
                   m_neosegParameters->setPrior2(prior2);    
                }
-               else 
+               else if(!prior2_QString.isEmpty())
                {
-                  m_errors += "'Prior2' is not correct";
+                  errors += " - 'Prior2' is not valid, it must be a positive number\n";
                }
 
-               double prior3=(attributes.value("prior3")).toString().toDouble(&ok);
+               QString prior3_QString = (attributes.value("prior3")).toString();
+               double prior3 = prior3_QString.toDouble(&ok);
                if( ok && m_neosegParameters->checkPrior3(prior3))
                {
                   m_neosegParameters->setPrior3(prior3);    
                }
-               else 
+               else if(!prior3_QString.isEmpty())
                {
-                  m_errors += "'Prior3' is not correct";
+                  errors += " - 'Prior3' is not valid, it must be a positive number\n";
                }
 
-               double prior4=(attributes.value("prior4")).toString().toDouble(&ok);
+               QString prior4_QString = (attributes.value("prior4")).toString();
+               double prior4 = prior4_QString.toDouble(&ok);
                if(ok && m_neosegParameters->checkPrior4(prior4))
                {
                   m_neosegParameters->setPrior4(prior4);    
                }
-               else 
+               else if(!prior4_QString.isEmpty())
                {
-                  m_errors += "'Prior4' is not correct";
+                  errors += " - 'Prior4' is not valid, it must be a positive number\n";
                }
 
-               double prior5=(attributes.value("prior5")).toString().toDouble(&ok);
+               QString prior5_QString = (attributes.value("prior5")).toString();
+               double prior5 = prior5_QString.toDouble(&ok);
                if(ok && m_neosegParameters->checkPrior5(prior5))
                {
                   m_neosegParameters->setPrior5(prior5);    
                }
-               else 
+               else if(!prior5_QString.isEmpty())
                {
-                  m_errors += "'Prior5' is not correct";
+                  errors += " - 'Prior5' is not valid, it must be a positive number\n";
                }
             }  
 
             else if (stream->name()=="Refinement")
             { 
-               bool refinement=(attributes.value("bool")).toString().toInt(&ok); 
+               QString refinement_QString = (attributes.value("bool")).toString();
+               bool refinement = refinement_QString.toInt(&ok); 
                if(ok && isBoolean(refinement))
                {
                   m_neosegParameters->setRefinement(refinement);    
                }
-               else 
+               else if(!refinement_QString.isEmpty())
                {
-                  m_errors += "'Refinement' is not correct";
+                  errors += " - 'Refinement' is not valid, it must be a boolean\n";
                }
-            }
 
-            else if (stream->name()=="Refinement-parameters")
-            { 
-               double initialParzenKernelWidth=(attributes.value("initial-parzen-kernel-width")).toString().toDouble(&ok); 
+               QString initialParzenKernelWidth_QString = (attributes.value("initial-parzen-kernel-width")).toString();
+               double initialParzenKernelWidth = initialParzenKernelWidth_QString.toDouble(&ok); 
                if(ok && m_neosegParameters->checkInitialParzenKernelWidth(initialParzenKernelWidth))
                {
                   m_neosegParameters->setInitialParzenKernelWidth(initialParzenKernelWidth);    
                }
-               else 
+               else if(!initialParzenKernelWidth_QString.isEmpty())
                {
-                  m_errors += "'Refinement-initial-parzen-kernel-width' is not correct";
+                  errors += " - 'Refinement-initial-parzen-kernel-width' is not valid, it must be a positive number\n";
                }
             }
          }
       }
-   }
+      m_parameters->setSelectedAtlases(m_selectedAtlases); 
 
-   QStringList::const_iterator it;
-   int i=0;
-   
-   for (it = m_selectedAtlases.constBegin(); it != m_selectedAtlases.constEnd(); ++it) 
-   {
-      if(!m_parameters->checkAtlas(*it))
-      {
-         m_selectedAtlases.removeAt(i);
-      }
-      i++;
+      return errors; 
    }
-
-   m_parameters->setSelectedAtlases(m_selectedAtlases); 
 }
 
 
-void XmlReader::readExecutablesConfigurationFile(QString file_path)
+QString XmlReader::readExecutablesConfigurationFile(QString file_path)
 {
    QFile* file = new::QFile(file_path);
 
    if(!file->exists())
    {
-      std::cout<<file_path.toStdString()<<" does not exist"<<std::endl; 
+      return " - " + file_path + " does not exist\n"; 
    }
    else
    {
@@ -602,23 +684,34 @@ void XmlReader::readExecutablesConfigurationFile(QString file_path)
 
       QXmlStreamReader* stream = new::QXmlStreamReader(file);
 
+      QString errors;
+
       while(!stream->atEnd())
       {
          stream->readNext();
 
-         if (stream->isStartElement())
+         if(stream->isStartElement())
          {
             QXmlStreamAttributes attributes = stream->attributes();
       
-            QString name = (stream->name()).toString(); 
-            QString path = (attributes.value("path")).toString(); 
-
-            if(m_executablePaths->checkExecutablePath(path))
+            if((stream->name()).toString()!="Executables")
             {
-               m_executablePaths->setExecutablePath(name, path);    
+               QString name = (stream->name()).toString(); 
+               QString path = (attributes.value("path")).toString(); 
+
+               if(m_executablePaths->checkExecutablePath(path))
+               {
+                  m_executablePaths->setExecutablePath(name, path);    
+               }
+               else
+               {
+                  errors += " - " + name + " path is not valid\n"; 
+               } 
             }
          }
       }
+
+      return errors; 
    }
 }
 

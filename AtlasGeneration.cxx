@@ -124,10 +124,13 @@ void AtlasGeneration::generateTemplate(TemplateImage& templateImage)
    std::vector<Atlas>::iterator it;
    for (it=m_atlasPopulation.begin()+1; it!=m_atlasPopulation.end(); ++it)
    {
-      QString atlas = "atlas_" + QString::number(i);
-      m_inputs.insert(atlas, getImage(*it, templateImage.name));
-      m_argumentsList << atlas; 
-      i++; 
+      if(!(getImage(*it, templateImage.name)).isEmpty())
+      {
+         QString atlas = "atlas_" + QString::number(i);
+         m_inputs.insert(atlas, getImage(*it, templateImage.name));
+         m_argumentsList << atlas; 
+         i++;
+      } 
    }
 
    QString average = m_module_dir->filePath(templateImage.name + ".nrrd"); 
@@ -431,7 +434,6 @@ void AtlasGeneration::copyFinalPriorProbability(PriorProbability& priorProbabili
 
    m_argumentsList << "ResampleVolume2" << priorProbability.input << priorProbability.output;
    execute(); 
-   m_unnecessaryFiles << finalProbability;
 } 
 
 void AtlasGeneration::implementRun()
@@ -526,6 +528,8 @@ void AtlasGeneration::implementRun()
    m_script += "\tlogger.info('Copying final gray probability...')\n"; 
    copyFinalPriorProbability(m_gray);
 
+   std::cout<<"15"<<std::endl;
+
    m_script += "\t# Copy CSF Probability #\n";
    m_script += "\tlogger.info('Copying final csf probability...')\n"; 
    copyFinalPriorProbability(m_csf);
@@ -538,16 +542,16 @@ void AtlasGeneration::implementRun()
 
 void AtlasGeneration::update()
 {
-   createDirectories(); 
+   createDirectories();  
 
    initializeScript();
 
    implementStop();
-   implementCheckFileExistence();   
+   implementCheckFileExistence();
    implementExecute();
    implementExecutePipe();
-   implementRun();
 
+   implementRun();
    writeScript();
 }
 

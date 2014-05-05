@@ -4,6 +4,7 @@
 // General Librairies // 
 #include <iostream>
 #include <vector>
+#include <iomanip> 
 
 // Qt Librairies // 
 #include <QString>
@@ -16,6 +17,7 @@
 #include "AntsParameters.h" 
 #include "NeosegParameters.h" 
 #include "ExecutablePaths.h" 
+#include "MinMax.h"
 
 
 class PipelineParameters
@@ -25,6 +27,8 @@ class PipelineParameters
    PipelineParameters();
 
    bool isBoolean(int value);
+   bool isSuperior(int value, int min);
+   bool isSuperior(double value, double min);
    bool isBetween(int value, int min, int max);
    bool isBetween(double value, double min, double max);
    bool isIn(QString item, QStringList list);
@@ -99,7 +103,9 @@ class PipelineParameters
    QStringList getSelectedAtlases(); 
 
    // Atlas Population 
-   std::map<QString,QFileInfoList> findAtlasFiles(QString atlas);
+   QMap<QString,QFileInfoList> findAtlasFiles(QString atlas);
+   bool checkAtlasFiles(QString atlas);
+   bool checkAtlasRange(QString atlas);
    bool checkAtlas(QString atlas);
    void initializeAtlasPopulation();
    void setAtlasPopulation(std::vector<Atlas> m_atlasPopulation);
@@ -146,16 +152,35 @@ class PipelineParameters
    bool getIncludingFA();
 
    // FA Weight
+   bool checkFAWeight(double FAWeight);
    void setFAWeight(double FAWeight);
    double getFAWeight(); 
 
    // FA Smoothing Size
+   bool checkFASmoothingSize(double FASmoothingSize);
    void setFASmoothingSize(double FASmoothingSize);
    double getFASmoothingSize(); 
+
+   // Using FA
+   void setUsingFA(bool usingFA);
+   bool getUsingFA();
+
+   // Using AD
+   void setUsingAD(bool usingAD);
+   bool getUsingAD();
 
    // Computing 3-Labels Segmentation
    void setComputing3LabelsSeg(bool computing3LabelsSeg);
    bool getComputing3LabelsSeg();   
+
+   // Reassigning White Matter 
+   void setReassigningWhiteMatter(bool reassigningWhiteMatter); 
+   bool getReassigningWhiteMatter(); 
+
+   // Size Threshold 
+   bool checkSizeThreshold(int sizeThreshold);
+   void setSizeThreshold(int sizeThreshold);
+   int getSizeThreshold();
 
    // Overwriting
    void setOverwriting(bool overwriting);
@@ -211,7 +236,6 @@ class PipelineParameters
    QString m_mask; 
    QString m_DWI; 
    QString m_b0; 
-   bool m_skullStripping; 
 
    Neo m_neo; 
 
@@ -227,6 +251,7 @@ class PipelineParameters
    QString m_atlasPopulationDirectory; 
 
    // Atlas Population
+   int m_precision;
    QStringList m_selectedAtlases; 
    std::vector<Atlas> m_atlasPopulation; 
 
@@ -266,17 +291,35 @@ class PipelineParameters
    bool m_includingFA;    
 
    // FA weight
+   double m_FAWeight_min;
    double m_FAWeight_default; 
    double m_FAWeight; 
 
    // FA Smoothing Size 
+   double m_FASmoothingSize_min;
    double m_FASmoothingSize_default;
    double m_FASmoothingSize;
     
-   
+   // Using FA
+   bool m_usingFA_default; 
+   bool m_usingFA; 
+
+   // Using AD
+   bool m_usingAD_default; 
+   bool m_usingAD; 
+
    // Computing 3-labels segmentation
    bool m_computing3LabelsSeg_default; 
    bool m_computing3LabelsSeg;
+
+   // Reassigning White Matter
+   bool m_reassigningWhiteMatter_default; 
+   bool m_reassigningWhiteMatter; 
+
+   // Size Threshold 
+   int m_sizeThreshold_min;
+   int m_sizeThreshold_default;
+   int m_sizeThreshold; 
 
    // Overwriting 
    bool m_overwriting_default;

@@ -16,6 +16,9 @@ include(${SlicerExecutionModel_USE_FILE})
 FIND_PACKAGE(GenerateCLP REQUIRED)
 INCLUDE(${GenerateCLP_USE_FILE})
 
+# Find ITK
+find_package(ITK REQUIRED)
+INCLUDE (${ITK_USE_FILE})
 
 QT4_ADD_RESOURCES(RESOURCES resources.qrc)
 
@@ -28,6 +31,12 @@ QT4_WRAP_CPP(MOC_SOURCES DerivedWindow.h MainScriptThread.h Pipeline.h)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 GENERATECLP(NeosegPipeline_CLP NeosegPipeline.xml) 
+
+
+add_library(MinMax MinMax.h)
+SET_TARGET_PROPERTIES(MinMax PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(MinMax ${ITK_LIBRARIES})
+
 
 SET(NeosegPipeline_SOURCE  main.cxx
                            NeosegPipelineTool.cxx 
@@ -71,6 +80,8 @@ SET(NeosegPipeline_HEADERS NeosegPipelineTool.h
                            TemplateImage.h
                            MainScriptThread.h)
 
+
+
 add_executable(NeosegPipeline ${NeosegPipeline_SOURCE} ${NeosegPipeline_HEADERS} ${MOC_SOURCES} ${UI_SOURCES} ${NeosegPipeline_CLP} ${RESOURCES})
 
-TARGET_LINK_LIBRARIES(NeosegPipeline ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(NeosegPipeline ${QT_LIBRARIES} MinMax)

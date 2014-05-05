@@ -12,7 +12,7 @@ ExecutablePaths::ExecutablePaths()
 void ExecutablePaths::setProgramPath(QString programPath)
 {
    m_currentDirectory = ((QFileInfo(programPath)).dir()).absolutePath();
-   m_splitPath.prepend(m_currentDirectory);
+   m_splitPath.prepend(m_currentDirectory); 
 }
 
 QString ExecutablePaths::findExecutablePath(QStringList splitPath, QString executableName)

@@ -80,6 +80,15 @@ bool AntsParameters::isSuperior(int value, int min)
    return false; 
 }
 
+bool AntsParameters::isSuperiorOrEqual(int value, int min)
+{
+   if(value>=min)
+   {
+      return true; 
+   }
+   return false; 
+}
+
 bool AntsParameters::isBetween(int value, int min, int max)
 {
    if(value>min && value<max)
@@ -97,6 +106,16 @@ bool AntsParameters::isSuperior(double value, double min)
    }
    return false; 
 }
+
+bool AntsParameters::isSuperiorOrEqual(double value, double min)
+{
+   if(value>=min)
+   {
+      return true; 
+   }
+   return false; 
+}
+
 
 bool AntsParameters::isBetween(double value, double min, double max)
 {
@@ -232,7 +251,7 @@ void AntsParameters::setIterationsJ(int iterationsJ)
 }
 bool AntsParameters::checkIterationsJ(int iterationsJ)
 {
-   return isSuperior(iterationsJ, m_iterationsJ_max);
+   return isSuperior(iterationsJ, m_iterations_min);
 }
 int AntsParameters::getIterationsJ()
 {
@@ -245,7 +264,7 @@ void AntsParameters::setIterationsK(int iterationsK)
 }
 bool AntsParameters::checkIterationsK(int iterationsK)
 {
-   return isSuperior(iterationsK, m_iterationsK_max);
+   return isSuperior(iterationsK, m_iterations_min);
 }
 int AntsParameters::getIterationsK()
 {
@@ -258,7 +277,7 @@ void AntsParameters::setIterationsL(int iterationsL)
 }
 bool AntsParameters::checkIterationsL(int iterationsL)
 {
-   return isSuperior(iterationsL, m_iterationsL_max);
+   return isSuperior(iterationsL, m_iterations_min);
 }
 int AntsParameters::getIterationsL()
 {
@@ -381,7 +400,7 @@ void AntsParameters::setDeformationFieldSigma(double deformationFieldSigma)
 }
 bool AntsParameters::checkDeformationFieldSigma(double deformationFieldSigma)
 {
-   return isSuperior(deformationFieldSigma, m_deformationFieldSigma_min);
+   return isSuperiorOrEqual(deformationFieldSigma, m_deformationFieldSigma_min);
 }
 double AntsParameters::getDeformationFieldSigma()
 {

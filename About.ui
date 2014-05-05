@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>813</width>
+    <width>844</width>
     <height>437</height>
    </rect>
   </property>
@@ -32,7 +32,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -42,7 +42,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;NeosegPipeline segments neonate brain MRI creating a individual specific atlas for Neoseg. &lt;br/&gt;&lt;/p&gt;&lt;p&gt;The atlas is composed of templates for T1 and T2 and probability maps for white matter, gray matter, CSF and rest. &lt;/p&gt;&lt;p&gt;To generate this atlas we register and average the images and the labels of the atlas population and then we run Neoseg with this atlas. &lt;br/&gt;&lt;/p&gt;&lt;p&gt;In order to improve the segmentation, we can use diffusion images by :&lt;/p&gt;&lt;p&gt;- including the white matter from the FA in the white matter probability map &lt;/p&gt;&lt;p&gt;- using the FA and/or AD as a additional modality in neoseg. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;NeosegPipeline segments neonate brain MRI creating a individual specific atlas for Neoseg. &lt;br/&gt;&lt;/p&gt;&lt;p&gt;The atlas is composed of templates for T1 and T2 and probability maps for white matter, gray matter, CSF and rest. &lt;/p&gt;&lt;p&gt;To generate this atlas we register and average the images and the labels of the atlas population and then we run Neoseg with this atlas. &lt;br/&gt;&lt;/p&gt;&lt;p&gt;In order to improve the segmentation, we can use diffusion images by :&lt;/p&gt;&lt;p&gt;- including the white matter from the FA in the white matter probability map &lt;/p&gt;&lt;p&gt;- using the FA and/or AD as an additional modality in neoseg. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>

@@ -178,7 +178,11 @@ void Pipeline::writeNeosegExecution()
    m_neosegExecution->setModuleDirectory(directory_path);
    m_neosegExecution->setProcessingDirectory(m_processing_path);
    m_neosegExecution->setAtlas(m_parameters->getAtlas());
+   m_neosegExecution->setUsingFA(m_parameters->getUsingFA());
+   m_neosegExecution->setUsingAD(m_parameters->getUsingAD());
    m_neosegExecution->setComputing3LabelsSeg(m_parameters->getComputing3LabelsSeg());
+   m_neosegExecution->setReassigningWhiteMatter(m_parameters->getReassigningWhiteMatter());
+   m_neosegExecution->setSizeThreshold(m_parameters->getSizeThreshold());
    m_neosegExecution->setNeosegParameters(m_parameters->getNeosegParameters());
    m_neosegExecution->setExecutablePaths(m_parameters->getExecutablePaths());
    m_neosegExecution->setSuffix(m_parameters->getSuffix());
@@ -333,6 +337,7 @@ void Pipeline::writePipeline()
       writeAtlasRegistration();
       writeAtlasPopulationRegistration();
       writeAtlasGeneration();
+      std::cout<<"6"<<std::endl;
    }
 
    writeNeosegExecution();
@@ -355,7 +360,7 @@ void Pipeline::runPipeline()
    }   
 
    m_mainScriptProcess = new QProcess;
-   //m_mainScriptProcess->setProcessChannelMode(QProcess::ForwardedChannels);
+   m_mainScriptProcess->setProcessChannelMode(QProcess::ForwardedChannels);
    m_mainScriptProcess->start(command);
 
    m_mainScriptProcess->waitForStarted();   

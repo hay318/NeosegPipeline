@@ -26,12 +26,12 @@ class NeosegExecution : public Script
 
    // Setting Parameters
    void setAtlas(QString atlas);  
-   void setComputing3LabelsSeg(bool computing3LabelsSeg);
+   void setUsingFA(bool usingFA);  
+   void setUsingAD(bool usingAD);  
    void setNeosegParameters(NeosegParameters* parameters);
-
-   // Checking Existing Results
-   void defineSegmentation();
-   bool checkSegmentation();
+   void setComputing3LabelsSeg(bool computing3LabelsSeg);
+   void setReassigningWhiteMatter(bool reassigningWhiteMatter);
+   void setSizeThreshold(int sizeThreshold);
 
    // Implementing Script 
    void initializeScript();
@@ -40,6 +40,7 @@ class NeosegExecution : public Script
    void writeAffineTranformationFiles();
    void runNeoseg();
    void mergeWhiteMatters();
+   void reassignWhiteMatter(); 
    void implementRun();  
 
 
@@ -50,13 +51,27 @@ class NeosegExecution : public Script
 
    private:
 
-   // Parameters
-   QString              m_atlas; 
-   bool                 m_computing3LabelsSeg;
-   NeosegParameters*    m_parameters;
+   // Atlas
+   QString m_atlas; 
+
+   // Using FA
+   bool m_usingFA; 
+
+   // Using AD
+   bool m_usingAD; 
+
+   // Computing 3-labels segmentation 
+   bool m_computing3LabelsSeg;
+   
+   // Reassigning White Matter 
+   bool m_reassigningWhiteMatter; 
+   int m_sizeThreshold; 
+
+   // Neoseg Parameters
+   NeosegParameters* m_parameters;
 
    // Outout 
-   QString              m_segmentation;
+   QString m_segmentation;
 };
 
 #endif

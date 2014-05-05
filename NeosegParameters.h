@@ -32,14 +32,6 @@ class NeosegParameters
    QString getReferenceImage();
    int getReferenceImageIndex();
    QStringList getReferenceImageValues();
-
-   // Using FA
-   void setUsingFA(bool usingFA);
-   bool getUsingFA();
-
-   // Using AD
-   void setUsingAD(bool usingAD);
-   bool getUsingAD();
    
    // Filter method 
    void setFilterMethod(QString filterMethod);
@@ -102,8 +94,6 @@ class NeosegParameters
    void setInitialParzenKernelWidth(double initialParzenKernelWidth);
    double getInitialParzenKernelWidth();
 
-
-
    private:
 
    // Reference Image 
@@ -111,59 +101,64 @@ class NeosegParameters
    QString m_referenceImage_default;
    QString m_referenceImage;
 
-   // Using FA
-   bool m_usingFA_default; 
-   bool m_usingFA; 
-
-   // Using AD
-   bool m_usingAD_default; 
-   bool m_usingAD; 
-
+   // Filter Method
    QStringList m_filterMethod_values; 
    QString m_filterMethod_default;
    QString m_filterMethod;
 
+   // Filter Iterations
    int m_filterIterations_min;
    int m_filterIterations_max;
    int m_filterIterations_default;
    int m_filterIterations;
 
+   // filter Time Step 
    double m_filterTimeStep_min;
    double m_filterTimeStep_max;
    double m_filterTimeStep_default;   
    double m_filterTimeStep;
 
+   // Prior Threshold
    double m_priorThreshold_min;
    double m_priorThreshold_max;
    double m_priorThreshold_default;
    double m_priorThreshold;
 
+   // Max Bias Degree
    int m_maxBiasDegree_default;
    int m_maxBiasDegree_min;
    int m_maxBiasDegree_max;
    int m_maxBiasDegree;
 
+   // Priors 
    double m_prior_min; 
    double m_prior_max; 
 
+   // Prior1
    double m_prior1_default;
    double m_prior1;
 
+   // Prior 2
    double m_prior2_default;
    double m_prior2;
 
+   // Prior 3
    double m_prior3_default;
    double m_prior3;
 
+   // Prior 4
    double m_prior4_default;
    double m_prior4;
 
+   // Prior 5
    double m_prior5_default;
    double m_prior5;
 
+   // Refinement
    bool m_refinement_default; 
    bool m_refinement;
 
+   // Initial Parzen Kernel Width
    double m_initialParzenKernelWidth_min;
    double m_initialParzenKernelWidth_max;
    double m_initialParzenKernelWidth_default;

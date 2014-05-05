@@ -6,12 +6,6 @@ NeosegParameters::NeosegParameters()
    m_referenceImage_default = m_referenceImage_values[0];
    m_referenceImage = m_referenceImage_default;
 
-   m_usingFA_default = false; 
-   m_usingFA = m_usingFA_default;
-
-   m_usingAD_default = true; 
-   m_usingAD = m_usingAD_default;
-
    m_filterMethod_values << "curvature flow" << "grad aniso diffusion"; 
    m_filterMethod_default = m_filterMethod_values[0];
    m_filterMethod = m_filterMethod_default;
@@ -135,25 +129,6 @@ QStringList NeosegParameters::getReferenceImageValues()
    return m_referenceImage_values; 
 }
 
-// Using FA
-void NeosegParameters::setUsingFA(bool usingFA)
-{
-   m_usingFA = usingFA; 
-}
-bool NeosegParameters::getUsingFA()
-{
-   return m_usingFA; 
-}
-
-// Using AD
-void NeosegParameters::setUsingAD(bool usingAD)
-{
-   m_usingAD = usingAD; 
-}
-bool NeosegParameters::getUsingAD()
-{
-   return m_usingAD; 
-}
 
 // Filter method 
 bool NeosegParameters::checkFilterMethod(QString filterMethod)
@@ -328,4 +303,5 @@ double NeosegParameters::getInitialParzenKernelWidth()
 {
    return m_initialParzenKernelWidth;
 }
+
 

@@ -13,6 +13,18 @@ PipelineParameters::PipelineParameters()
    m_atlasPopulationDirectory_default = env.value("NEOSEG_PIPELINE_ATLAS_POPULATION_DIRECTORY", QString::null);   
    m_atlasPopulationDirectory = m_atlasPopulationDirectory_default; 
 
+   m_precision = 10000;
+   QStringList atlases = QDir(m_atlasPopulationDirectory).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+   QStringList::iterator it; 
+   for(it = atlases.begin(); it != atlases.end(); it++ )
+   {
+      if(checkAtlas(*it))
+      {
+         m_selectedAtlases << *it;
+      }
+   }
+
+
    m_smoothing_values << "gaussian" << "curve evolution";
    m_smoothing_default = m_smoothing_values[0];
    m_smoothing = m_smoothing_default;
@@ -43,16 +55,35 @@ PipelineParameters::PipelineParameters()
    m_includingFA = m_includingFA_default; 
 
    // FA Weight
+   m_FAWeight_min = 0;
    m_FAWeight_default = 1.5; 
    m_FAWeight = m_FAWeight_default; 
 
    // FA Smoothing Size 
+   m_FASmoothingSize_min = 0; 
    m_FASmoothingSize_default = 1; 
    m_FASmoothingSize = m_FASmoothingSize_default; 
    
+   // Usign FA
+   m_usingFA_default = false; 
+   m_usingFA = m_usingFA_default;
+
+   // Using AD
+   m_usingAD_default = true; 
+   m_usingAD = m_usingAD_default;
+
    // Computing 3-labels Seg 
    m_computing3LabelsSeg_default = true; 
    m_computing3LabelsSeg = m_computing3LabelsSeg_default;
+
+   // Reassigning White Matter
+   m_reassigningWhiteMatter_default = true; 
+   m_reassigningWhiteMatter = m_reassigningWhiteMatter_default;
+
+   // Size Threshold 
+   m_sizeThreshold_min = 0; 
+   m_sizeThreshold_default = 200; 
+   m_sizeThreshold = m_sizeThreshold_default; 
 
    // Overwritting
    m_overwriting_default = 0;
@@ -82,6 +113,7 @@ PipelineParameters::PipelineParameters()
 
    m_executablePaths = new ExecutablePaths(); 
 
+   m_executablePaths->setDefaultExecutablePath("ImageStat");
    m_executablePaths->setDefaultExecutablePath("SegPostProcessCLP");
    m_executablePaths->setDefaultExecutablePath("N4ITKBiasFieldCorrection");
    m_executablePaths->setDefaultExecutablePath("ANTS");
@@ -96,9 +128,28 @@ PipelineParameters::PipelineParameters()
    m_executablePaths->setDefaultExecutablePath("HistogramMatching");
    m_executablePaths->setExecutablePath("SpreadFA", "/work/mcherel/project/neosegPipeline/spreadFA/bin/SpreadFA");
    m_executablePaths->setExecutablePath("neoseg", "/work/mcherel/project/neoseg/bin/bin_lessRefinement/neoseg");
+   m_executablePaths->setExecutablePath("ReassignWhiteMatter", "/work/mcherel/project/neosegPipeline/reassignWhiteMatter/bin/ReassignWhiteMatter");
 }
 
 // Checking Functions
+
+bool PipelineParameters::isSuperior(int value, int min)
+{
+   if(value>min)
+   {
+      return true; 
+   }
+   return false; 
+}
+
+bool PipelineParameters::isSuperior(double value, double min)
+{
+   if(value>min)
+   {
+      return true; 
+   }
+   return false; 
+}
 
 bool PipelineParameters::isBetween(int value, int min, int max)
 {
@@ -124,7 +175,7 @@ bool PipelineParameters::isIn(QString item, QStringList list)
    QStringList::iterator it; 
    for(it=list.begin(); it!=list.end(); ++it)
    {
-      if(item.compare(*it, Qt::CaseInsensitive))
+      if(item.compare(*it, Qt::CaseInsensitive)==0)
       {
          return true;
       }
@@ -198,7 +249,7 @@ bool PipelineParameters::checkOutput(QString output)
 }
 void PipelineParameters::setOutput(QString output) 
 {
-   m_output=output;
+   m_output = QFileInfo(output).absoluteFilePath();
 }
 QString PipelineParameters::getOutput() 
 {
@@ -212,7 +263,7 @@ bool PipelineParameters::checkT1(QString T1)
 }
 void PipelineParameters::setT1(QString T1)
 {
-   m_T1=T1;
+   m_T1 = QFileInfo(T1).absoluteFilePath();
 }
 QString PipelineParameters::getT1()
 {
@@ -226,7 +277,7 @@ bool PipelineParameters::checkT2(QString T2)
 }
 void PipelineParameters::setT2(QString T2)
 {
-   m_T2=T2;
+   m_T2 = QFileInfo(T2).absoluteFilePath();
 }
 QString PipelineParameters::getT2()
 {
@@ -240,7 +291,7 @@ bool PipelineParameters::checkMask(QString mask)
 }
 void PipelineParameters::setMask(QString mask)
 {
-   m_mask=mask;
+   m_mask = QFileInfo(mask).absoluteFilePath();
 }
 QString PipelineParameters::getMask()
 {
@@ -254,7 +305,7 @@ bool PipelineParameters::checkDWI(QString DWI)
 }
 void PipelineParameters::setDWI(QString DWI)
 {
-   m_DWI=DWI;
+   m_DWI = QFileInfo(DWI).absoluteFilePath();
 }
 QString PipelineParameters::getDWI()
 {
@@ -268,7 +319,7 @@ bool PipelineParameters::checkb0(QString b0)
 }
 void PipelineParameters::setb0(QString b0)
 {
-   m_b0=b0;
+   m_b0 = QFileInfo(b0).absoluteFilePath();
 }
 QString PipelineParameters::getb0()
 {
@@ -354,7 +405,7 @@ QString PipelineParameters::getAtlasPopulationDirectory()
 // Selected Atlases
 void PipelineParameters::setSelectedAtlases(QStringList selectedAtlases) 
 {
-   m_selectedAtlases=selectedAtlases;
+   m_selectedAtlases = selectedAtlases;
 }
 QStringList PipelineParameters::getSelectedAtlases() 
 {
@@ -362,30 +413,30 @@ QStringList PipelineParameters::getSelectedAtlases()
 }
 
 // Atlas Population 
-std::map<QString,QFileInfoList> PipelineParameters::findAtlasFiles(QString atlas_name)
+QMap<QString,QFileInfoList> PipelineParameters::findAtlasFiles(QString atlas_name)
 {
-   std::map<QString,QFileInfoList> atlasFiles;
+   QMap<QString,QFileInfoList> atlasFiles;
  
    QDir* atlasPopulation_dir = new QDir(m_atlasPopulationDirectory);
    QString atlas_path = atlasPopulation_dir->filePath(atlas_name);
 
    QDir* atlas_dir = new QDir(atlas_path);
 
-   atlasFiles.insert(std::pair<QString,QFileInfoList>("T1",find(atlas_dir, "T1")));
-   atlasFiles.insert(std::pair<QString,QFileInfoList>("T2",find(atlas_dir, "T2")));
-   atlasFiles.insert(std::pair<QString,QFileInfoList>("seg",find(atlas_dir, "seg")));
-   atlasFiles.insert(std::pair<QString,QFileInfoList>("white",find(atlas_dir, "white")));
-   atlasFiles.insert(std::pair<QString,QFileInfoList>("gray",find(atlas_dir, "gray")));
-   atlasFiles.insert(std::pair<QString,QFileInfoList>("csf",find(atlas_dir, "csf")));
+   atlasFiles.insert("T1",find(atlas_dir, "T1"));
+   atlasFiles.insert("T2",find(atlas_dir, "T2"));
+   atlasFiles.insert("seg",find(atlas_dir, "seg"));
+   atlasFiles.insert("white",find(atlas_dir, "white"));
+   atlasFiles.insert("gray",find(atlas_dir, "gray"));
+   atlasFiles.insert("csf",find(atlas_dir, "csf"));
 
    return atlasFiles;
 }
 
-bool PipelineParameters::checkAtlas(QString atlas)
-{ 
-   std::map<QString,QFileInfoList> atlasFiles = findAtlasFiles(atlas);  
+bool PipelineParameters::checkAtlasFiles(QString atlas)
+{
+   QMap<QString,QFileInfoList> atlasFiles = findAtlasFiles(atlas);  
 
-   if ((atlasFiles["T1"]).size() == 1 && (atlasFiles["T2"]).size() == 1)
+   if ((atlasFiles["T1"]).size() == 1 || (atlasFiles["T2"]).size() == 1)
    {
       // Hard segmentation
       if ((atlasFiles["seg"]).size() == 1)
@@ -395,12 +446,56 @@ bool PipelineParameters::checkAtlas(QString atlas)
 
       // Soft segmentation
       if ((atlasFiles["white"]).size() == 1 && (atlasFiles["gray"]).size() == 1 && (atlasFiles["csf"]).size() == 1)
-      {
-         return true;
-      }      
+      {  
+         return true; 
+      }
    }
-   return false;
+   return false; 
 }
+
+bool PipelineParameters::checkAtlasRange(QString atlas)
+{
+   QMap<QString,QFileInfoList> atlasFiles = findAtlasFiles(atlas); 
+
+   if ((atlasFiles["white"]).size() == 1 && (atlasFiles["gray"]).size() == 1 && (atlasFiles["csf"]).size() == 1)
+   {
+      QString white_path = ((atlasFiles["white"])[0]).filePath(); 
+      QString gray_path = ((atlasFiles["gray"])[0]).filePath(); 
+      QString csf_path = ((atlasFiles["csf"])[0]).filePath(); 
+
+      MinMax<float> white_minMax(white_path.toStdString());  
+      MinMax<float> gray_minMax(gray_path.toStdString());  
+      MinMax<float> csf_minMax(csf_path.toStdString());  
+
+      float min_white = ((int)(white_minMax.GetMin())*m_precision)/m_precision; 
+      float max_white = ((int)(white_minMax.GetMax())*m_precision)/m_precision; 
+
+      float min_gray = ((int)(gray_minMax.GetMin())*m_precision)/m_precision; 
+      float max_gray = ((int)(gray_minMax.GetMax())*m_precision)/m_precision; 
+
+      float min_csf = ((int)(csf_minMax.GetMin())*m_precision)/m_precision; 
+      float max_csf = ((int)(csf_minMax.GetMax())*m_precision)/m_precision;
+
+      if( min_white < 0 || max_white > 1 || min_gray < 0 || max_gray > 1 || min_csf < 0 || max_csf > 1 )
+      {
+         return false; 
+      }
+   } 
+   return true;
+}
+
+
+bool PipelineParameters::checkAtlas(QString atlas)
+{ 
+   QMap<QString,QFileInfoList> atlasFiles = findAtlasFiles(atlas);  
+
+   if(checkAtlasFiles(atlas) && checkAtlasRange(atlas))
+   {
+      return true; 
+   }
+   return false; 
+}
+
 void PipelineParameters::initializeAtlasPopulation() 
 {
    m_atlasPopulation.clear(); 
@@ -416,10 +511,25 @@ void PipelineParameters::initializeAtlasPopulation()
 
       atlas.name=*it;
 
-      std::map<QString,QFileInfoList> atlasFiles = findAtlasFiles(atlas_path); 
+      QMap<QString,QFileInfoList> atlasFiles = findAtlasFiles(atlas_path); 
 
-      atlas.T1 = (atlasFiles["T1"])[0].filePath();
-      atlas.T2 = (atlasFiles["T2"])[0].filePath();
+      if((atlasFiles["T1"]).size() > 0)
+      {
+         atlas.T1 = (atlasFiles["T1"])[0].filePath();
+      }
+      else
+      {
+         atlas.T1 = ""; 
+      }
+ 
+      if((atlasFiles["T2"]).size() > 0)
+      {
+         atlas.T2 = (atlasFiles["T2"])[0].filePath();
+      }
+      else
+      {
+         atlas.T2 = ""; 
+      }
 
       if( (atlasFiles["seg"]).size()==1 )
       {
@@ -430,9 +540,9 @@ void PipelineParameters::initializeAtlasPopulation()
 
       if( (atlasFiles["white"]).size()==1 && (atlasFiles["gray"]).size()==1 && (atlasFiles["csf"]).size()==1 )
       {
-         atlas.white=(atlasFiles["white"])[0].filePath();
-         atlas.gray=(atlasFiles["gray"])[0].filePath();
-         atlas.csf=(atlasFiles["csf"])[0].filePath();
+         atlas.white = (atlasFiles["white"])[0].filePath();
+         atlas.gray = (atlasFiles["gray"])[0].filePath();
+         atlas.csf = (atlasFiles["csf"])[0].filePath();
          atlas.probabilistic=1;
       }
 
@@ -443,7 +553,7 @@ void PipelineParameters::initializeAtlasPopulation()
 }
 void PipelineParameters::setAtlasPopulation(std::vector<Atlas> atlasPopulation)
 {
-   m_atlasPopulation=atlasPopulation;
+   m_atlasPopulation = atlasPopulation;
 }
 std::vector<Atlas> PipelineParameters::getAtlasPopulation()
 {
@@ -579,6 +689,10 @@ bool PipelineParameters::getIncludingFA()
 }
 
 // FA Weight 
+bool PipelineParameters::checkFAWeight(double FAWeight)
+{
+   return isSuperior(FAWeight, m_FAWeight_min);
+}
 void PipelineParameters::setFAWeight(double FAWeight)
 {
    m_FAWeight = FAWeight; 
@@ -589,6 +703,10 @@ double PipelineParameters::getFAWeight()
 }
 
 // FA Smoothing Size
+bool PipelineParameters::checkFASmoothingSize(double FASmoothingSize)
+{
+   return isSuperior(FASmoothingSize, m_FASmoothingSize_min);
+}
 void PipelineParameters::setFASmoothingSize(double FASmoothingSize)
 {
    m_FASmoothingSize = FASmoothingSize; 
@@ -596,6 +714,26 @@ void PipelineParameters::setFASmoothingSize(double FASmoothingSize)
 double PipelineParameters::getFASmoothingSize()
 {
    return m_FASmoothingSize; 
+}
+
+// Using FA
+void PipelineParameters::setUsingFA(bool usingFA)
+{
+   m_usingFA = usingFA; 
+}
+bool PipelineParameters::getUsingFA()
+{
+   return m_usingFA; 
+}
+
+// Using AD
+void PipelineParameters::setUsingAD(bool usingAD)
+{
+   m_usingAD = usingAD; 
+}
+bool PipelineParameters::getUsingAD()
+{
+   return m_usingAD; 
 }
 
 // Computing 3-Labels Segmentation
@@ -607,6 +745,30 @@ bool PipelineParameters::getComputing3LabelsSeg()
 {
    return m_computing3LabelsSeg;
 } 
+
+// Reassigning White Matter 
+void PipelineParameters::setReassigningWhiteMatter(bool reassigningWhiteMatter)
+{
+   m_reassigningWhiteMatter = reassigningWhiteMatter; 
+}
+bool PipelineParameters::getReassigningWhiteMatter()
+{
+   return m_reassigningWhiteMatter; 
+}
+
+// White Threshold 
+bool PipelineParameters::checkSizeThreshold(int sizeThreshold)
+{
+   return isSuperior(sizeThreshold, m_sizeThreshold_min);
+}
+void PipelineParameters::setSizeThreshold(int sizeThreshold)
+{
+   m_sizeThreshold = sizeThreshold; 
+}
+int PipelineParameters::getSizeThreshold()
+{
+   return m_sizeThreshold; 
+}
 
 // Overwriting
 void PipelineParameters::setOverwriting(bool overwriting)
@@ -730,11 +892,11 @@ QString PipelineParameters::checkImages()
       {
          errors += "You cannot include the FA in the probability maps without a DWI\n"; 
       }
-      if(m_neosegParameters->getUsingFA())
+      if(m_usingFA)
       {
          errors += "You cannot use the FA in Neoseg without a DWI\n"; 
       }
-      if(m_neosegParameters->getUsingAD())
+      if(m_usingAD)
       {
          errors += "You cannot use the AD in Neoseg without a DWI\n"; 
       }      
@@ -746,11 +908,11 @@ QString PipelineParameters::checkImages()
       {
          errors += "You cannot include the FA in the probability maps without a b0\n"; 
       }
-      if(m_neosegParameters->getUsingFA())
+      if(m_usingFA)
       {
          errors += "You cannot use the FA in Neoseg without a b0\n"; 
       }
-      if(m_neosegParameters->getUsingAD())
+      if(m_usingAD)
       {
          errors += "You cannot use the AD in Neoseg without a b0\n"; 
       }      
