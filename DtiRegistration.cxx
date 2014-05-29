@@ -23,7 +23,6 @@ void DtiRegistration::initializeScript()
    defineExecutable("ImageMath");
    defineExecutable("bet2");
    defineExecutable("dtiprocess");
-   defineExecutable("HistogramMatching");
 
    m_script += "logger = logging.getLogger('NeosegPipeline')\n\n";
 

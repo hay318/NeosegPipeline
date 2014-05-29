@@ -8,7 +8,9 @@ struct Neo {
 QString prefix; 
 QString T1;
 QString T2; 
+QString T2Modified; 
 QString mask;
+QString dilatedMask;
 QString DWI;
 QString b0;
 QString FA;

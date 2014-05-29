@@ -25,6 +25,7 @@ class NeosegExecution : public Script
    NeosegExecution(QString module);
 
    // Setting Parameters
+   void setNewAtlas(bool newAtlas); 
    void setAtlas(QString atlas);  
    void setUsingFA(bool usingFA);  
    void setUsingAD(bool usingAD);  
@@ -52,6 +53,7 @@ class NeosegExecution : public Script
    private:
 
    // Atlas
+   bool m_newAtlas;
    QString m_atlas; 
 
    // Using FA

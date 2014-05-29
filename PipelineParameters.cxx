@@ -54,6 +54,17 @@ PipelineParameters::PipelineParameters()
    m_includingFA_default = true; 
    m_includingFA = m_includingFA_default; 
 
+   // FA Shift
+   m_FAShift_min = 0; 
+   m_FAShift_max = 1; 
+   m_FAShift_default = 0.3; 
+   m_FAShift = m_FAShift_default;
+   
+   // FA Sigma Scale 
+   m_FASigmaScale = 0; 
+   m_FASigmaScale_default = 10; 
+   m_FASigmaScale = m_FASigmaScale_default; 
+
    // FA Weight
    m_FAWeight_min = 0;
    m_FAWeight_default = 1.5; 
@@ -119,15 +130,17 @@ PipelineParameters::PipelineParameters()
    m_executablePaths->setDefaultExecutablePath("ANTS");
    m_executablePaths->setDefaultExecutablePath("ResampleVolume2");
    m_executablePaths->setDefaultExecutablePath("ImageMath");
+   m_executablePaths->setDefaultExecutablePath("ImageStat");
    m_executablePaths->setDefaultExecutablePath("ITKTransformTools");
    m_executablePaths->setDefaultExecutablePath("dtiestim");
    m_executablePaths->setDefaultExecutablePath("dtiprocess");
    m_executablePaths->setDefaultExecutablePath("bet2");
    m_executablePaths->setDefaultExecutablePath("unu");
    m_executablePaths->setDefaultExecutablePath("InsightSNAP");
-   m_executablePaths->setDefaultExecutablePath("HistogramMatching");
    m_executablePaths->setExecutablePath("SpreadFA", "/work/mcherel/project/neosegPipeline/spreadFA/bin/SpreadFA");
-   m_executablePaths->setExecutablePath("neoseg", "/work/mcherel/project/neoseg/bin/bin_lessRefinement/neoseg");
+   m_executablePaths->setExecutablePath("Neoseg", "/work/mcherel/project/neoseg/bin/bin_lessRefinement/neoseg");
+   m_executablePaths->setExecutablePath("CleanRingMask", "/work/mcherel/project/neosegPipeline/cleanRingMask/bin/CleanRingMask");
+   m_executablePaths->setExecutablePath("WeightedLabelsAverage", "/work/mcherel/project/neosegPipeline/weightedLabelsAverage/bin/WeightedLabelsAverage");
    m_executablePaths->setExecutablePath("ReassignWhiteMatter", "/work/mcherel/project/neosegPipeline/reassignWhiteMatter/bin/ReassignWhiteMatter");
 }
 
@@ -249,7 +262,14 @@ bool PipelineParameters::checkOutput(QString output)
 }
 void PipelineParameters::setOutput(QString output) 
 {
-   m_output = QFileInfo(output).absoluteFilePath();
+   if(!output.isEmpty())
+   {
+      m_output = QFileInfo(output).absoluteFilePath();
+   }
+   else
+   {
+      m_output = ""; 
+   }
 }
 QString PipelineParameters::getOutput() 
 {
@@ -263,7 +283,14 @@ bool PipelineParameters::checkT1(QString T1)
 }
 void PipelineParameters::setT1(QString T1)
 {
-   m_T1 = QFileInfo(T1).absoluteFilePath();
+   if(!T1.isEmpty())
+   {
+      m_T1 = QFileInfo(T1).absoluteFilePath();
+   }
+   else
+   {
+      m_T1 = ""; 
+   }
 }
 QString PipelineParameters::getT1()
 {
@@ -277,7 +304,14 @@ bool PipelineParameters::checkT2(QString T2)
 }
 void PipelineParameters::setT2(QString T2)
 {
-   m_T2 = QFileInfo(T2).absoluteFilePath();
+   if(!T2.isEmpty())
+   {
+      m_T2 = QFileInfo(T2).absoluteFilePath();
+   }
+   else
+   {
+      m_T2 = ""; 
+   }
 }
 QString PipelineParameters::getT2()
 {
@@ -291,7 +325,14 @@ bool PipelineParameters::checkMask(QString mask)
 }
 void PipelineParameters::setMask(QString mask)
 {
-   m_mask = QFileInfo(mask).absoluteFilePath();
+   if(!mask.isEmpty())
+   {
+      m_mask = QFileInfo(mask).absoluteFilePath();
+   }
+   else
+   {
+      m_mask = ""; 
+   }
 }
 QString PipelineParameters::getMask()
 {
@@ -305,7 +346,14 @@ bool PipelineParameters::checkDWI(QString DWI)
 }
 void PipelineParameters::setDWI(QString DWI)
 {
-   m_DWI = QFileInfo(DWI).absoluteFilePath();
+   if(!DWI.isEmpty())
+   {
+      m_DWI = QFileInfo(DWI).absoluteFilePath();
+   }
+   else
+   {
+      m_DWI = ""; 
+   }
 }
 QString PipelineParameters::getDWI()
 {
@@ -319,7 +367,14 @@ bool PipelineParameters::checkb0(QString b0)
 }
 void PipelineParameters::setb0(QString b0)
 {
-   m_b0 = QFileInfo(b0).absoluteFilePath();
+   if(!b0.isEmpty())
+   {
+      m_b0 = QFileInfo(b0).absoluteFilePath();
+   }
+   else
+   {
+      m_b0 = ""; 
+   }
 }
 QString PipelineParameters::getb0()
 {
@@ -688,6 +743,34 @@ bool PipelineParameters::getIncludingFA()
    return m_includingFA;
 }
 
+// FA Shift
+bool PipelineParameters::checkFAShift(double FAShift)
+{
+   return isBetween(FAShift, m_FAShift_min, m_FAShift_max);
+}
+void PipelineParameters::setFAShift(double FAShift)
+{
+   m_FAShift = FAShift; 
+}
+double PipelineParameters::getFAShift()
+{
+   return m_FAShift; 
+}
+
+// FA Sigma Scale
+bool PipelineParameters::checkFASigmaScale(double FASigmaScale)
+{
+   return isSuperior(FASigmaScale, m_FASigmaScale_min);
+}
+void PipelineParameters::setFASigmaScale(double FASigmaScale)
+{
+   m_FASigmaScale = FASigmaScale; 
+}
+double PipelineParameters::getFASigmaScale()
+{
+   return m_FASigmaScale; 
+}
+
 // FA Weight 
 bool PipelineParameters::checkFAWeight(double FAWeight)
 {
@@ -917,6 +1000,7 @@ QString PipelineParameters::checkImages()
          errors += "You cannot use the AD in Neoseg without a b0\n"; 
       }      
    }
+
    return errors;
 }
 

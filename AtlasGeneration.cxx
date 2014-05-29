@@ -38,6 +38,14 @@ void AtlasGeneration::setIncludingFA(bool includingFA)
 {
    m_includingFA = includingFA;
 }
+void AtlasGeneration::setFAShift(double FAShift)
+{
+   m_FAShift = FAShift;
+}
+void AtlasGeneration::setFASigmaScale(double FASigmaScale)
+{
+   m_FASigmaScale = FASigmaScale;
+}
 void AtlasGeneration::setFAWeight(double FAWeight)
 {
    m_FAWeight = FAWeight;
@@ -133,11 +141,18 @@ void AtlasGeneration::generateTemplate(TemplateImage& templateImage)
       } 
    }
 
-   QString average = m_module_dir->filePath(templateImage.name + ".nrrd"); 
+   QString average = templateImage.dir->filePath(templateImage.name + ".nrrd"); 
    templateImage.output = templateImage.name;
-   m_outputs.insert(templateImage.output, average);
+   m_outputs.insert(templateImage.name + "Average", average);
 
-   m_argumentsList << "'-outfile'" << templateImage.output;
+   m_argumentsList << "'-type'" << "'float'" << "'-outfile'" << templateImage.name + "Average";
+   execute();
+
+   QString rescaledAverage = m_module_dir->filePath(templateImage.name + ".nrrd");  
+
+   m_log = "Rescaling template " + templateImage.name;
+   m_outputs.insert(templateImage.output,rescaledAverage);
+   m_argumentsList << "ImageMath" << templateImage.name + "Average" << "'-rescale'" << "'0, 255'" << "'-outfile'" << templateImage.name;
    execute();
 }
 
@@ -163,7 +178,7 @@ void AtlasGeneration::generateWeightedAveragedLabels()
    m_script += "\tif checkFileExistence(parameters_path)==False:\n";   
    m_script += "\t\tlogger.info('- Writing the XML file...')\n";
    m_script += "\t\tparameters = Element('WEIGHTED-AVERAGED-LABELS-PARAMETERS')\n";
-   addSubElement(m_script, "parameters", "Input", "INPUT", m_neo.T1);
+   addSubElement("parameters", "Input", "INPUT", m_neo.T1);
    m_script += "\t\tatlasPopulation = SubElement(parameters, 'ATLAS-POPULATION')\n";
 
    std::vector<Atlas>::iterator it;
@@ -176,29 +191,29 @@ void AtlasGeneration::generateWeightedAveragedLabels()
       if(atlas.probabilistic)
       {
          m_script += "\t\tatlas = SubElement(atlasPopulation, 'PROBABILISTIC-ATLAS')\n";
-         addSubElement(m_script, "atlas", "image", "IMAGE", (*it).T2); 
-         addSubElement(m_script, "atlas", "seg", "WHITE", (*it).white);
-         addSubElement(m_script, "atlas", "seg", "GRAY", (*it).gray);
-         addSubElement(m_script, "atlas", "seg", "CSF", (*it).csf);
+         addSubElement("atlas", "image", "IMAGE", (*it).T2); 
+         addSubElement("atlas", "seg", "WHITE", (*it).white);
+         addSubElement("atlas", "seg", "GRAY", (*it).gray);
+         addSubElement("atlas", "seg", "CSF", (*it).csf);
       }
 
       else
       {
          m_script += "\t\tatlas = SubElement(atlasPopulation, 'ATLAS')\n";
-         addSubElement(m_script, "atlas", "image", "IMAGE", (*it).T2); 
-         addSubElement(m_script, "atlas", "seg", "SEG", (*it).seg);
+         addSubElement("atlas", "image", "IMAGE", (*it).T2); 
+         addSubElement("atlas", "seg", "SEG", (*it).seg);
       }
    }
    
    m_script += "\t\tweights = SubElement(parameters, 'WEIGHTS')\n";
-   addSubElement(m_script, "weights", "computingWeights", "COMPUTING-WEIGHTS", QString::number(m_computingWeights));
-   addSubElement(m_script, "weights", "neightborhoodRadius", "NEIGHTBORHOOD-RADIUS", QString::number(m_neightborhoodRadius));
-   addSubElement(m_script, "weights", "neightborhoodRadiusUnit", "NEIGHTBORHOOD-RADIUS-UNIT", m_neightborhoodRadiusUnit);
+   addSubElement("weights", "computingWeights", "COMPUTING-WEIGHTS", QString::number(m_computingWeights));
+   addSubElement("weights", "neightborhoodRadius", "NEIGHTBORHOOD-RADIUS", QString::number(m_neightborhoodRadius));
+   addSubElement("weights", "neightborhoodRadiusUnit", "NEIGHTBORHOOD-RADIUS-UNIT", m_neightborhoodRadiusUnit);
 
    m_script += "\t\toutputs = SubElement(parameters, 'OUTPUTS')\n";
-   addSubElement(m_script, "outputs", "white", "WHITE-AVERAGE", whiteAverage);
-   addSubElement(m_script, "outputs", "gray", "GRAY-AVERAGE", grayAverage);
-   addSubElement(m_script, "outputs", "csf", "CSF-AVERAGE", csfAverage);
+   addSubElement("outputs", "white", "WHITE-AVERAGE", whiteAverage);
+   addSubElement("outputs", "gray", "GRAY-AVERAGE", grayAverage);
+   addSubElement("outputs", "csf", "CSF-AVERAGE", csfAverage);
 
    m_script += "\t\tXML = xml.dom.minidom.parseString(ElementTree.tostring(parameters))\n";
    m_script += "\t\tpretty_xml_as_string = XML.toprettyxml()\n";
@@ -244,8 +259,8 @@ void AtlasGeneration::extractWMFromFA()
    QString spreadFA = FA_dir->filePath(m_prefix + "FA" + "-spread" + m_suffix + ".nrrd");
    m_outputs.insert("spreadFA", spreadFA);
  
-   m_argumentsList << "SpreadFA" << "rescaledFA" << "spreadFA";
-   m_log = "- Spreading the FA...";
+   m_argumentsList << "SpreadFA" << "'--input'" << "rescaledFA" << "'--shift'" << QString::number(m_FAShift) << "'--sigma'" << QString::number(m_FASigmaScale) << "'--output'" << "spreadFA";
+   m_log = "- Spreading the FA";
    execute();
    m_unnecessaryFiles << spreadFA; 
 
@@ -254,7 +269,7 @@ void AtlasGeneration::extractWMFromFA()
    m_outputs.insert("smoothedFA", smoothedFA);
  
    m_argumentsList << "ImageMath" << "spreadFA" << "'-smooth'"<< "'-gauss'" << "'-size'" << "'" + QString::number(m_FASmoothingSize) + "'" << "'-type'" << "'float'" << "'-outfile'" << "smoothedFA";
-   m_log = "- Smoothing the FA (type=gauss, size=1)";
+   m_log = "- Smoothing the FA (type=gauss, size=" + QString::number(m_FASmoothingSize) + ")";
    execute();
    m_unnecessaryFiles << smoothedFA; 
 
@@ -280,7 +295,7 @@ void AtlasGeneration::extractWMFromFA()
    QString weightedFA = FA_dir->filePath(m_prefix + "FA" + "-weighted" + m_suffix + ".nrrd");
    m_outputs.insert("weightedFA", weightedFA);
    m_argumentsList << "ImageMath" << "maskedFA" << "'-constOper'" << "'2," + QString::number(m_FAWeight) + "'" << "'-type'" << "'float'" << "'-outfile'" << "weightedFA";
-   m_log = "- Multiplying the FA by 1.5";  
+   m_log = "- Multiplying the FA by " + QString::number(m_FAWeight);  
    execute(); 
    m_unnecessaryFiles << weightedFA; 
 
@@ -322,21 +337,8 @@ void AtlasGeneration::generatePriorProbability(PriorProbability& priorProbabilit
    m_argumentsList << "ImageMath" << priorProbability.input << "'-mask'"<< "mask" << "'-type'" << "'float'" << "'-outfile'" << priorProbability.output;
    execute();
    m_unnecessaryFiles << maskedProbability;
-}
 
-void AtlasGeneration::preNormalizePriorProbability(PriorProbability& priorProbability)
-{
-   priorProbability.input = priorProbability.output;
-   priorProbability.output = priorProbability.name + "_preNormalizedProbability";
-   QString preNormalizedProbability = priorProbability.dir->filePath(priorProbability.name + "-preNormalizedProbability" + m_suffix + ".nrrd");
-
-   m_log = "- Dividing the probability by the sum of the probabilities";
-   m_outputs.insert(priorProbability.output, preNormalizedProbability); 
-   m_argumentsList_1 << "unu" << "'2op'" << "'/'" << priorProbability.input << "sumProbabilities" << "'-t'" << "'float'";
-   m_argumentsList_2 << "unu" << "'save'" << "'-e'" << "'gzip'" << "'-f'" << "'nrrd'" << "'-o'" << priorProbability.output;
-   executePipe();
-   m_unnecessaryFiles << preNormalizedProbability;
-
+   // Rescaling P`1robability
    priorProbability.input = priorProbability.output;
    priorProbability.output = priorProbability.name + "_rescaledProbability";
    QString rescaledProbability = priorProbability.dir->filePath(priorProbability.name + "-rescaledProbability" + m_suffix + ".nrrd");
@@ -346,24 +348,6 @@ void AtlasGeneration::preNormalizePriorProbability(PriorProbability& priorProbab
    m_argumentsList << "ImageMath" << priorProbability.input << "'-constOper'"<< "'2,255'" << "'-outfile'" << priorProbability.output;
    execute(); 
    m_unnecessaryFiles << rescaledProbability;
-}
-
-void AtlasGeneration::computeSumProbabilities()
-{
-   QString sumProbabilities = m_priorProbabilities_dir->filePath("sumProbabilities" + m_suffix + ".nrrd");
-   m_outputs.insert("sumProbabilities", sumProbabilities);
-
-   m_log = "- Computing the sum of the probabilities"; 
-   m_argumentsList_1 << "unu" << "'3op'" << "'+'" << "white_maskedProbability" << "gray_maskedProbability" << "csf_maskedProbability" << "'-t'" << "'float'";
-   m_argumentsList_2 << "unu" << "'save'" << "'-e'" << "'gzip'" << "'-f'" << "'nrrd'" << "'-o'" << "sumProbabilities";
-   executePipe();
-
-   m_log = "- Replacing 0 by 1 in the sum(to be able to divide)";
-   m_argumentsList_1 << "unu" << "'2op'" << "'if'" << "sumProbabilities" << "'1'" << "'-t'" << "'float'";
-   m_argumentsList_2 << "unu" << "'save'" << "'-e'" << "'gzip'" << "'-f'" << "'nrrd'" << "'-o'" << "sumProbabilities";
-   executePipe(); 
-
-   m_unnecessaryFiles << sumProbabilities;
 }
 
 void AtlasGeneration::computeRest()
@@ -500,22 +484,6 @@ void AtlasGeneration::implementRun()
    m_script += "\tlogger.info('Computing csf probability :')\n";
    generatePriorProbability(m_csf);
 
-   m_script += "\t# Compute Sum Of Probabilities #\n";
-   m_script += "\tlogger.info('Computing the sum of the probabilities :')\n"; 
-   computeSumProbabilities();
-
-   m_script += "\t# Prenormalize White Probability #\n";
-   m_script += "\tlogger.info('Prenormalizing white probability :')\n";
-   preNormalizePriorProbability(m_white);
-
-   m_script += "\t# Prenormalize Gray Probability #\n";
-   m_script += "\tlogger.info('Prenormalizing gray probability :')\n";
-   preNormalizePriorProbability(m_gray);
-
-   m_script += "\t# Prenormalize CSF Probability #\n";
-   m_script += "\tlogger.info('Prenormalizing CSF probability :')\n";
-   preNormalizePriorProbability(m_csf);
-
    m_script += "\t# Compute Rest Probability #\n"; 
    m_script += "\tlogger.info('Computing rest probability :')\n"; 
    computeRest(); 
@@ -528,8 +496,6 @@ void AtlasGeneration::implementRun()
    m_script += "\tlogger.info('Copying final gray probability...')\n"; 
    copyFinalPriorProbability(m_gray);
 
-   std::cout<<"15"<<std::endl;
-
    m_script += "\t# Copy CSF Probability #\n";
    m_script += "\tlogger.info('Copying final csf probability...')\n"; 
    copyFinalPriorProbability(m_csf);
@@ -537,7 +503,6 @@ void AtlasGeneration::implementRun()
    m_script += "\t# Copy Rest Probability #\n";
    m_script += "\tlogger.info('Copying final rest probability...')\n"; 
    copyFinalPriorProbability(m_rest);
-
 }
 
 void AtlasGeneration::update()

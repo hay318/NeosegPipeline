@@ -8,6 +8,7 @@ struct Atlas {
 QString name;
 QString T1;
 QString T2;
+QString mask;
 bool probabilistic;
 QString seg; 
 QString white;

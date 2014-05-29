@@ -9,10 +9,10 @@ ExecutablePaths::ExecutablePaths()
    m_splitPath.prepend(".");
 
    // Executables with version
-   m_executables_withVersionLongFlag << "SegPostProcessCLP" << "N4ITKBiasFieldCorrection" << "dtiestim" << "dtiprocess" << "ResampleVolume2";
+   m_executables_withVersionLongFlag << "SegPostProcessCLP" << "N4ITKBiasFieldCorrection" << "dtiestim" << "dtiprocess" << "ResampleVolume2" << "WeightedLabelsAverage" << "ReassignWhiteMatter";
    m_executables_withVersionShortFlag << "ImageMath";
    m_executables_withVersionArgument << "ITKTransformTools";
-   m_executables_withoutVersionFlag << "bet2" << "ANTS" << "ImageMath" << "SNAP" << "unu";
+   m_executables_withoutVersionFlag << "bet2" << "ANTS" << "ImageMath" << "SNAP" << "unu" << "Neoseg";
 }
 
 void ExecutablePaths::setProgramPath(QString programPath)
@@ -21,12 +21,12 @@ void ExecutablePaths::setProgramPath(QString programPath)
    m_splitPath.prepend(m_currentDirectory); 
 }
 
-QString ExecutablePaths::findExecutablePath(QStringList splitPath, QString executableName)
+QString ExecutablePaths::findExecutablePath(QString executableName)
 {
    QStringList::iterator it;
-   for(it=m_splitPath.begin(); it!=m_splitPath.end(); ++it)
+   for(it = m_splitPath.begin(); it != m_splitPath.end(); ++it)
    {
-      if(QDir(*it).exists(executableName))
+      if(QFileInfo(QDir(*it).filePath(executableName)).isExecutable())
       {
          return QDir(*it).filePath(executableName);
       }
@@ -82,12 +82,10 @@ bool ExecutablePaths::checkExecutablePath(QString executable_name, QString execu
 
    if(output.contains(subString, Qt::CaseInsensitive))
    {
-      std::cout<<executable_name.toStdString()<<" is valid"<<std::endl;
       return true;
    }
    else
    {
-      std::cout<<executable_name.toStdString()<<" is not valid"<<std::endl;
       return false;
    }
  
@@ -95,11 +93,11 @@ bool ExecutablePaths::checkExecutablePath(QString executable_name, QString execu
 
 void ExecutablePaths::setDefaultExecutablePath(QString name)
 {
-   m_executables[name]=findExecutablePath(m_splitPath, name);
+   m_executables[name]=findExecutablePath(name);
 }
 QString ExecutablePaths::getDefaultExecutablePath(QString name)
 {
-   return findExecutablePath(m_splitPath, name);
+   return findExecutablePath(name);
 } 
 
 void ExecutablePaths::setExecutablePath(QString name, QString path)
@@ -125,6 +123,10 @@ QString ExecutablePaths::checkExecutables()
       {
          errors += name + " path is empty\n";
       }      
+      /*else if(!checkExecutablePath(name, path))
+      {
+         errors += name + " path does not seem to be the good one\n";
+      }*/
    }
 
    return errors;

@@ -3,7 +3,10 @@
 NeosegExecution::NeosegExecution(QString module) : Script(module)
 {
 }
-
+void NeosegExecution::setNewAtlas(bool newAtlas)
+{
+   m_newAtlas = newAtlas; 
+}
 void NeosegExecution::setAtlas(QString atlas)
 {
    m_atlas = atlas;
@@ -40,7 +43,7 @@ void NeosegExecution::initializeScript()
    importXmlModules();
   
    defineExecutable("ImageMath");
-   defineExecutable("neoseg");
+   defineExecutable("Neoseg");
    defineExecutable("ReassignWhiteMatter"); 
 
    m_script += "logger = logging.getLogger('NeosegPipeline')\n\n";
@@ -96,53 +99,54 @@ void NeosegExecution::writeXMLFile()
    m_script += "\t\tlogger.info('Writing the XML file...')\n";  
    m_script += "\t\tsegmentationParameters = Element('SEGMENTATION-PARAMETERS')\n";
 
-   addSubElement(m_script, "segmentationParameters", "suffix", "SUFFIX", m_prefix);
-   addSubElement(m_script, "segmentationParameters", "atlasDirectory", "ATLAS-DIRECTORY", m_atlas);
-   addSubElement(m_script, "segmentationParameters", "atlasOrientation", "ATLAS-ORIENTATION", "RAI");
-   addSubElement(m_script, "segmentationParameters", "atlasFormat", "ATLAS-FORMAT", "NRRD");
-   addSubElement(m_script, "segmentationParameters", "outputDirectory", "OUTPUT-DIRECTORY", m_module_path);
-   addSubElement(m_script, "segmentationParameters", "outputFormat", "OUTPUT-FORMAT", "NRRD");
+   addSubElement("segmentationParameters", "suffix", "SUFFIX", m_neo.prefix);
+   addSubElement("segmentationParameters", "atlasDirectory", "ATLAS-DIRECTORY", m_atlas);
+   addSubElement("segmentationParameters", "atlasOrientation", "ATLAS-ORIENTATION", "RAI");
+   addSubElement("segmentationParameters", "atlasFormat", "ATLAS-FORMAT", "NRRD");
+   addSubElement("segmentationParameters", "outputDirectory", "OUTPUT-DIRECTORY", m_module_path);
+   addSubElement("segmentationParameters", "outputFormat", "OUTPUT-FORMAT", "NRRD");
 
    m_script += "\t\tT2 = SubElement(segmentationParameters, 'IMAGE')\n";
-   addSubElement(m_script,"T2", "T2File", "FILE", m_neo.T2);   
-   addSubElement(m_script,"T2", "T2Orientation", "ORIENTATION", "RAI"); 
+   addSubElement("T2", "T2File", "FILE", m_neo.T2);   
+   addSubElement("T2", "T2Orientation", "ORIENTATION", "RAI"); 
 
    m_script += "\t\tT1 = SubElement(segmentationParameters, 'IMAGE')\n";
-   addSubElement(m_script,"T1", "T1File", "FILE", m_neo.T1);   
-   addSubElement(m_script,"T1", "T1Orientation", "ORIENTATION", "RAI");
+   addSubElement("T1", "T1File", "FILE", m_neo.T1);   
+   addSubElement("T1", "T1Orientation", "ORIENTATION", "RAI");
  
    if(m_usingFA)
    {
       m_script += "\t\tFA = SubElement(segmentationParameters, 'IMAGE')\n";
-      addSubElement(m_script,"FA", "FAFile", "FILE", m_neo.FA);   
-      addSubElement(m_script,"FA", "FAOrientation", "ORIENTATION", "RAI"); 
+      addSubElement("FA", "FAFile", "FILE", m_neo.FA);   
+      addSubElement("FA", "FAOrientation", "ORIENTATION", "RAI"); 
    }
+
 
    if(m_usingAD)
    {
       m_script += "\t\tAD = SubElement(segmentationParameters, 'IMAGE')\n";
-      addSubElement(m_script,"AD", "ADFile", "FILE", m_neo.AD);   
-      addSubElement(m_script,"AD", "ADOrientation", "ORIENTATION", "RAI"); 
+      addSubElement("AD", "ADFile", "FILE", m_neo.AD);   
+      addSubElement("AD", "ADOrientation", "ORIENTATION", "RAI"); 
    }
 
-   addSubElement(m_script, "segmentationParameters", "filterIterations", "FILTER-ITERATIONS", QString::number(m_parameters->getNumberOfIterations()));
-   addSubElement(m_script, "segmentationParameters", "filterTimeStep", "FILTER-TIME-STEP", QString::number(m_parameters->getTimeStep()));
-   addSubElement(m_script, "segmentationParameters", "filterMethod", "FILTER-METHOD", m_parameters->getFilterMethod());
-   addSubElement(m_script, "segmentationParameters", "maxBiasDegree", "MAX-BIAS-DEGREE", QString::number(m_parameters->getMaxBiasDegree()));
-   addSubElement(m_script, "segmentationParameters", "prior1", "PRIOR-1", QString::number(m_parameters->getPrior1()));
-   addSubElement(m_script, "segmentationParameters", "prior2", "PRIOR-2", QString::number(m_parameters->getPrior2()));
-   addSubElement(m_script, "segmentationParameters", "prior3", "PRIOR-3", QString::number(m_parameters->getPrior3()));
-   addSubElement(m_script, "segmentationParameters", "prior4", "PRIOR-4", QString::number(m_parameters->getPrior4()));
-   addSubElement(m_script, "segmentationParameters", "prior5", "PRIOR-5", QString::number(m_parameters->getPrior5()));
+   addSubElement("segmentationParameters", "filterIterations", "FILTER-ITERATIONS", QString::number(m_parameters->getNumberOfIterations()));
+   addSubElement("segmentationParameters", "filterTimeStep", "FILTER-TIME-STEP", QString::number(m_parameters->getTimeStep()));
+   addSubElement("segmentationParameters", "filterMethod", "FILTER-METHOD", m_parameters->getFilterMethod());
+   addSubElement("segmentationParameters", "maxBiasDegree", "MAX-BIAS-DEGREE", QString::number(m_parameters->getMaxBiasDegree()));
+   addSubElement("segmentationParameters", "prior1", "PRIOR-1", QString::number(m_parameters->getPrior1()));
+   addSubElement("segmentationParameters", "prior2", "PRIOR-2", QString::number(m_parameters->getPrior2()));
+   addSubElement("segmentationParameters", "prior3", "PRIOR-3", QString::number(m_parameters->getPrior3()));
+   addSubElement("segmentationParameters", "prior4", "PRIOR-4", QString::number(m_parameters->getPrior4()));
+   addSubElement("segmentationParameters", "prior5", "PRIOR-5", QString::number(m_parameters->getPrior5()));
 
-   addSubElement(m_script, "segmentationParameters", "doAtlasWarp", "DO-ATLAS-WARP", QString::number(0));
-   addSubElement(m_script, "segmentationParameters", "atlasWarpGridX", "ATLAS-WARP-GRID-X", QString::number(5));
-   addSubElement(m_script, "segmentationParameters", "atlasWarpGridY", "ATLAS-WARP-GRID-Y", QString::number(5));
-   addSubElement(m_script, "segmentationParameters", "atlasWarpGridZ", "ATLAS-WARP-GRID-Z", QString::number(5));
+   addSubElement("segmentationParameters", "doAtlasWarp", "DO-ATLAS-WARP", QString::number(0));
+   addSubElement("segmentationParameters", "atlasWarpGridX", "ATLAS-WARP-GRID-X", QString::number(5));
+   addSubElement("segmentationParameters", "atlasWarpGridY", "ATLAS-WARP-GRID-Y", QString::number(5));
+   addSubElement("segmentationParameters", "atlasWarpGridZ", "ATLAS-WARP-GRID-Z", QString::number(5));
 
-   addSubElement(m_script, "segmentationParameters", "mahalanobisThreshold", "MAHALANOBIS-THRESHOLD", QString::number(4));
-   addSubElement(m_script, "segmentationParameters", "parzenKernelWidth", "PARZEN-KERNEL-WIDTH", QString::number(m_parameters->getInitialParzenKernelWidth()));
-   addSubElement(m_script, "segmentationParameters", "priorThreshold", "PRIOR-THRESHOLD", QString::number(m_parameters->getPriorThreshold()));
+   addSubElement("segmentationParameters", "mahalanobisThreshold", "MAHALANOBIS-THRESHOLD", QString::number(4));
+   addSubElement("segmentationParameters", "parzenKernelWidth", "PARZEN-KERNEL-WIDTH", QString::number(m_parameters->getInitialParzenKernelWidth()));
+   addSubElement("segmentationParameters", "priorThreshold", "PRIOR-THRESHOLD", QString::number(m_parameters->getPriorThreshold()));
 
    QString referenceImageIndex; 
 
@@ -155,8 +159,8 @@ void NeosegExecution::writeXMLFile()
       referenceImageIndex = "2";   
    }    
 
-   addSubElement(m_script, "segmentationParameters", "referenceImageIndex", "REFERENCE-IMAGE-INDEX", referenceImageIndex);
-   addSubElement(m_script, "segmentationParameters", "referenceModality", "REFERENCE-MODALITY", m_parameters->getReferenceImage());
+   addSubElement("segmentationParameters", "referenceImageIndex", "REFERENCE-IMAGE-INDEX", referenceImageIndex);
+   addSubElement("segmentationParameters", "referenceModality", "REFERENCE-MODALITY", m_parameters->getReferenceImage());
 
    m_script += "\t\tXML = xml.dom.minidom.parseString(ElementTree.tostring(segmentationParameters))\n";
    m_script += "\t\tpretty_xml_as_string = XML.toprettyxml()\n";
@@ -185,7 +189,7 @@ void NeosegExecution::writeAffineTranformationFiles()
       referenceTemplate_name = "templateT2";
    }  
 
-   QString T2ToTemplate_name = T2_name + "_to_" + referenceTemplate_name + "_" + m_prefix + ".affine"; 
+   QString T2ToTemplate_name = T2_name + "_to_" + referenceTemplate_name + "_" + m_neo.prefix + ".affine"; 
    QString T2ToTemplate_path = m_module_dir->filePath(T2ToTemplate_name); 
 
    m_script += "\tT2ToTemplate = '" + T2ToTemplate_path + "'\n";
@@ -193,7 +197,7 @@ void NeosegExecution::writeAffineTranformationFiles()
    m_script += "\tif checkFileExistence(T2ToTemplate)==False:\n";   
    m_script += "\t\twriteAffineTransformationFile(T2ToTemplate)\n\n";
 
-   QString T2ToT1_name = T2_name + "_to_" + T1_name + "_" + m_prefix + ".affine"; 
+   QString T2ToT1_name = T2_name + "_to_" + T1_name + "_" + m_neo.prefix + ".affine"; 
    QString T2ToT1_path = m_module_dir->filePath(T2ToT1_name); 
 
    m_script += "\tT2ToT1 = '" + T2ToT1_path + "'\n";
@@ -204,7 +208,7 @@ void NeosegExecution::writeAffineTranformationFiles()
    {
       QString FA_name = (QFileInfo(m_neo.FA)).baseName(); 
 
-      QString T2ToFA_name = T2_name + "_to_" + FA_name + "_" + m_prefix + ".affine"; 
+      QString T2ToFA_name = T2_name + "_to_" + FA_name + "_" + m_neo.prefix + ".affine"; 
       QString T2ToFA_path = m_module_dir->filePath(T2ToFA_name); 
 
       m_script += "\tT2ToFA = '" + T2ToFA_path + "'\n";
@@ -216,7 +220,7 @@ void NeosegExecution::writeAffineTranformationFiles()
    {
       QString AD_name = (QFileInfo(m_neo.AD)).baseName(); 
 
-      QString T2ToAD_name = T2_name + "_to_" + AD_name + "_" + m_prefix + ".affine"; 
+      QString T2ToAD_name = T2_name + "_to_" + AD_name + "_" + m_neo.prefix + ".affine"; 
       QString T2ToAD_path = m_module_dir->filePath(T2ToAD_name); 
 
       m_script += "\tT2ToAD = '" + T2ToAD_path + "'\n";
@@ -228,12 +232,12 @@ void NeosegExecution::writeAffineTranformationFiles()
 void NeosegExecution::runNeoseg()
 {
    QFileInfo* T2 = new QFileInfo(m_neo.T2);
-   QString segmentation_name = T2->baseName() + "_EMonly_labels_" + m_prefix + ".nrrd"; 
+   QString segmentation_name = T2->baseName() + "_EMonly_labels_" + m_neo.prefix + ".nrrd"; 
    QString segmentation_path = m_module_dir->filePath(segmentation_name);
 
    m_log = "Running Neoseg";
    m_outputs.insert("seg_4Labels", segmentation_path); 
-   m_argumentsList << "neoseg" << "parameters_path";
+   m_argumentsList << "Neoseg" << "parameters_path";
    execute(); 
 
    m_neo.seg4Labels = segmentation_path;
@@ -348,17 +352,17 @@ void NeosegExecution::reassignWhiteMatter()
 
    m_script += "\t\tparameters = Element('REASSIGN-WHITE-MATTER-PARAMETERS')\n";
 
-   addSubElement(m_script, "parameters", "Input", "INPUT", m_neo.seg3Labels);
+   addSubElement("parameters", "Input", "INPUT", m_neo.seg3Labels);
 
-   addSubElement(m_script, "parameters", "Threshold", "THRESHOLD", QString::number(m_sizeThreshold));
+   addSubElement("parameters", "Threshold", "THRESHOLD", QString::number(m_sizeThreshold));
 
    m_script += "\t\tprobabilityMaps = SubElement(parameters, 'PROBABILITY-MAPS')\n";
    QString white = QDir(m_atlas).filePath("white.nrrd");
-   addSubElement(m_script, "probabilityMaps", "white", "WHITE", white);
+   addSubElement("probabilityMaps", "white", "WHITE", white);
    QString gray = QDir(m_atlas).filePath("gray.nrrd");
-   addSubElement(m_script, "probabilityMaps", "gray", "GRAY", gray);
+   addSubElement("probabilityMaps", "gray", "GRAY", gray);
    QString csf = QDir(m_atlas).filePath("csf.nrrd");
-   addSubElement(m_script, "probabilityMaps", "csf", "CSF", csf);
+   addSubElement("probabilityMaps", "csf", "CSF", csf);
 
    QString output_name; 
    if(m_computing3LabelsSeg)
@@ -370,7 +374,7 @@ void NeosegExecution::reassignWhiteMatter()
       output_name = m_prefix + "seg-4labels-WMReassigned" + m_suffix + ".nrrd"; 
    }
    QString output = m_module_dir->filePath(output_name); 
-   addSubElement(m_script, "parameters", "Output", "OUTPUT", output);
+   addSubElement("parameters", "Output", "OUTPUT", output);
 
    m_script += "\t\tXML = xml.dom.minidom.parseString(ElementTree.tostring(parameters))\n";
    m_script += "\t\tpretty_xml_as_string = XML.toprettyxml()\n";
@@ -385,7 +389,7 @@ void NeosegExecution::reassignWhiteMatter()
 
    m_log = "- Reassigning white matter";
    m_outputs.insert("seg_WMReassigned", output);
-   m_argumentsList << "ReassignWhiteMatter" << "parameters_path";
+   m_argumentsList << "ReassignWhiteMatter" << "'--parameters'" << "parameters_path";
    execute(); 
    m_unnecessaryFiles << m_XML_path;
 
@@ -423,9 +427,11 @@ void NeosegExecution::implementRun()
    m_script += "\t# Write XML File #\n";
    writeXMLFile();
    
-   m_script += "\t# Write Affine Transformation File #\n";
-   writeAffineTranformationFiles();
-
+   if(m_newAtlas)
+   {
+      m_script += "\t# Write Affine Transformation File #\n";
+      writeAffineTranformationFiles();
+   }
    m_script += "\t# Run Neoseg #\n";
    runNeoseg();
 

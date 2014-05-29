@@ -131,6 +131,10 @@ class AntsParameters
    void setUsingSmoothedMask(bool usingSmoothedMask); 
    bool getUsingSmoothedMask();
 
+   // Adding extra CSF
+   void setAddingExtraCSF(bool addingExtraCSF); 
+   bool getAddingExtraCSF();
+
    private:
    
    // Image Metrics
@@ -218,6 +222,11 @@ class AntsParameters
    // Using Smoothed Mask
    bool m_usingSmoothedMask_default;
    bool m_usingSmoothedMask; 
+
+   // Adding Extra CSF
+   bool m_addingExtraCSF_default;
+   bool m_addingExtraCSF; 
+
 }; 
 
 

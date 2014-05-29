@@ -1,17 +1,5 @@
 #include "NeosegPipelineTool.h"
 
-/*!
- * \file NeosegPipelineTool.cxx
- * \brief Main class of NeosegPipeline, source file
- * \author Marie Cherel
- */
-
-
-/*!
-*  \brief Constructor
-*  creates 
-*
-*/
 NeosegPipelineTool::NeosegPipelineTool()
 {
    m_parameters = new::PipelineParameters();
@@ -29,41 +17,76 @@ void NeosegPipelineTool::setProgramPath(QString programPath)
 }
 void NeosegPipelineTool::setOutput(QString output)
 {
-      m_parameters->setOutput(output);
+   m_parameters->setOutput(output);
 }
 void NeosegPipelineTool::setT1(QString T1)
 {
-   if(m_parameters->checkT1(T1))
+   if(!T1.isEmpty())
    {
-      m_parameters->setT1(T1);
+      if(m_parameters->checkT1(T1))
+      {
+         m_parameters->setT1(T1);
+      }
+      else
+      {
+         m_errors += T1 + " does not exist\n";
+      }
    }
 }
 void NeosegPipelineTool::setT2(QString T2)
 {
-   if(m_parameters->checkT2(T2))
+   if(!T2.isEmpty())
    {
-      m_parameters->setT2(T2);
+      if(m_parameters->checkT2(T2))
+      {
+         m_parameters->setT2(T2);
+      }
+      else
+      {
+         m_errors += T2 + " does not exist\n";
+      }
    }
 }
 void NeosegPipelineTool::setMask(QString mask)
 {
-   if(m_parameters->checkMask(mask))
+   if(!mask.isEmpty())
    {
-      m_parameters->setMask(mask);
+      if(m_parameters->checkMask(mask))
+      {
+         m_parameters->setMask(mask);
+      }
+      else
+      {
+         m_errors += mask + " does not exist\n";
+      }
    }
 }
 void NeosegPipelineTool::setDWI(QString DWI)
 {
-   if(m_parameters->checkDWI(DWI))
+   if(!DWI.isEmpty())
    {
-      m_parameters->setDWI(DWI);
+      if(m_parameters->checkDWI(DWI))
+      {
+         m_parameters->setDWI(DWI);
+      }
+      else
+      {
+         m_errors += DWI + " does not exist\n";
+      }
    }
 }
 void NeosegPipelineTool::setb0(QString b0)
 {
-   if(m_parameters->checkb0(b0))
+   if(!b0.isEmpty())
    {
-      m_parameters->setb0(b0);
+      if(m_parameters->checkb0(b0))
+      {
+         m_parameters->setb0(b0);
+      }
+      else
+      {
+         m_errors += b0 + " does not exist\n";
+      }
    }
 }
 void NeosegPipelineTool::setParametersFile(QString xmlFile) 

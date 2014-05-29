@@ -128,11 +128,11 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void initializePipelineLogging();
    void initializeRegistrationsLogging();
 
-   void printPipelineLog(QString log_path);    
+   void printPipelineLog();    
    void printRegistrationLog(QString file_name); 
 
    void selectLog();
-   void changeExecutionPlainTextEdit(int index);
+   void changeExecutionPlainTextEdit();
 
    // Enable widgets 
    void setParametersWidgetEnabled(bool enabled);

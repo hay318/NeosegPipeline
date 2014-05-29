@@ -1,13 +1,12 @@
-
-
 #include <QApplication>
 
-#include "NeosegPipelineTool.h"
 #include "NeosegPipelineCLP.h"
+#include "NeosegPipelineTool.h"
+
 
 int main(int argc, char *argv[])
 {	
-   PARSE_ARGS;	
+   PARSE_ARGS;
 
    NeosegPipelineTool tool;
 

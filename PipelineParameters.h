@@ -151,6 +151,16 @@ class PipelineParameters
    void setIncludingFA(bool includingFA);
    bool getIncludingFA();
 
+   // FA Shift
+   bool checkFAShift(double FAShift);
+   void setFAShift(double FAShift);
+   double getFAShift();
+
+   // FA Sigma Scale
+   bool checkFASigmaScale(double FASigmaScale);
+   void setFASigmaScale(double FASigmaScale);
+   double getFASigmaScale();
+
    // FA Weight
    bool checkFAWeight(double FAWeight);
    void setFAWeight(double FAWeight);
@@ -290,7 +300,18 @@ class PipelineParameters
    bool m_includingFA_default; 
    bool m_includingFA;    
 
-   // FA weight
+   // FA Shift 
+   double m_FAShift_min; 
+   double m_FAShift_max; 
+   double m_FAShift_default; 
+   double m_FAShift; 
+
+   // FA Sigma Scale
+   double m_FASigmaScale_min;
+   double m_FASigmaScale_default; 
+   double m_FASigmaScale; 
+
+   // FA Weight
    double m_FAWeight_min;
    double m_FAWeight_default; 
    double m_FAWeight; 

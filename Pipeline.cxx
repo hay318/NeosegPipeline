@@ -331,17 +331,20 @@ void Pipeline::writePipeline()
    m_log_path = output_dir->filePath((m_parameters->getNeo()).prefix + ".log"); 
 
    writePreProcessingData();
-   writeDTIRegistration(); 
+   
+   if( (m_parameters->getNewAtlas() && m_parameters->getIncludingFA()) || m_parameters->getUsingFA() || m_parameters->getUsingAD())
+   {
+      writeDTIRegistration(); 
+   }
 
-   if (m_parameters->getNewAtlas()==true)
+   if(m_parameters->getNewAtlas()==true)
    {
       writeAtlasRegistration();
-      writeAtlasPopulationRegistration();
+      writeAtlasPopulationRegistration(); 
       writeAtlasGeneration();
    }
 
    writeNeosegExecution();
-
    writeMainScript();
 }
 
@@ -373,7 +376,7 @@ void Pipeline::runPipeline()
 
    if(m_mainScriptProcess->exitCode()==0)
    {
-      cleanUp();
+      //cleanUp();
    }
 }
 

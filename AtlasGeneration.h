@@ -33,6 +33,8 @@ class AtlasGeneration : public Script
    void setNeightborhoodRadius(double neightborhoodRadius);
    void setNeightborhoodRadiusUnit(QString neightborhoodRadiusUnit);
    void setIncludingFA(bool includingFA);
+   void setFAShift(double FAShift);
+   void setFASigmaScale(double FASigmaScale);
    void setFAWeight(double FAWeight);
    void setFASmoothingSize(double FASmoothingSize); 
    void setSmoothing(QString smoothing);
@@ -53,8 +55,6 @@ class AtlasGeneration : public Script
    void extractWMFromFA();
    void generateWeightedAveragedLabels();
    void generatePriorProbability(PriorProbability& priorProbability);
-   void preNormalizePriorProbability(PriorProbability& priorProbability);
-   void computeSumProbabilities();
    void computeRest();
    void copyFinalPriorProbability(PriorProbability& probability);
 
@@ -73,6 +73,8 @@ class AtlasGeneration : public Script
    bool                 m_computingWeights;
    QString              m_neightborhoodRadiusUnit; 
    bool                 m_includingFA;
+   double               m_FAShift; 
+   double               m_FASigmaScale; 
    double               m_FAWeight; 
    double               m_FASmoothingSize; 
    double               m_neightborhoodRadius; 

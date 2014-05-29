@@ -164,7 +164,7 @@ void DerivedWindow::setMainScriptThread(MainScriptThread* thread)
 
 void DerivedWindow::printErrors(QString errors)
 {
-   QMessageBox::critical(this, "Errors in XML file(s)", errors);   
+   QMessageBox::critical(this, tr("Errors in XML file(s)"), errors);   
 }
 
 void DerivedWindow::initializeImagesMap()
@@ -199,6 +199,9 @@ void DerivedWindow::initializeExecutablesMap()
    Executable bet2 = {bet2_button, bet2_lineEdit, resetBet2_button};
    m_executables_map.insert("bet2", bet2);
 
+   Executable unu = {unu_button, unu_lineEdit, resetUnu_button};
+   m_executables_map.insert("unu", unu);
+
    Executable dtiestim = {dtiestim_button, dtiestim_lineEdit, resetDtiestim_button};
    m_executables_map.insert("dtiestim", dtiestim);
 
@@ -213,6 +216,15 @@ void DerivedWindow::initializeExecutablesMap()
 
    Executable ImageMath = {ImageMath_button, ImageMath_lineEdit, resetImageMath_button};
    m_executables_map.insert("ImageMath", ImageMath);
+
+   Executable WeightedLabelsAverage = {WeightedLabelsAverage_button, WeightedLabelsAverage_lineEdit, resetWeightedLabelsAverage_button};
+   m_executables_map.insert("WeightedLabelsAverage", WeightedLabelsAverage);
+
+   Executable ReassignWhiteMatter = {ReassignWhiteMatter_button, ReassignWhiteMatter_lineEdit, resetReassignWhiteMatter_button};
+   m_executables_map.insert("ReassignWhiteMatter", ReassignWhiteMatter);
+
+   Executable Neoseg = {Neoseg_button, Neoseg_lineEdit, resetNeoseg_button};
+   m_executables_map.insert("Neoseg", Neoseg);
 
    Executable InsightSNAP = {InsightSNAP_button, InsightSNAP_lineEdit, resetInsightSNAP_button};
    m_executables_map.insert("InsightSNAP", InsightSNAP);
@@ -257,13 +269,13 @@ void DerivedWindow::enterImage(QString image_name)
          if(!QFileInfo(image_path).isFile())
          {
             (image.enter_lineEdit)->clear(); 
-            QMessageBox::critical(this, image_name, image_path + " is not a file,\nPlease enter a new file path");
+            QMessageBox::critical(this, image_name, image_path + tr(" is not a file,\nPlease enter a new file path"));
          }
       }
       else
       {
          (image.enter_lineEdit)->clear(); 
-         QMessageBox::critical(this, image_name, image_path + " does not exist,\nPlease enter a new file path");
+         QMessageBox::critical(this, image_name, image_path + tr(" does not exist,\nPlease enter a new file path"));
 
       }
    }
@@ -279,7 +291,7 @@ void DerivedWindow::selectOuput()
    }
 }
 void DerivedWindow::enterOutput()
-{
+{   
    QString output = output_lineEdit->text();
 
    if(!output.isEmpty()) 
@@ -294,23 +306,22 @@ void DerivedWindow::enterOutput()
 void DerivedWindow::createOutput(QString output)
 {
    QMessageBox messageBox(this);
-
-   messageBox.setText(output + " does not exist,");
-   messageBox.setInformativeText("Do you want to create it?");
+   messageBox.setText(output + tr(" does not exist,"));
+   messageBox.setInformativeText(tr("Do you want to create it?"));
    messageBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
    messageBox.setDefaultButton(QMessageBox::Yes);
-
+   int answer = messageBox.exec();
+ 
    QString output_path = QFileInfo(output).absoluteFilePath();
    bool result;
 
-   int answer = messageBox.exec();
    switch (answer)
    {
       case QMessageBox::Yes:
          result = (QDir::root()).mkpath(output_path);
          if(!result)
          {
-            QMessageBox::critical(this, "Output directory", output_path + "\n can not be created,\n Please enter a new directory path");             
+            QMessageBox::critical(this, tr("Output directory"), output_path + tr("\n can not be created,\n Please enter a new directory path"));             
          }
          break;
       case QMessageBox::No:
@@ -331,7 +342,7 @@ void DerivedWindow::enterPrefix()
    {
       if(!m_parameters->checkPrefixSuffix(prefix))
       {
-         QMessageBox::critical(this, "Prefix", prefix + " is not a valid prefix,\nIt can not contains " + m_parameters->getForbiddenCharacters() + ",\nPlease enter a new prefix");  
+         QMessageBox::critical(this, tr("Prefix"), prefix + tr(" is not a valid prefix,\nIt can not contains ") + m_parameters->getForbiddenCharacters() + tr(",\nPlease enter a new prefix"));  
          prefix_lineEdit->clear();           
       }
    }
@@ -346,7 +357,7 @@ void DerivedWindow::enterSuffix()
    {
       if(!m_parameters->checkPrefixSuffix(suffix))
       {
-         QMessageBox::critical(this, "Suffix", suffix + " is not a valid suffix,\nIt can not contains " + m_parameters->getForbiddenCharacters() + ",\nPlease enter a new suffix");  
+         QMessageBox::critical(this, tr("Suffix"), suffix + tr(" is not a valid suffix,\nIt can not contains ") + m_parameters->getForbiddenCharacters() + tr(",\nPlease enter a new suffix"));  
          suffix_lineEdit->clear();               
       }
    }
@@ -381,7 +392,7 @@ void DerivedWindow::selectNewOrExistingAtlas()
 //***** Atlas Population Directory *****//
 void DerivedWindow::selectAtlasPopulationDirectory()
 {
-   QString atlasPopulationDirectory = QFileDialog::getExistingDirectory (this, "Open Directory", atlasPopulationDirectory_lineEdit->text(), QFileDialog::ShowDirsOnly);
+   QString atlasPopulationDirectory = QFileDialog::getExistingDirectory (this, tr("Open Directory"), atlasPopulationDirectory_lineEdit->text(), QFileDialog::ShowDirsOnly);
    atlasPopulationDirectory_lineEdit->setText(atlasPopulationDirectory);
    checkAtlases();
    displayAtlases();
@@ -398,7 +409,7 @@ void DerivedWindow::enterAtlasPopulationDirectory()
       if(!m_parameters->checkAtlasPopulationDirectory(atlasPopulationDirectory))
       {
          atlasPopulationDirectory_lineEdit->clear();
-         QMessageBox::critical(this, "Output Directory", atlasPopulationDirectory + "\ndoes not exist, enter a new directory path");
+         QMessageBox::critical(this, tr("Output Directory"), atlasPopulationDirectory + tr("\ndoes not exist, enter a new directory path"));
       }
    }
    checkAtlases();
@@ -495,11 +506,11 @@ void DerivedWindow::selectAtlas(QListWidgetItem* item)
 //***** Existing Atlas *****//
 void DerivedWindow::selectExistingAtlas()
 {
-   QString existingAtlas = QFileDialog::getExistingDirectory (0, "Open Directory", m_existingAtlases_path, QFileDialog::ShowDirsOnly);
+   QString existingAtlas = QFileDialog::getExistingDirectory (0, tr("Open Directory"), m_existingAtlases_path, QFileDialog::ShowDirsOnly);
 
    if(m_parameters->checkExistingAtlas(existingAtlas)==false)
    {
-      QMessageBox::critical(this, "Atlas Directory", existingAtlas_lineEdit->text() + "\nis not a valid atlas");
+      QMessageBox::critical(this, tr("Atlas Directory"), existingAtlas + tr("\nis not a valid atlas"));
    }
    else
    {
@@ -515,7 +526,7 @@ void DerivedWindow::enterExistingAtlas()
       if (!m_parameters->checkExistingAtlas(existingAtlas))
       {
          existingAtlas_lineEdit->clear();
-         QMessageBox::critical(this, "Atlas Directory", existingAtlas + "\nis not a valid atlas");
+         QMessageBox::critical(this, tr("Atlas Directory"), existingAtlas + tr("\nis not a valid atlas"));
       } 
    }
 }
@@ -523,17 +534,17 @@ void DerivedWindow::enterExistingAtlas()
 //***** Parameters Configuration File *****//
 void DerivedWindow::selectParameters()
 {
-	QString parameters = QFileDialog::getOpenFileName(this, "Open file", m_data_path,"XML (*.xml)");
+	QString parameters = QFileDialog::getOpenFileName(this, tr("Open file"), m_data_path,"XML (*.xml)");
    if(!parameters.isEmpty())
    {
       XmlReader xmlReader;
       xmlReader.setPipelineParameters(m_parameters);
       QString parametersErrors = xmlReader.readParametersConfigurationFile(parameters); 
 
-      parametersErrors = "Errors in the parameters configuration :\n" + parametersErrors; 
-      parametersErrors += "\n";
-      parametersErrors += "All the parameters that are nor valid, are left to their default value\n";
-      QMessageBox::critical(this, "Errors in XML file", parametersErrors);   
+      parametersErrors = tr("Errors in the parameters configuration :\n") + parametersErrors; 
+      parametersErrors += tr("\n");
+      parametersErrors += tr("All the parameters that are nor valid, are left to their default value\n");
+      QMessageBox::critical(this, tr("Errors in XML file"), parametersErrors);   
    }
 }
 
@@ -541,17 +552,17 @@ void DerivedWindow::selectParameters()
 //***** Executables Configuration File *****//
 void DerivedWindow::selectExecutables()
 {
-	QString executables = QFileDialog::getOpenFileName(this, "Ouvrir un fichier", m_data_path,"XML (*.xml)");
+	QString executables = QFileDialog::getOpenFileName(this, tr("Open file"), m_data_path,"XML (*.xml)");
    if(!executables.isEmpty())
    {
       XmlReader xmlReader;
       xmlReader.setPipelineParameters(m_parameters);
       QString executablesErrors = xmlReader.readParametersConfigurationFile(executables); 
 
-      executablesErrors = "Errors in the parameters configuration :\n" + executablesErrors; 
-      executablesErrors += "\n";
-      executablesErrors += "All the parameters that are nor valid, are left to their default value\n";
-      QMessageBox::critical(this, "Errors in XML file", executablesErrors);  
+      executablesErrors = tr("Errors in the parameters configuration :\n") + executablesErrors; 
+      executablesErrors += tr("\n");
+      executablesErrors += tr("All the parameters that are nor valid, are left to their default value\n");
+      QMessageBox::critical(this, tr("Errors in XML file"), executablesErrors);  
    }
 }
 
@@ -569,7 +580,7 @@ void DerivedWindow::selectExecutable(QString executable_name)
       dir_path = (QFileInfo(executable_path).dir()).absolutePath(); 
    }
 
-	executable_path = QFileDialog::getOpenFileName(this, "Select executable", dir_path);
+	executable_path = QFileDialog::getOpenFileName(this, tr("Select executable"), dir_path);
    if(!executable_path.isEmpty())
    {
       if(QFileInfo(executable_path).isExecutable())
@@ -578,7 +589,7 @@ void DerivedWindow::selectExecutable(QString executable_name)
       }
       else
       {
-         QMessageBox::critical(this, executable_name, executable_path + "\nis not executable");      
+         QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable"));      
       }
    }
 }
@@ -595,14 +606,14 @@ void DerivedWindow::enterExecutable(QString executable_name)
          if(!QFileInfo(executable_path).isExecutable())
          {
             (executable.enter_lineEdit)->clear();
-            QMessageBox::critical(this, executable_name, executable_path + "\nis not executable, enter a new executable path");            
+            QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable, enter a new executable path"));            
          }
       }
 
       else 
       {
          (executable.enter_lineEdit)->clear();
-         QMessageBox::critical(this, executable_name, executable_path + "\ndoes not exist, enter a new file path");
+         QMessageBox::critical(this, executable_name, executable_path + tr("\ndoes not exist, enter a new file path"));
       }
    }   
 }
@@ -617,11 +628,15 @@ void DerivedWindow::resetAllExecutables()
    resetExecutable("N4ITKBiasFieldCorrection"); 
    resetExecutable("ITKTransformTools"); 
    resetExecutable("bet2"); 
+   resetExecutable("unu"); 
    resetExecutable("dtiestim"); 
    resetExecutable("dtiprocess"); 
    resetExecutable("ANTS"); 
    resetExecutable("ResampleVolume2"); 
    resetExecutable("ImageMath"); 
+   resetExecutable("WeightedLabelsAverage"); 
+   resetExecutable("ReassignWhiteMatter"); 
+   resetExecutable("Neoseg"); 
    resetExecutable("InsightSNAP");
 }
 
@@ -675,6 +690,8 @@ void DerivedWindow::initializeParameters()
    weightsRadiusUnit_comboBox->setCurrentIndex(m_parameters->getWeightsRadiusUnitIndex());
   
    includingFA_checkBox->setChecked(m_parameters->getIncludingFA()); 
+   FAShift_spinBox->setValue(m_parameters->getFAShift());
+   FASigmaScale_spinBox->setValue(m_parameters->getFASigmaScale());
    FAWeight_spinBox->setValue(m_parameters->getFAWeight());
    FASmoothingSize_spinBox->setValue(m_parameters->getFASmoothingSize());
 
@@ -720,6 +737,7 @@ void DerivedWindow::initializeParameters()
 
    usingMask_checkBox->setChecked(m_antsParameters->getUsingMask());
    usingSmoothedMask_checkBox->setChecked(m_antsParameters->getUsingSmoothedMask());
+   addingExtraCSF_checkBox->setChecked(m_antsParameters->getAddingExtraCSF());
 
    //Neoseg 
    referenceModality_comboBox->insertItems(0, m_neosegParameters->getReferenceImageValues());
@@ -747,13 +765,16 @@ void DerivedWindow::initializeParameters()
    N4ITKBiasFieldCorrection_lineEdit->setText(m_executables->getExecutablePath("N4ITKBiasFieldCorrection"));
    ITKTransformTools_lineEdit->setText(m_executables->getExecutablePath("ITKTransformTools"));
    bet2_lineEdit->setText(m_executables->getExecutablePath("bet2"));
+   unu_lineEdit->setText(m_executables->getExecutablePath("unu"));
    dtiestim_lineEdit->setText(m_executables->getExecutablePath("dtiestim"));
    dtiprocess_lineEdit->setText(m_executables->getExecutablePath("dtiprocess"));
    ANTS_lineEdit->setText(m_executables->getExecutablePath("ANTS"));
    ResampleVolume2_lineEdit->setText(m_executables->getExecutablePath("ResampleVolume2"));
    ImageMath_lineEdit->setText(m_executables->getExecutablePath("ImageMath"));
+   WeightedLabelsAverage_lineEdit->setText(m_executables->getExecutablePath("WeightedLabelsAverage"));
+   ReassignWhiteMatter_lineEdit->setText(m_executables->getExecutablePath("ReassignWhiteMatter"));
+   Neoseg_lineEdit->setText(m_executables->getExecutablePath("Neoseg"));
    InsightSNAP_lineEdit->setText(m_executables->getExecutablePath("InsightSNAP"));
-
 }
 
 
@@ -798,15 +819,10 @@ void DerivedWindow::setParameters()
       
       // Including FA
       m_parameters->setIncludingFA(includingFA_checkBox->isChecked()); 
+      m_parameters->setFAShift(FAShift_spinBox->value());
+      m_parameters->setFASigmaScale(FASigmaScale_spinBox->value());
       m_parameters->setFAWeight(FAWeight_spinBox->value()); 
       m_parameters->setFASmoothingSize(FASmoothingSize_spinBox->value()); 
-
-      m_parameters->setUsingFA(usingFA_checkBox->isChecked());
-      m_parameters->setUsingAD(usingAD_checkBox->isChecked());
-
-      // Reassigning White Matter
-      m_parameters->setReassigningWhiteMatter(reassigningWhite_checkBox->isChecked()); 
-      m_parameters->setSizeThreshold(whiteThreshold_spinBox->value());
    }
 
    else 
@@ -814,6 +830,14 @@ void DerivedWindow::setParameters()
       m_parameters->setNewAtlas(false);  
       m_parameters->setAtlas(existingAtlas_lineEdit->text());    
    }
+
+   m_parameters->setUsingFA(usingFA_checkBox->isChecked());
+   m_parameters->setUsingAD(usingAD_checkBox->isChecked());
+
+   // Reassigning White Matter
+   m_parameters->setReassigningWhiteMatter(reassigningWhite_checkBox->isChecked()); 
+   m_parameters->setSizeThreshold(whiteThreshold_spinBox->value());
+
 
    // Computation
    m_parameters->setOverwriting(overwriting_checkBox->isChecked());
@@ -847,6 +871,7 @@ void DerivedWindow::setParameters()
 
    m_antsParameters->setUsingMask(usingMask_checkBox->isChecked());
    m_antsParameters->setUsingSmoothedMask(usingSmoothedMask_checkBox->isChecked());
+   m_antsParameters->setAddingExtraCSF(addingExtraCSF_checkBox->isChecked());
 
    // Neoseg parameters 
    m_neosegParameters->setReferenceImage(referenceModality_comboBox->currentText()); 
@@ -877,11 +902,15 @@ void DerivedWindow::setExecutables()
    m_executables->setExecutablePath("N4ITKBiasFieldCorrection", N4ITKBiasFieldCorrection_lineEdit->text()); 
    m_executables->setExecutablePath("N4ITKBiasFieldCorrection", N4ITKBiasFieldCorrection_lineEdit->text()); 
    m_executables->setExecutablePath("bet2", bet2_lineEdit->text()); 
+   m_executables->setExecutablePath("unu", unu_lineEdit->text()); 
    m_executables->setExecutablePath("dtiestim", dtiestim_lineEdit->text()); 
    m_executables->setExecutablePath("dtiprocess", dtiprocess_lineEdit->text()); 
    m_executables->setExecutablePath("ANTS", ANTS_lineEdit->text()); 
    m_executables->setExecutablePath("ResampleVolume2", ResampleVolume2_lineEdit->text()); 
    m_executables->setExecutablePath("ImageMath", ImageMath_lineEdit->text()); 
+   m_executables->setExecutablePath("WeightedLabelsAverage", WeightedLabelsAverage_lineEdit->text()); 
+   m_executables->setExecutablePath("ReassignWhiteMatter", ReassignWhiteMatter_lineEdit->text()); 
+   m_executables->setExecutablePath("Neoseg", Neoseg_lineEdit->text()); 
    m_executables->setExecutablePath("InsightSNAP", InsightSNAP_lineEdit->text()); 
    m_executablesSet = true;
 }
@@ -890,7 +919,7 @@ void DerivedWindow::saveParameters()
 {
    setParameters();
 
-   QString parameters_path = QFileDialog::getSaveFileName(this, "Save file", "parameters.xml", "XML files (*.xml)");
+   QString parameters_path = QFileDialog::getSaveFileName(this, tr("Save file"), tr("parameters.xml"), "XML files (*.xml)");
 
    XmlWriter* parameters = new::XmlWriter();
    parameters->setPipelineParameters(m_parameters);  
@@ -901,7 +930,7 @@ void DerivedWindow::saveExecutables()
 {
    setExecutables();
 
-   QString executables_path = QFileDialog::getSaveFileName(this, "Save file", "executables.xml", "XML files (*.xml)");
+   QString executables_path = QFileDialog::getSaveFileName(this, tr("Save file"), tr("executables.xml"), "XML files (*.xml)");
 
    XmlWriter* executables = new::XmlWriter();
    executables->setPipelineParameters(m_parameters);  
@@ -972,12 +1001,17 @@ void DerivedWindow::runPipeline()
    QString imagesErrors = m_parameters->checkImages(); 
    QString executablesErrors = m_executables->checkExecutables(); 
 
+   std::cout<<executablesErrors.toStdString()<<std::endl; 
+
    if(imagesErrors.isEmpty() && executablesErrors.isEmpty())
    {
       m_pipeline->writePipeline();
 
       initializePipelineLogging();
-      initializeRegistrationsLogging();
+      if(m_parameters->getNewAtlas())
+      {
+         initializeRegistrationsLogging();
+      }
 
       m_pipeline->setPlainTextEdit(m_log_plainTextEdit); 
       m_thread->setPipeline(m_pipeline);
@@ -998,14 +1032,12 @@ void DerivedWindow::runPipeline()
    }
    else
    {
-      QMessageBox::critical(this, "Errors", imagesErrors + executablesErrors);
+      QMessageBox::critical(this, tr("Errors"), imagesErrors + "\n" + executablesErrors);
    }
 }
 
 void DerivedWindow::initializePipelineLogging()
 {
-   Logging logging; 
-
    // Radio Button
    pipeline_radioButton->setEnabled(true); 
    pipeline_radioButton->setChecked(true); 
@@ -1027,7 +1059,7 @@ void DerivedWindow::initializePipelineLogging()
    // QFileSystemWatcher
    QFileSystemWatcher* log_watcher = new::QFileSystemWatcher(this); 
    log_watcher->addPath(log_path); 
-   connect(log_watcher, SIGNAL(fileChanged(QString)), this, SLOT(printPipelineLog(QString)));
+   connect(log_watcher, SIGNAL(fileChanged(QString)), this, SLOT(printPipelineLog()));
 }
 
 void DerivedWindow::initializeRegistrationsLogging()
@@ -1059,7 +1091,6 @@ void DerivedWindow::initializeRegistrationsLogging()
       execution_layout->addWidget(log_plainTextEdit);
 
       log_plainTextEdit->setMaximumBlockCount(500);
-
       log_plainTextEdit->hide(); 
 
       // Atlas Directory 
@@ -1091,10 +1122,10 @@ void DerivedWindow::initializeRegistrationsLogging()
    registrations_comboBox->clear();
    registrations_comboBox->setEnabled(true); 
    registrations_comboBox->insertItems(0, selectedAtlases); 
-   connect(registrations_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeExecutionPlainTextEdit(int)));
+   connect(registrations_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeExecutionPlainTextEdit()));
 }
 
-void DerivedWindow::printPipelineLog(QString log_path)
+void DerivedWindow::printPipelineLog()
 {  
    QScrollBar *scrollBar = m_log_plainTextEdit->verticalScrollBar();
 
@@ -1111,7 +1142,6 @@ void DerivedWindow::printPipelineLog(QString log_path)
 
 void DerivedWindow::printRegistrationLog(QString log_path)
 {  
-
    QString atlas_name = (QFileInfo(log_path).absoluteDir()).dirName(); 
    Logging logging = m_registrationLoggings[atlas_name];
    QTextStream* log_textStream = logging.textStream;
@@ -1148,7 +1178,7 @@ void DerivedWindow::selectLog()
    }
 }
 
-void DerivedWindow::changeExecutionPlainTextEdit(int index)
+void DerivedWindow::changeExecutionPlainTextEdit()
 {
    QString atlas_name = registrations_comboBox->currentText(); 
    
@@ -1224,8 +1254,8 @@ void DerivedWindow::closeEvent(QCloseEvent *event)
    {
       QMessageBox* messageBox = new::QMessageBox(this);
 
-      messageBox->setText("The pipeline is still running,");
-      messageBox->setInformativeText("Do you want to terminate it?");
+      messageBox->setText(tr("The pipeline is still running,"));
+      messageBox->setInformativeText(tr("Do you want to terminate it?"));
       messageBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
       messageBox->setDefaultButton(QMessageBox::No);
 

@@ -20,6 +20,7 @@
 #include "Neo.h"
 #include "AntsParameters.h"
 #include "ExecutablePaths.h"
+#include "MinMax.h"
 
 class AtlasRegistration : public Script  
 {

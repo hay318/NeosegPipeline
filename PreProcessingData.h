@@ -13,6 +13,8 @@
 #include "Script.h"
 #include "Neo.h"
 #include "ExecutablePaths.h"
+#include "MinMax.h"
+
 
 class PreProcessingData : public Script 
 {
@@ -21,10 +23,15 @@ class PreProcessingData : public Script
    // Constructor 
    PreProcessingData(QString module);
 
+   // Set 
+   void setAddingExtraCSF(bool addingExtraCSF); 
+
    // Implementing Script 
    void initializeScript();
    QString skullStripImage(QString image);
    QString correctImage(QString image);
+   QString dilateMask();
+   QString addExtraCSF();
    void implementRun();
 
    // Updating & Getting Output 
@@ -32,6 +39,9 @@ class PreProcessingData : public Script
    Neo getOutput();
 
    private: 
+
+   // Paraneters
+   bool              m_addingExtraCSF; 
 
    // Suffix
    QString           m_skullStripping_suffix;

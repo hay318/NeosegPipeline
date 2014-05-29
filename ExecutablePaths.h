@@ -29,7 +29,7 @@ class ExecutablePaths
    void setDefaultExecutablePath(QString name);
    QString getDefaultExecutablePath(QString name);
 
-   QString findExecutablePath(QStringList splitPath, QString executableName);
+   QString findExecutablePath(QString executableName);
   
    QString checkExecutables();
 
