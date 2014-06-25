@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Neoseg-pipeline-parameters>
+<Parameters>
+    <General-parameters>
+        <New-atlas-computation bool="1"/>
+        <New-atlas-parameters>
+            <Atlas-population-directory path="/work/mcherel/project/atlasPopulation/atlases"/>
+            <Atlas-Population>
+                <Atlas name="brainDevelopment"/>
+                <Atlas name="BUSS_2099"/>
+                <Atlas name="BUSS_2106"/>
+                <Atlas name="neo-0106-1"/>
+                <Atlas name="neo-0203-1-1"/>
+                <Atlas name="neo-0321-1"/>
+                <Atlas name="T0244-1-1"/>
+                <Atlas name="T0274-1-1"/>
+                <Atlas name="T0287-1-1"/>
+                <Atlas name="T0295-1-2"/>
+                <Atlas name="UNCInfant"/>
+            </Atlas-Population>
+            <Smoothing type="gaussian" size="1"/>
+            <Computing-weights bool="1" modality="T2" radius="3" unit="mm"/>
+            <Including-FA bool="1" weight="1.5" smoothing-size="1"/>
+        </New-atlas-parameters>
+        <Neoseg-images using-FA="0" using-AD="1"/>
+        <Computing-3-labels-seg bool="1"/>
+        <Reassigning-white-matter bool="1" size-threshold="200"/>
+        <Computation-parameters>
+            <Overwriting bool="0"/>
+            <Stopping-if-error bool="1"/>
+            <Cleaning-up bool="0"/>
+            <Computing-system name="local"/>
+            <Number-of-cores nb="14"/>
+        </Computation-parameters>
+    </General-parameters>
+    <ANTS-parameters-atlas>
+        <First-modality metric="CC" weight="1" radius="4"/>
+        <Second-modality metric="CC" weight="1" radius="4"/>
+        <Iterations J="200" K="75" L="50"/>
+        <Transformation type="SyN" gradient-step-length="0.125" number-of-time-steps="2" delta-time="0.01"/>
+        <Regularization type="" gradient-field-sigma="3" deformation-field-sigma="0"/>
+        <Mask brain-mask="0" smoothed-brain-mask="1"/>
+    </ANTS-parameters-atlas>
+    <Neoseg-parameters>
+        <Reference-image name="T1"/>
+        <Filtering type="curvature flow" iterations="5" time-step="0.01"/>
+        <Prior-threshold value="0.9"/>
+        <Mas-bias-degree value="4"/>
+        <Priors prior1="0.4" prior2="1.4" prior3="1" prior4="1" prior5="1"/>
+        <Refinement bool="0" initial-parzen-kernel-width="0.05"/>
+    </Neoseg-parameters>
+</Parameters>
