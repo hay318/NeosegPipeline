@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+   <title>Reassign White Matter</title>
+   <description>A tool to reassign small islands of white matters according to the probability maps. For any suggestion or question, please contact cherel[at]unc.edu</description>
+   <contributor>Marie Cherel</contributor>
+   <version>1.1 | Compiled ${TODAY}</version>
+   <parameters>
+      <file>
+	 <name>parameters_file</name>
+	 <description>Path of the XML file that contains the parameters</description>
+	 <longflag>parameters</longflag>
+	 <label>xml file</label>
+      </file>
+   </parameters>
+</executable>
