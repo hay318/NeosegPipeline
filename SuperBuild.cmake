@@ -306,7 +306,7 @@ ExternalProject_Add(${proj}
     ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
     ${${PROJECT_NAME}_EXTERNAL_PROJECT_ARGS}
     -D${PRIMARY_PROJECT_NAME}_SUPERBUILD:BOOL=OFF    #NOTE: VERY IMPORTANT reprocess top level CMakeList.txt
-    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_INSTALL_PREFIX:PATH=${PRIMARY_PROJECT_NAME}-install
     -DBUILD_NeosegPipeline:BOOL=${BUILD_NeosegPipeline}
     -DBUILD_WeightedLabelsAverage:BOOL=${BUILD_WeightedLabelsAverage}
     -DBUILD_SpreadFA:BOOL=${BUILD_SpreadFA}
@@ -361,4 +361,19 @@ if(BUILD_teem)
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/teem-install/bin/unu DESTINATION bin)
 endif()
 
+if(BUILD_NeosegPipeline)
+install(PROGRAMS ${PRIMARY_PROJECT_NAME}-install/bin/NeosegPipeline DESTINATION bin)
+endif()
+
+if(BUILD_WeightedLabelsAverage)
+install(PROGRAMS ${PRIMARY_PROJECT_NAME}-install/bin/WeightedLabelsAverage DESTINATION bin)
+endif()
+
+if(BUILD_SpreadFA)
+install(PROGRAMS ${PRIMARY_PROJECT_NAME}-install/bin/SpreadFA DESTINATION bin)
+endif()
+
+if(BUILD_ReassignWhiteMatter)
+install(PROGRAMS ${PRIMARY_PROJECT_NAME}-install/bin/ReassignWhiteMatter DESTINATION bin)
+endif()
 

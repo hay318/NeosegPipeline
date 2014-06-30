@@ -3,30 +3,13 @@
     <file>icons/Logo128*128.png</file>
     <file>icons/LogoWithRing.png</file>
     <file>icons/eye.png</file>
-    <file>icons/logo.png</file>
     <file>icons/stop-button.png</file>
     <file>icons/run-button.png</file>
-    <file>icons/run-5.png</file>
-    <file>icons/run-4.png</file>
-    <file>icons/stop-4.png</file>
-    <file>icons/stop-2.png</file>
-    <file>icons/run-3.png</file>
     <file>icons/save-softwares.png</file>
     <file>icons/load.png</file>
-    <file>icons/save-2.png</file>
     <file>icons/load-softwares.png</file>
-    <file>icons/binocular.png</file>
     <file>icons/save-3.png</file>
-    <file>icons/magnifying-glasses.png</file>
-    <file>icons/itkSNAP.png</file>
     <file>icons/info.png</file>
-    <file>icons/open.png</file>
     <file>icons/quit.png</file>
-    <file>icons/run.png</file>
-    <file>icons/save.png</file>
-    <file>icons/stop.png</file>
-  </qresource>
-  <qresource prefix="newPrefix">
-    <file>icons/logo.png</file>
   </qresource>
 </RCC>
