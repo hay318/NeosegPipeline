@@ -52,6 +52,40 @@ void XmlWriter::writeElement(QXmlStreamWriter* stream, QString tag, QString name
    stream->writeEndElement();
 }
 
+void XmlWriter::writeDataConfiguration(QString file_path)
+{
+   QFile* file = new::QFile(file_path);
+   file->open(QIODevice::WriteOnly);
+
+   QXmlStreamWriter* stream = new::QXmlStreamWriter(file);
+   stream->setAutoFormatting(true);
+
+   stream->writeStartDocument(); 
+   stream->writeDTD("<!DOCTYPE Neoseg-pipeline-data>");
+
+   writeData(stream); 
+
+   stream->writeEndDocument();
+
+   file->close(); 
+}
+
+void XmlWriter::writeData(QXmlStreamWriter* stream)
+{
+   stream->writeStartElement("Inputs"); 
+   writeElement(stream, "T1", "path", m_parameters->getT1()); 
+   writeElement(stream, "T2", "path", m_parameters->getT2());
+   writeElement(stream, "Mask", "path", m_parameters->getMask());
+   writeElement(stream, "DWI", "path", m_parameters->getDWI());
+   stream->writeEndElement();  
+
+   stream->writeStartElement("Outputs"); 
+   writeElement(stream, "Output-files","prefix", m_parameters->getPrefix(), "suffix", m_parameters->getSuffix());
+   writeElement(stream, "Output-directory", "path", m_parameters->getOutput());
+   stream->writeEndElement();  
+
+}
+
 void XmlWriter::writeGeneralParameters(QXmlStreamWriter* stream)
 {
     stream->writeStartElement("General-parameters");
@@ -85,7 +119,7 @@ void XmlWriter::writeGeneralParameters(QXmlStreamWriter* stream)
 
       if(m_parameters->getIncludingFA())
       {
-         writeElement(stream, "Including-FA", "bool", QString::number(m_parameters->getIncludingFA()), "weight", QString::number(m_parameters->getFAWeight()), "smoothing-size", QString::number(m_parameters->getFASmoothingSize()));  
+         writeElement(stream, "Including-FA", "bool", QString::number(m_parameters->getIncludingFA()), "shift", QString::number(m_parameters->getFAShift()), "sigma", QString::number(m_parameters->getFASigmaScale()), "weight", QString::number(m_parameters->getFAWeight()), "smoothing-size", QString::number(m_parameters->getFASmoothingSize()));  
       }
       else
       {
@@ -97,7 +131,7 @@ void XmlWriter::writeGeneralParameters(QXmlStreamWriter* stream)
 
    else
    {
-      writeElement(stream, "Atlas-path","path", m_parameters->getAtlas());
+      writeElement(stream, "Existing-atlas","path", m_parameters->getExistingAtlas());
    }
 
    writeElement(stream, "Neoseg-images","using-FA", QString::number(m_parameters->getUsingFA()), "using-AD", QString::number(m_parameters->getUsingAD()));   
@@ -111,18 +145,14 @@ void XmlWriter::writeGeneralParameters(QXmlStreamWriter* stream)
    writeElement(stream, "Stopping-if-error","bool", QString::number(m_parameters->getStoppingIfError()));
    writeElement(stream, "Cleaning-up","bool", QString::number(m_parameters->getCleaningUp()));
    writeElement(stream, "Computing-system","name", m_parameters->getComputingSystem());
-   writeElement(stream, "Number-of-cores","nb", QString::number(m_parameters->getNumberOfCores()));   
    stream->writeEndElement(); // COMPUTATION
 
    stream->writeEndElement(); // GENERAL-PARAMETERS
 }
 
-
-void XmlWriter::writeAntsParameters(QXmlStreamWriter* stream)
+void XmlWriter::writeAntsParameters(QXmlStreamWriter* stream, AntsParameters* antsParameters)
 {
-   AntsParameters* antsParameters=m_parameters->getAntsParameters();  
-
-   stream->writeStartElement("ANTS-parameters");
+   stream->writeStartElement("ANTS-parameters" + antsParameters->getName());
 
    writeElement(stream, "First-modality", "metric", antsParameters->getImageMetric1(), "weight", QString::number(antsParameters->getWeight1()), "radius", QString::number(antsParameters->getRadius1()));
    writeElement(stream, "Second-modality", "metric", antsParameters->getImageMetric2(), "weight", QString::number(antsParameters->getWeight2()), "radius", QString::number(antsParameters->getRadius2()));
@@ -134,6 +164,7 @@ void XmlWriter::writeAntsParameters(QXmlStreamWriter* stream)
    writeElement(stream, "Regularization", "type", antsParameters->getRegularizationType(), "gradient-field-sigma", QString::number(antsParameters->getGradientFieldSigma()), "deformation-field-sigma", QString::number(antsParameters->getDeformationFieldSigma()));
 
    writeElement(stream, "Mask", "brain-mask", QString::number(antsParameters->getUsingMask()), "smoothed-brain-mask", QString::number(antsParameters->getUsingSmoothedMask()));
+   writeElement(stream, "Resources", "Number-of-Registrations", QString::number(antsParameters->getNumberOfRegistrations()), "Number-of-Cores", QString::number(antsParameters->getWeight1()), "Number-of-GB", QString::number(antsParameters->getNumberOfGB()));
 
    stream->writeEndElement();
 }
@@ -177,7 +208,8 @@ void XmlWriter::writeParametersConfiguration(QString file_path)
    stream->writeStartElement("Parameters");
 
    writeGeneralParameters(stream);  
-   writeAntsParameters(stream);
+   writeAntsParameters(stream, m_parameters->getAntsParametersDTI());
+   writeAntsParameters(stream, m_parameters->getAntsParametersAtlas());
    writeNeosegParameters(stream); 
 
    stream->writeEndElement();
@@ -189,7 +221,7 @@ void XmlWriter::writeParametersConfiguration(QString file_path)
 
 void XmlWriter::writeExecutables(QXmlStreamWriter* stream)
 {
-   ExecutablePaths* executablePaths=m_parameters->getExecutablePaths();
+   ExecutablePaths* executablePaths = m_parameters->getExecutablePaths();
 
    stream->writeStartElement("Executables"); 
    writeElement(stream, "SegPostProcessCLP", "path", executablePaths->getExecutablePath("SegPostProcessCLP")); 
@@ -203,6 +235,12 @@ void XmlWriter::writeExecutables(QXmlStreamWriter* stream)
    writeElement(stream, "ResampleVolume2", "path", executablePaths->getExecutablePath("ResampleVolume2")); 
    writeElement(stream, "ImageMath", "path", executablePaths->getExecutablePath("ImageMath")); 
    writeElement(stream, "InsightSNAP", "path", executablePaths->getExecutablePath("InsightSNAP"));
+   stream->writeEndElement(); 
+
+   LibraryPaths* libraryPaths = m_parameters->getLibraryPaths();
+
+   stream->writeStartElement("Library-directories"); 
+   writeElement(stream, "FSL", "path", libraryPaths->getLibraryPath("FSL")); 
    stream->writeEndElement(); 
 }
 

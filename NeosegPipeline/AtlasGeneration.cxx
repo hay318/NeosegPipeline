@@ -96,9 +96,7 @@ void AtlasGeneration::initializeScript()
    defineExecutable("ResampleVolume2");
    defineExecutable("unu");
    defineExecutable("SpreadFA");
-
-   QString WeightedLabelsAverage = "/work/mcherel/project/neosegPipeline/weightedLabelsAverage/bin/WeightedLabelsAverage";
-   m_script += "WeightedLabelsAverage = '" + WeightedLabelsAverage + "'\n\n";
+   defineExecutable("WeightedLabelsAverage");
 
    m_script += "logger = logging.getLogger('NeosegPipeline')\n\n";
 
@@ -230,7 +228,7 @@ void AtlasGeneration::generateWeightedAveragedLabels()
    m_outputs.insert(m_white.output, whiteAverage);
    m_outputs.insert(m_gray.output, grayAverage);
    m_outputs.insert(m_csf.output, csfAverage);
-   m_argumentsList << "WeightedLabelsAverage" << "parameters_path";
+   m_argumentsList << "WeightedLabelsAverage" << "'--parameters'" << "parameters_path";
    execute(); 
    m_unnecessaryFiles << m_XML_path;
    m_unnecessaryFiles << whiteAverage; 
@@ -259,7 +257,7 @@ void AtlasGeneration::extractWMFromFA()
    QString spreadFA = FA_dir->filePath(m_prefix + "FA" + "-spread" + m_suffix + ".nrrd");
    m_outputs.insert("spreadFA", spreadFA);
  
-   m_argumentsList << "SpreadFA" << "'--input'" << "rescaledFA" << "'--shift'" << QString::number(m_FAShift) << "'--sigma'" << QString::number(m_FASigmaScale) << "'--output'" << "spreadFA";
+   m_argumentsList << "SpreadFA" << "'--input'" << "rescaledFA" << "'--shift'" << "'" + QString::number(m_FAShift) + "'" << "'--sigma'" << "'" + QString::number(m_FASigmaScale) + "'" << "'--output'" << "spreadFA";
    m_log = "- Spreading the FA";
    execute();
    m_unnecessaryFiles << spreadFA; 
@@ -503,15 +501,14 @@ void AtlasGeneration::implementRun()
    m_script += "\t# Copy Rest Probability #\n";
    m_script += "\tlogger.info('Copying final rest probability...')\n"; 
    copyFinalPriorProbability(m_rest);
+
 }
 
 void AtlasGeneration::update()
 {
    createDirectories();  
-
    initializeScript();
-
-   implementStop();
+   implementStop(); 
    implementCheckFileExistence();
    implementExecute();
    implementExecutePipe();

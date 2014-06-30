@@ -7,9 +7,13 @@ void NeosegExecution::setNewAtlas(bool newAtlas)
 {
    m_newAtlas = newAtlas; 
 }
-void NeosegExecution::setAtlas(QString atlas)
+void NeosegExecution::setExistingAtlas(QString atlas)
 {
    m_atlas = atlas;
+}
+void NeosegExecution::setAtlasFormat(QString atlasFormat)
+{
+   m_atlasFormat = atlasFormat;
 }
 void NeosegExecution::setUsingFA(bool usingFA)
 {
@@ -88,6 +92,70 @@ void NeosegExecution::implementWriteAffineTranformationFile()
 
    m_script += "\tfile.close()\n\n";
 }
+void NeosegExecution::addInputImages()
+{
+   m_images.insert("T1", m_neo.T1); 
+   m_images.insert("T2", m_neo.T2); 
+   if(m_usingFA)
+   {
+      m_images.insert("FA", m_neo.FA); 
+   }
+   if(m_usingAD)
+   {
+      m_images.insert("AD", m_neo.AD); 
+   }
+
+   QDir atlas_dir(m_atlas);
+
+   m_images.insert("templateT1", atlas_dir.filePath("templateT1" + m_atlasFormat));
+   m_images.insert("templateT2", atlas_dir.filePath("templateT2" + m_atlasFormat));
+   m_images.insert("white", atlas_dir.filePath("white" + m_atlasFormat));
+   m_images.insert("gray", atlas_dir.filePath("gray" + m_atlasFormat));
+   m_images.insert("csf", atlas_dir.filePath("csf" + m_atlasFormat));
+   m_images.insert("rest", atlas_dir.filePath("rest" + m_atlasFormat));
+}
+
+void NeosegExecution::addOutputImages()
+{
+   QString T1corrected_name = QFileInfo(m_neo.T1).baseName() + "_corrected_" + m_neo.prefix + ".nrrd";  
+   m_images.insert("T1_corrected", m_module_dir->filePath(T1corrected_name)); 
+   
+   QString T2corrected_name = QFileInfo(m_neo.T2).baseName() + "_corrected_" + m_neo.prefix + ".nrrd";  
+   m_images.insert("T2_corrected", m_module_dir->filePath(T2corrected_name)); 
+
+   QString basename = QFileInfo(m_neo.T2).baseName();
+
+   QString template_name = basename + "_template_" + m_neo.prefix + ".nrrd";  
+   m_images.insert("template", m_module_dir->filePath(template_name));  
+
+   QString labels_name = basename + "_EMonly_labels_" + m_neo.prefix + ".nrrd";  
+   m_images.insert("labels", m_module_dir->filePath(labels_name)); 
+
+   QString posterior0_name = basename + "_EMonly_posterior0_" + m_neo.prefix + ".nrrd";  
+   m_images.insert("posterior0", m_module_dir->filePath(posterior0_name)); 
+
+   QString posterior1_name = basename + "_EMonly_posterior1_" + m_neo.prefix + ".nrrd";  
+   m_images.insert("posterior1", m_module_dir->filePath(posterior1_name)); 
+
+   QString posterior2_name = basename + "_EMonly_posterior2_" + m_neo.prefix + ".nrrd";  
+   m_images.insert("posterior2", m_module_dir->filePath(posterior2_name)); 
+
+   QString posterior3_name = basename + "_EMonly_posterior3_" + m_neo.prefix + ".nrrd";  
+   m_images.insert("posterior3", m_module_dir->filePath(posterior3_name)); 
+}
+
+void NeosegExecution::changeOrigin(float origin[3])
+{
+   QMap<QString, QString>::iterator it;
+
+   for(it = m_images.begin(); it != m_images.end(); ++it)
+   {
+      m_log = "- Change origin to " + QString::number(origin[0]) + "," + QString::number(origin[1]) + "," + QString::number(origin[2]);
+      m_inputs.insert(it.key(), it.value());
+      m_argumentsList << "ImageMath" << it.key() << "'-changeOrig'" << "'" + QString::number(origin[0]) + "," + QString::number(origin[1]) + "," + QString::number(origin[2]) + "'" << "'-outfile'" << it.key(); 
+      execute(); 
+   }
+}
 
 void NeosegExecution::writeXMLFile()
 {   
@@ -102,7 +170,7 @@ void NeosegExecution::writeXMLFile()
    addSubElement("segmentationParameters", "suffix", "SUFFIX", m_neo.prefix);
    addSubElement("segmentationParameters", "atlasDirectory", "ATLAS-DIRECTORY", m_atlas);
    addSubElement("segmentationParameters", "atlasOrientation", "ATLAS-ORIENTATION", "RAI");
-   addSubElement("segmentationParameters", "atlasFormat", "ATLAS-FORMAT", "NRRD");
+   addSubElement("segmentationParameters", "atlasFormat", "ATLAS-FORMAT", m_atlasFormat);
    addSubElement("segmentationParameters", "outputDirectory", "OUTPUT-DIRECTORY", m_module_path);
    addSubElement("segmentationParameters", "outputFormat", "OUTPUT-FORMAT", "NRRD");
 
@@ -393,6 +461,8 @@ void NeosegExecution::reassignWhiteMatter()
    execute(); 
    m_unnecessaryFiles << m_XML_path;
 
+   m_neo.seg3Labels = output;
+
 }
 
 void NeosegExecution::implementRun()
@@ -407,15 +477,15 @@ void NeosegExecution::implementRun()
    QString seg_name;  
    if(m_computing3LabelsSeg && m_reassigningWhiteMatter)
    {
-      seg_name = m_prefix + "3Labels-WMReassigned" + m_suffix + ".nrrd";
+      seg_name = m_prefix + "seg-3Labels-WMReassigned" + m_suffix + ".nrrd";
    }
    if(m_computing3LabelsSeg && !m_reassigningWhiteMatter)
    {
-      seg_name = m_prefix + "3Labels" + m_suffix + ".nrrd";
+      seg_name = m_prefix + "seg-3Labels" + m_suffix + ".nrrd";
    }
    if(!m_computing3LabelsSeg && m_reassigningWhiteMatter)
    {
-      seg_name = m_prefix + "WMReassigned" + m_suffix + ".nrrd";
+      seg_name = m_prefix + "seg-WMReassigned" + m_suffix + ".nrrd";
    }
    QString seg_path = m_module_dir->filePath(seg_name); 
 
@@ -424,16 +494,31 @@ void NeosegExecution::implementRun()
 
    m_script += "\tlogger.debug('')\n\n";
 
+   addInputImages(); 
+ 
+   if(m_neo.origin[0] != 0 || m_neo.origin[1] != 0 || m_neo.origin[2] != 0)
+   {
+      m_script += "\t# Change Origin #\n";
+      float origin[3] = {0,0,0};
+      changeOrigin(origin);
+   }
+
    m_script += "\t# Write XML File #\n";
    writeXMLFile();
-   
-   if(m_newAtlas)
-   {
-      m_script += "\t# Write Affine Transformation File #\n";
-      writeAffineTranformationFiles();
-   }
+
+   m_script += "\t# Write Affine Transformation File #\n";
+   writeAffineTranformationFiles();
+
    m_script += "\t# Run Neoseg #\n";
    runNeoseg();
+
+   if(m_neo.origin[0] != 0 || m_neo.origin[1] != 0 || m_neo.origin[2] != 0)
+   {
+      addOutputImages(); 
+
+      m_script += "\t# Change Origin #\n";
+      changeOrigin(m_neo.origin);
+   }
 
    if(m_computing3LabelsSeg)
    {
@@ -446,7 +531,6 @@ void NeosegExecution::implementRun()
       m_script += "\t# Reassign White Matter #\n";
       reassignWhiteMatter(); 
    }
-
 } 
 
 void NeosegExecution::update()

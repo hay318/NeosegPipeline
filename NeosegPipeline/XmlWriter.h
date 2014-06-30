@@ -25,8 +25,11 @@ class XmlWriter
       void writeElement(QXmlStreamWriter* stream, QString tag, QString name1, QString value1, QString name2, QString value2, QString name3, QString value3, QString name4, QString value4);
       void writeElement(QXmlStreamWriter* stream, QString tag, QString name1, QString value1, QString name2, QString value2, QString name3, QString value3, QString name4, QString value4, QString name5, QString value5);
 
+      void writeData(QXmlStreamWriter* stream);
+      void writeDataConfiguration(QString file_path); 
+
       void writeGeneralParameters(QXmlStreamWriter* stream);
-      void writeAntsParameters(QXmlStreamWriter* stream);
+      void writeAntsParameters(QXmlStreamWriter* stream, AntsParameters* antsParameters);
       void writeNeosegParameters(QXmlStreamWriter* stream);
       void writeParametersConfiguration(QString file_path); 
 

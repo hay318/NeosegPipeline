@@ -6,8 +6,17 @@ PipelineParameters::PipelineParameters()
    m_prefix = "neo";
    m_suffix = "NP";
 
+   m_skullStripping_default = true; 
+   m_skullStripping = m_skullStripping_default; 
+
+   m_correcting_default = true; 
+   m_correcting = m_correcting_default;
+
    m_newAtlas_default = true; 
    m_newAtlas = m_newAtlas_default;
+
+   m_atlasFormat_default = ".nrrd"; 
+   m_atlasFormat = m_atlasFormat_default;
 
    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
    m_atlasPopulationDirectory_default = env.value("NEOSEG_PIPELINE_ATLAS_POPULATION_DIRECTORY", QString::null);   
@@ -23,7 +32,6 @@ PipelineParameters::PipelineParameters()
          m_selectedAtlases << *it;
       }
    }
-
 
    m_smoothing_values << "gaussian" << "curve evolution";
    m_smoothing_default = m_smoothing_values[0];
@@ -109,43 +117,18 @@ PipelineParameters::PipelineParameters()
    m_stoppingIfError = m_stoppingIfError_default; 
 
    // Computing System
-   m_computingSystem_values << "local" << "killdevil";
+   m_computingSystem_values << "local" << "killdevil" << "killdevil interactive";
    m_computingSystem_default = m_computingSystem_values[0];
    m_computingSystem = m_computingSystem_default;
 
-   m_numberOfCores_min = 0;
-   m_numberOfCores_max = 20;
-   m_numberOfCores_default = 1;
-   m_numberOfCores = m_numberOfCores_default;
-
-   m_antsParameters = new AntsParameters(); 
-
+   m_antsParameters_DTI = new AntsParameters("DTI"); 
+   m_antsParameters_atlas = new AntsParameters("atlas");
    m_neosegParameters = new NeosegParameters(); 
-
    m_executablePaths = new ExecutablePaths(); 
-
-   m_executablePaths->setDefaultExecutablePath("ImageStat");
-   m_executablePaths->setDefaultExecutablePath("SegPostProcessCLP");
-   m_executablePaths->setDefaultExecutablePath("N4ITKBiasFieldCorrection");
-   m_executablePaths->setDefaultExecutablePath("ANTS");
-   m_executablePaths->setDefaultExecutablePath("ResampleVolume2");
-   m_executablePaths->setDefaultExecutablePath("ImageMath");
-   m_executablePaths->setDefaultExecutablePath("ImageStat");
-   m_executablePaths->setDefaultExecutablePath("ITKTransformTools");
-   m_executablePaths->setDefaultExecutablePath("dtiestim");
-   m_executablePaths->setDefaultExecutablePath("dtiprocess");
-   m_executablePaths->setDefaultExecutablePath("bet2");
-   m_executablePaths->setDefaultExecutablePath("unu");
-   m_executablePaths->setDefaultExecutablePath("InsightSNAP");
-   m_executablePaths->setExecutablePath("SpreadFA", "/work/mcherel/project/neosegPipeline/spreadFA/bin/SpreadFA");
-   m_executablePaths->setExecutablePath("Neoseg", "/work/mcherel/project/neoseg/bin/bin_lessRefinement/neoseg");
-   m_executablePaths->setExecutablePath("CleanRingMask", "/work/mcherel/project/neosegPipeline/cleanRingMask/bin/CleanRingMask");
-   m_executablePaths->setExecutablePath("WeightedLabelsAverage", "/work/mcherel/project/neosegPipeline/weightedLabelsAverage/bin/WeightedLabelsAverage");
-   m_executablePaths->setExecutablePath("ReassignWhiteMatter", "/work/mcherel/project/neosegPipeline/reassignWhiteMatter/bin/ReassignWhiteMatter");
+   m_libraryPaths = new LibraryPaths(); 
 }
 
 // Checking Functions
-
 bool PipelineParameters::isSuperior(int value, int min)
 {
    if(value>min)
@@ -224,6 +207,27 @@ void PipelineParameters::setProgramPath(QString programPath)
 {
    m_programPath = programPath; 
    m_executablePaths->setProgramPath(programPath); 
+
+   m_executablePaths->setDefaultExecutablePath("python");
+   m_executablePaths->setDefaultExecutablePath("SegPostProcessCLP");
+   m_executablePaths->setDefaultExecutablePath("N4ITKBiasFieldCorrection");
+   m_executablePaths->setDefaultExecutablePath("ANTS");
+   m_executablePaths->setDefaultExecutablePath("ResampleVolume2");
+   m_executablePaths->setDefaultExecutablePath("ImageMath");
+   m_executablePaths->setDefaultExecutablePath("ITKTransformTools");
+   m_executablePaths->setDefaultExecutablePath("dtiestim");
+   m_executablePaths->setDefaultExecutablePath("dtiprocess");
+   m_executablePaths->setDefaultExecutablePath("bet2");
+   m_executablePaths->setDefaultExecutablePath("unu");
+   m_executablePaths->setDefaultExecutablePath("InsightSNAP");
+   m_executablePaths->setDefaultExecutablePath("SpreadFA");
+   m_executablePaths->setDefaultExecutablePath("Neoseg");
+   m_executablePaths->setDefaultExecutablePath("WeightedLabelsAverage");
+   m_executablePaths->setDefaultExecutablePath("ReassignWhiteMatter");
+
+   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+   m_libraryPaths->setLibraryPath("FSL", env.value("FSLDIR", QString::null));
+   
 }
 QString PipelineParameters::getProgramPath()
 {
@@ -360,27 +364,6 @@ QString PipelineParameters::getDWI()
    return m_DWI;
 }
 
-// b0
-bool PipelineParameters::checkb0(QString b0)
-{
-   return (QFile(b0)).exists();
-}
-void PipelineParameters::setb0(QString b0)
-{
-   if(!b0.isEmpty())
-   {
-      m_b0 = QFileInfo(b0).absoluteFilePath();
-   }
-   else
-   {
-      m_b0 = ""; 
-   }
-}
-QString PipelineParameters::getb0()
-{
-   return m_b0;
-}
-
 // Neo
 void PipelineParameters::initializeNeo()
 {
@@ -389,7 +372,11 @@ void PipelineParameters::initializeNeo()
    m_neo.T2 = m_T2;
    m_neo.mask = m_mask; 
    m_neo.DWI = m_DWI; 
-   m_neo.b0 = m_b0; 
+
+   Origin<float> T1((m_T1).toStdString());
+   (m_neo.origin)[0] = (T1.GetOrigin())[0];
+   (m_neo.origin)[1] = (T1.GetOrigin())[1];
+   (m_neo.origin)[2] = (T1.GetOrigin())[2];
 }
 void PipelineParameters::setNeo(Neo neo)
 {
@@ -400,6 +387,25 @@ Neo PipelineParameters::getNeo()
    return m_neo;
 }
 
+// SkullStripping 
+void PipelineParameters::setSkullStripping(bool skullStripping)
+{
+   m_skullStripping = skullStripping; 
+}
+bool PipelineParameters::getSkullStripping()
+{
+   return m_skullStripping; 
+}
+
+// Correcting
+void PipelineParameters::setCorrecting(bool correcting)
+{
+   m_correcting = correcting; 
+}
+bool PipelineParameters::getCorrecting()
+{
+   return m_correcting; 
+}
 
 // New Atlas
 void PipelineParameters::setNewAtlas(bool newAtlas)
@@ -434,13 +440,26 @@ bool PipelineParameters::checkExistingAtlas(QString atlas)
 
    return false;
 }
-void PipelineParameters::setAtlas(QString atlas)
+void PipelineParameters::setExistingAtlas(QString existingAtlas)
 {
-   m_atlas=atlas;
+   m_existingAtlas = existingAtlas;
+
+   QDir* atlas_dir = new QDir(m_existingAtlas);
+   QFileInfoList templateT1 = find(atlas_dir, "templateT1");
+   if(templateT1.size() == 1)
+   {
+      m_atlasFormat = templateT1[0].completeSuffix();
+   }
 }
-QString PipelineParameters::getAtlas()
+QString PipelineParameters::getExistingAtlas()
 {
-   return m_atlas;
+   return m_existingAtlas;
+}
+
+// Atlas Format
+QString PipelineParameters::getAtlasFormat()
+{
+   return m_atlasFormat;
 }
 
 // Atlas Population Directory
@@ -460,6 +479,7 @@ QString PipelineParameters::getAtlasPopulationDirectory()
 // Selected Atlases
 void PipelineParameters::setSelectedAtlases(QStringList selectedAtlases) 
 {
+   m_selectedAtlases.clear(); 
    m_selectedAtlases = selectedAtlases;
 }
 QStringList PipelineParameters::getSelectedAtlases() 
@@ -620,23 +640,22 @@ bool PipelineParameters::checkSmoothing(QString smoothing)
 {
    return isIn(smoothing, m_smoothing_values);
 }
-QString PipelineParameters::getSmoothingFlag(QString regularizationType)
+QString PipelineParameters::getSmoothingFlag()
 {
-   if(regularizationType.compare("gauss", Qt::CaseInsensitive) || regularizationType.compare("gaussian", Qt::CaseInsensitive))
+   if(!m_smoothing.compare("gaussian", Qt::CaseInsensitive))
    {
       return "gauss";
    }
 
-   if(regularizationType.compare("curveEvolution", Qt::CaseInsensitive) || regularizationType.compare("curve evolution", Qt::CaseInsensitive))
+   if(!m_smoothing.compare("curve evolution", Qt::CaseInsensitive))
    {
       return "curveEvol";
    }
-   
-   return NULL;
+   return NULL; 
 }
 void PipelineParameters::setSmoothing(QString smoothing)
 {
-   m_smoothing=getSmoothingFlag(smoothing);
+   m_smoothing=smoothing;
 }
 QString PipelineParameters::getSmoothing()
 {
@@ -920,9 +939,13 @@ int PipelineParameters::getNumberOfCores()
 }
 
 // ANTS Parameters
-AntsParameters* PipelineParameters::getAntsParameters()
+AntsParameters* PipelineParameters::getAntsParametersDTI()
 {
-   return m_antsParameters;
+   return m_antsParameters_DTI;
+}
+AntsParameters* PipelineParameters::getAntsParametersAtlas()
+{
+   return m_antsParameters_atlas;
 }
 
 // Neoseg Parameters
@@ -935,6 +958,12 @@ NeosegParameters* PipelineParameters::getNeosegParameters()
 ExecutablePaths* PipelineParameters::getExecutablePaths()
 {
    return m_executablePaths;
+}
+
+// Executable Paths 
+LibraryPaths* PipelineParameters::getLibraryPaths()
+{
+   return m_libraryPaths;
 }
 
 // Segmentation
@@ -971,7 +1000,7 @@ QString PipelineParameters::checkImages()
 
    if(m_DWI.isEmpty())
    {
-      if(m_includingFA)
+      if(m_includingFA && m_newAtlas)
       {
          errors += "You cannot include the FA in the probability maps without a DWI\n"; 
       }
@@ -985,20 +1014,9 @@ QString PipelineParameters::checkImages()
       }      
    }
 
-   if(m_b0.isEmpty())
+   if(!m_newAtlas && m_reassigningWhiteMatter)
    {
-      if(m_includingFA)
-      {
-         errors += "You cannot include the FA in the probability maps without a b0\n"; 
-      }
-      if(m_usingFA)
-      {
-         errors += "You cannot use the FA in Neoseg without a b0\n"; 
-      }
-      if(m_usingAD)
-      {
-         errors += "You cannot use the AD in Neoseg without a b0\n"; 
-      }      
+      errors += "You cannot reassign the small islands of white matter without creating a new atlas\n";      
    }
 
    return errors;

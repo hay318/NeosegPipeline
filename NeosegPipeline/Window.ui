@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>717</width>
-    <height>882</height>
+    <width>743</width>
+    <height>963</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -20,8 +20,8 @@
    <string>Neoseg Pipeline</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="resources.qrc">
-    <normaloff>:/icons/icons/logo.png</normaloff>:/icons/icons/logo.png</iconset>
+   <iconset resource="../NeoSegPipeline/resources.qrc">
+    <normaloff>:/icons/icons/LogoWithRing.png</normaloff>:/icons/icons/LogoWithRing.png</iconset>
   </property>
   <property name="iconSize">
    <size>
@@ -49,7 +49,7 @@
              <string> Run Pipeline</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../NeoSegPipeline/resources.qrc">
               <normaloff>:/icons/icons/run-button.png</normaloff>:/icons/icons/run-button.png</iconset>
             </property>
             <property name="iconSize">
@@ -66,7 +66,7 @@
              <string> Stop Pipeline</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../NeoSegPipeline/resources.qrc">
               <normaloff>:/icons/icons/stop-button.png</normaloff>:/icons/icons/stop-button.png</iconset>
             </property>
             <property name="iconSize">
@@ -143,7 +143,7 @@
              <string> Display results</string>
             </property>
             <property name="icon">
-             <iconset resource="resources.qrc">
+             <iconset resource="../NeoSegPipeline/resources.qrc">
               <normaloff>:/icons/icons/eye.png</normaloff>:/icons/icons/eye.png</iconset>
             </property>
             <property name="iconSize">
@@ -242,7 +242,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabs">
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="Data">
        <attribute name="title">
@@ -329,7 +329,7 @@
                   <number>0</number>
                  </property>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="b0_lineEdit"/>
+                  <widget class="QLineEdit" name="DWI_lineEdit"/>
                  </item>
                  <item row="0" column="0">
                   <widget class="QPushButton" name="DWI_button">
@@ -337,16 +337,6 @@
                     <string>DWI</string>
                    </property>
                   </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QPushButton" name="b0_button">
-                   <property name="text">
-                    <string>b0</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QLineEdit" name="DWI_lineEdit"/>
                  </item>
                 </layout>
                </widget>
@@ -501,15 +491,15 @@
              <property name="title">
               <string>Existing Atlas</string>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_39">
-              <item>
+             <layout class="QGridLayout" name="gridLayout_41">
+              <item row="0" column="0">
                <widget class="QPushButton" name="existingAtlas_button">
                 <property name="text">
                  <string>Existing Atlas</string>
                 </property>
                </widget>
               </item>
-              <item>
+              <item row="0" column="2">
                <widget class="QLineEdit" name="existingAtlas_lineEdit"/>
               </item>
              </layout>
@@ -664,48 +654,472 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_6">
+       <attribute name="title">
+        <string>Preprocessing Data</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_9">
+        <item>
+         <widget class="QGroupBox" name="groupBox_11">
+          <property name="title">
+           <string>Structural Images</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_11">
+           <item>
+            <widget class="QCheckBox" name="skullStripping_checkBox">
+             <property name="text">
+              <string>Skull-strip T1 and T2 images</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="correcting_checkBox">
+             <property name="text">
+              <string>Correct inomogeneity of T1 and T2 images</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_15">
+          <property name="title">
+           <string>Diffusion Images - Registration</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_13">
+           <item>
+            <widget class="QGroupBox" name="groupBox_9">
+             <property name="title">
+              <string>Similarity Model</string>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_15">
+              <item>
+               <widget class="QWidget" name="widget_29" native="true">
+                <layout class="QGridLayout" name="gridLayout_32">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>30</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>10</number>
+                 </property>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_47">
+                   <property name="text">
+                    <string>Image Metric           </string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_48">
+                   <property name="text">
+                    <string>Weight</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_49">
+                   <property name="text">
+                    <string>Radius</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox_21">
+                <property name="title">
+                 <string>b0</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_33">
+                 <item row="0" column="0" alignment="Qt::AlignLeft">
+                  <widget class="QComboBox" name="imageMetric1_DTI_comboBox"/>
+                 </item>
+                 <item row="1" column="0" alignment="Qt::AlignLeft">
+                  <widget class="QDoubleSpinBox" name="weight1_DTI_spinBox">
+                   <property name="value">
+                    <double>0.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0" alignment="Qt::AlignLeft">
+                  <widget class="QSpinBox" name="radius1_DTI_spinBox"/>
+                 </item>
+                 <item row="0" column="1">
+                  <spacer name="horizontalSpacer_32">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="AD">
+                <property name="title">
+                 <string>AD</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_34">
+                 <item row="3" column="0" alignment="Qt::AlignLeft">
+                  <widget class="QSpinBox" name="radius2_DTI_spinBox"/>
+                 </item>
+                 <item row="0" column="0" alignment="Qt::AlignLeft">
+                  <widget class="QComboBox" name="imageMetric2_DTI_comboBox"/>
+                 </item>
+                 <item row="2" column="0" alignment="Qt::AlignLeft">
+                  <widget class="QDoubleSpinBox" name="weight2_DTI_spinBox">
+                   <property name="value">
+                    <double>0.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <spacer name="horizontalSpacer_33">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_18">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_12">
+             <property name="title">
+              <string>Iterations</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_35">
+              <item row="0" column="2">
+               <widget class="QWidget" name="widget_34" native="true">
+                <layout class="QHBoxLayout" name="horizontalLayout_17">
+                 <property name="margin">
+                  <number>1</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="label_50">
+                   <property name="text">
+                    <string>Max Iterations :</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_51">
+                   <property name="text">
+                    <string> JxKxL =</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="iterationsJ_DTI_spinBox">
+                   <property name="maximum">
+                    <number>500</number>
+                   </property>
+                   <property name="value">
+                    <number>0</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item alignment="Qt::AlignHCenter">
+                  <widget class="QLabel" name="label_52">
+                   <property name="text">
+                    <string>x</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="iterationsK_DTI_spinBox">
+                   <property name="maximum">
+                    <number>500</number>
+                   </property>
+                   <property name="value">
+                    <number>0</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item alignment="Qt::AlignHCenter">
+                  <widget class="QLabel" name="label_53">
+                   <property name="text">
+                    <string>x</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QSpinBox" name="iterationsL_DTI_spinBox">
+                   <property name="maximum">
+                    <number>500</number>
+                   </property>
+                   <property name="value">
+                    <number>0</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_27">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget_35" native="true">
+             <layout class="QGridLayout" name="gridLayout_36">
+              <property name="margin">
+               <number>0</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QGroupBox" name="groupBox_13">
+                <property name="title">
+                 <string>Transformation</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_37">
+                 <item row="4" column="1">
+                  <widget class="QWidget" name="widget_48" native="true">
+                   <layout class="QHBoxLayout" name="horizontalLayout_32">
+                    <property name="margin">
+                     <number>0</number>
+                    </property>
+                    <item alignment="Qt::AlignLeft">
+                     <widget class="QDoubleSpinBox" name="deltaTime_DTI_spinBox">
+                      <property name="decimals">
+                       <number>3</number>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_54">
+                      <property name="text">
+                       <string>[advanced]</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="label_55">
+                   <property name="text">
+                    <string>Number Of Time Steps   </string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0">
+                  <widget class="QLabel" name="label_56">
+                   <property name="text">
+                    <string>Delta Time</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1" alignment="Qt::AlignLeft">
+                  <widget class="QComboBox" name="transformationType_DTI_comboBox"/>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_57">
+                   <property name="text">
+                    <string>Gradient Step Length</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_58">
+                   <property name="text">
+                    <string>Transformation Type</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1" alignment="Qt::AlignLeft">
+                  <widget class="QDoubleSpinBox" name="gradientStepLength_DTI_spinBox">
+                   <property name="decimals">
+                    <number>3</number>
+                   </property>
+                   <property name="value">
+                    <double>0.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QWidget" name="widget_49" native="true">
+                   <layout class="QHBoxLayout" name="horizontalLayout_38">
+                    <property name="margin">
+                     <number>0</number>
+                    </property>
+                    <item alignment="Qt::AlignLeft">
+                     <widget class="QDoubleSpinBox" name="numberOfTimeSteps_DTI_spinBox">
+                      <property name="decimals">
+                       <number>3</number>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_59">
+                      <property name="text">
+                       <string>[advanced]</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QGroupBox" name="groupBox_14">
+                <property name="title">
+                 <string>Regularization</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_38">
+                 <item row="1" column="1" alignment="Qt::AlignLeft">
+                  <widget class="QDoubleSpinBox" name="gradientFieldSigma_DTI_spinBox">
+                   <property name="value">
+                    <double>0.000000000000000</double>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="label_60">
+                   <property name="text">
+                    <string>Deformation Filed Sigma</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1" alignment="Qt::AlignLeft">
+                  <widget class="QDoubleSpinBox" name="deformationFieldSigma_DTI_spinBox"/>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="label_61">
+                   <property name="text">
+                    <string>Gradient Field Sigma</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1" alignment="Qt::AlignLeft">
+                  <widget class="QComboBox" name="regularizationType_DTI_comboBox">
+                   <property name="sizeAdjustPolicy">
+                    <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_62">
+                   <property name="text">
+                    <string>Regularization Type</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QWidget" name="widget_38" native="true"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_24">
+             <property name="title">
+              <string>Constraints</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_39">
+              <item row="0" column="1">
+               <widget class="QCheckBox" name="usingMask_DTI_checkBox">
+                <property name="text">
+                 <string>Use the brain mask</string>
+                </property>
+                <property name="autoExclusive">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2" alignment="Qt::AlignRight">
+               <widget class="QCheckBox" name="usingSmoothedMask_DTI_checkBox">
+                <property name="text">
+                 <string>Use a smoothed brain mask</string>
+                </property>
+                <property name="autoExclusive">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="noMask_DTI_checkBox">
+                <property name="text">
+                 <string>No mask</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_8">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="tab_3">
        <attribute name="title">
         <string>Atlas Registration</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_7">
-        <item row="0" column="0">
-         <widget class="QGroupBox" name="numberOfRegistrations_groupBox">
-          <property name="title">
-           <string>Number Of Registrations</string>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_22">
-           <item>
-            <widget class="QLabel" name="label_14">
-             <property name="text">
-              <string>Number of registrations processed at the same time  [1 registration = 1 core]</string>
-             </property>
-            </widget>
-           </item>
-           <item alignment="Qt::AlignLeft">
-            <widget class="QSpinBox" name="numberOfCores_spinBox">
-             <property name="value">
-              <number>0</number>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_23">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item row="2" column="0">
+        <item row="3" column="0">
          <spacer name="verticalSpacer_3">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -721,7 +1135,7 @@ p, li { white-space: pre-wrap; }
         <item row="1" column="0">
          <widget class="QGroupBox" name="ANTSParameters_groupBox">
           <property name="title">
-           <string>ANTS Parameters</string>
+           <string>Registration</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
@@ -773,17 +1187,17 @@ p, li { white-space: pre-wrap; }
                 </property>
                 <layout class="QGridLayout" name="gridLayout">
                  <item row="0" column="0" alignment="Qt::AlignLeft">
-                  <widget class="QComboBox" name="imageMetric1_comboBox"/>
+                  <widget class="QComboBox" name="imageMetric1_atlas_comboBox"/>
                  </item>
                  <item row="1" column="0" alignment="Qt::AlignLeft">
-                  <widget class="QDoubleSpinBox" name="weight1_spinBox">
+                  <widget class="QDoubleSpinBox" name="weight1_atlas_spinBox">
                    <property name="value">
                     <double>0.000000000000000</double>
                    </property>
                   </widget>
                  </item>
                  <item row="2" column="0" alignment="Qt::AlignLeft">
-                  <widget class="QSpinBox" name="radius1_spinBox"/>
+                  <widget class="QSpinBox" name="radius1_atlas_spinBox"/>
                  </item>
                  <item row="0" column="1">
                   <spacer name="horizontalSpacer_29">
@@ -808,13 +1222,13 @@ p, li { white-space: pre-wrap; }
                 </property>
                 <layout class="QGridLayout" name="gridLayout_27">
                  <item row="3" column="0" alignment="Qt::AlignLeft">
-                  <widget class="QSpinBox" name="radius2_spinBox"/>
+                  <widget class="QSpinBox" name="radius2_atlas_spinBox"/>
                  </item>
                  <item row="0" column="0" alignment="Qt::AlignLeft">
-                  <widget class="QComboBox" name="imageMetric2_comboBox"/>
+                  <widget class="QComboBox" name="imageMetric2_atlas_comboBox"/>
                  </item>
                  <item row="2" column="0" alignment="Qt::AlignLeft">
-                  <widget class="QDoubleSpinBox" name="weight2_spinBox">
+                  <widget class="QDoubleSpinBox" name="weight2_atlas_spinBox">
                    <property name="value">
                     <double>0.000000000000000</double>
                    </property>
@@ -879,7 +1293,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item>
-                  <widget class="QSpinBox" name="iterationsJ_spinBox">
+                  <widget class="QSpinBox" name="iterationsJ_atlas_spinBox">
                    <property name="maximum">
                     <number>500</number>
                    </property>
@@ -896,7 +1310,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item>
-                  <widget class="QSpinBox" name="iterationsK_spinBox">
+                  <widget class="QSpinBox" name="iterationsK_atlas_spinBox">
                    <property name="maximum">
                     <number>500</number>
                    </property>
@@ -913,7 +1327,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item>
-                  <widget class="QSpinBox" name="iterationsL_spinBox">
+                  <widget class="QSpinBox" name="iterationsL_atlas_spinBox">
                    <property name="maximum">
                     <number>500</number>
                    </property>
@@ -960,7 +1374,7 @@ p, li { white-space: pre-wrap; }
                      <number>0</number>
                     </property>
                     <item alignment="Qt::AlignLeft">
-                     <widget class="QDoubleSpinBox" name="deltaTime_spinBox">
+                     <widget class="QDoubleSpinBox" name="deltaTime_atlas_spinBox">
                       <property name="decimals">
                        <number>3</number>
                       </property>
@@ -991,7 +1405,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item row="0" column="1" alignment="Qt::AlignLeft">
-                  <widget class="QComboBox" name="transformationType_comboBox"/>
+                  <widget class="QComboBox" name="transformationType_atlas_comboBox"/>
                  </item>
                  <item row="2" column="0">
                   <widget class="QLabel" name="label_25">
@@ -1008,7 +1422,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item row="2" column="1" alignment="Qt::AlignLeft">
-                  <widget class="QDoubleSpinBox" name="gradientStepLength_spinBox">
+                  <widget class="QDoubleSpinBox" name="gradientStepLength_atlas_spinBox">
                    <property name="decimals">
                     <number>3</number>
                    </property>
@@ -1024,7 +1438,7 @@ p, li { white-space: pre-wrap; }
                      <number>0</number>
                     </property>
                     <item alignment="Qt::AlignLeft">
-                     <widget class="QDoubleSpinBox" name="numberOfTimeSteps_spinBox">
+                     <widget class="QDoubleSpinBox" name="numberOfTimeSteps_atlas_spinBox">
                       <property name="decimals">
                        <number>3</number>
                       </property>
@@ -1050,7 +1464,7 @@ p, li { white-space: pre-wrap; }
                 </property>
                 <layout class="QGridLayout" name="gridLayout_12">
                  <item row="1" column="1" alignment="Qt::AlignLeft">
-                  <widget class="QDoubleSpinBox" name="gradientFieldSigma_spinBox">
+                  <widget class="QDoubleSpinBox" name="gradientFieldSigma_atlas_spinBox">
                    <property name="value">
                     <double>0.000000000000000</double>
                    </property>
@@ -1064,7 +1478,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item row="2" column="1" alignment="Qt::AlignLeft">
-                  <widget class="QDoubleSpinBox" name="deformationFieldSigma_spinBox"/>
+                  <widget class="QDoubleSpinBox" name="deformationFieldSigma_atlas_spinBox"/>
                  </item>
                  <item row="1" column="0">
                   <widget class="QLabel" name="label_21">
@@ -1074,7 +1488,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item row="0" column="1" alignment="Qt::AlignLeft">
-                  <widget class="QComboBox" name="regularizationType_comboBox">
+                  <widget class="QComboBox" name="regularizationType_atlas_comboBox">
                    <property name="sizeAdjustPolicy">
                     <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
                    </property>
@@ -1112,7 +1526,7 @@ p, li { white-space: pre-wrap; }
              </property>
              <layout class="QGridLayout" name="gridLayout_30">
               <item row="0" column="1">
-               <widget class="QCheckBox" name="usingMask_checkBox">
+               <widget class="QCheckBox" name="usingMask_atlas_checkBox">
                 <property name="text">
                  <string>Use the brain mask</string>
                 </property>
@@ -1121,27 +1535,74 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
-              <item row="0" column="2">
-               <widget class="QCheckBox" name="usingSmoothedMask_checkBox">
+              <item row="0" column="2" alignment="Qt::AlignRight">
+               <widget class="QCheckBox" name="usingSmoothedMask_atlas_checkBox">
                 <property name="text">
-                 <string>Use a smoothed version of the brain mask</string>
+                 <string>Use a smoothed brain mask</string>
                 </property>
                 <property name="autoExclusive">
                  <bool>true</bool>
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
-               <widget class="QCheckBox" name="addingExtraCSF_checkBox">
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="noMask_atlas_checkBox">
                 <property name="text">
-                 <string>Add an extra ring of CSF</string>
-                </property>
-                <property name="autoExclusive">
-                 <bool>true</bool>
+                 <string>No mask</string>
                 </property>
                </widget>
               </item>
              </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QGroupBox" name="numberOfRegistrations_groupBox">
+          <property name="title">
+           <string>Resources</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_40">
+           <item row="1" column="1" alignment="Qt::AlignLeft">
+            <widget class="QSpinBox" name="numberOfCores_spinBox">
+             <property name="toolTip">
+              <string>0 = no restriction</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_63">
+             <property name="text">
+              <string>Number of core(s) per registration</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_14">
+             <property name="text">
+              <string>Number of registrations processed at the same time</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" alignment="Qt::AlignLeft">
+            <widget class="QSpinBox" name="numberOfRegistrations_spinBox">
+             <property name="toolTip">
+              <string>0 = all the registrations</string>
+             </property>
+             <property name="value">
+              <number>0</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3" alignment="Qt::AlignLeft">
+            <widget class="QSpinBox" name="numberOfGB_spinBox"/>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="label_64">
+             <property name="text">
+              <string>Number of GB per registration</string>
+             </property>
             </widget>
            </item>
           </layout>
@@ -2164,272 +2625,339 @@ p, li { white-space: pre-wrap; }
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QWidget" name="widget_2" native="true">
-          <layout class="QGridLayout" name="gridLayout_2">
-           <item row="11" column="0">
-            <widget class="QPushButton" name="WeightedLabelsAverage_button">
-             <property name="text">
-              <string>WeightedLabelsAverage</string>
-             </property>
+         <widget class="QGroupBox" name="groupBox_16">
+          <property name="title">
+           <string>Executables</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_8">
+           <item>
+            <widget class="QWidget" name="widget_2" native="true">
+             <layout class="QGridLayout" name="gridLayout_2">
+              <item row="13" column="3">
+               <widget class="QPushButton" name="resetNeoseg_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="11" column="2">
+               <widget class="QLineEdit" name="WeightedLabelsAverage_lineEdit"/>
+              </item>
+              <item row="11" column="0">
+               <widget class="QPushButton" name="WeightedLabelsAverage_button">
+                <property name="text">
+                 <string>WeightedLabelsAverage</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QPushButton" name="N4ITKBiasFieldCorrection_button">
+                <property name="text">
+                 <string>N4ITKBiasFieldCorrection </string>
+                </property>
+               </widget>
+              </item>
+              <item row="10" column="0">
+               <widget class="QPushButton" name="ImageMath_button">
+                <property name="text">
+                 <string>ImageMath</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="0">
+               <widget class="QPushButton" name="dtiprocess_button">
+                <property name="text">
+                 <string>dtiprocess</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="3">
+               <widget class="QPushButton" name="resetDtiprocess_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="12" column="0">
+               <widget class="QPushButton" name="SpreadFA_button">
+                <property name="text">
+                 <string>SpreadFA</string>
+                </property>
+               </widget>
+              </item>
+              <item row="14" column="3">
+               <widget class="QPushButton" name="resetReassignWhiteMatter_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="10" column="3">
+               <widget class="QPushButton" name="resetImageMath_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="12" column="2">
+               <widget class="QLineEdit" name="SpreadFA_lineEdit"/>
+              </item>
+              <item row="10" column="2">
+               <widget class="QLineEdit" name="ImageMath_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="2">
+               <widget class="QLineEdit" name="ResampleVolume2_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="8" column="0">
+               <widget class="QPushButton" name="ANTS_button">
+                <property name="text">
+                 <string>ANTS</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="0">
+               <widget class="QPushButton" name="dtiestim_button">
+                <property name="text">
+                 <string>dtiestim</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="3">
+               <widget class="QPushButton" name="resetBet2_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2">
+               <widget class="QLineEdit" name="N4ITKBiasFieldCorrection_lineEdit"/>
+              </item>
+              <item row="11" column="3">
+               <widget class="QPushButton" name="resetWeightedLabelsAverage_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="2">
+               <widget class="QLineEdit" name="dtiprocess_lineEdit"/>
+              </item>
+              <item row="8" column="3">
+               <widget class="QPushButton" name="resetANTS_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="2">
+               <widget class="QLineEdit" name="bet2_lineEdit"/>
+              </item>
+              <item row="8" column="2">
+               <widget class="QLineEdit" name="ANTS_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="16" column="2">
+               <widget class="QLineEdit" name="InsightSNAP_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QLineEdit" name="SegPostProcessCLP_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="16" column="3">
+               <widget class="QPushButton" name="resetInsightSNAP_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="2">
+               <widget class="QLineEdit" name="ITKTransformTools_lineEdit"/>
+              </item>
+              <item row="14" column="0">
+               <widget class="QPushButton" name="ReassignWhiteMatter_button">
+                <property name="text">
+                 <string>ReassignWhiteMatter</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="3">
+               <widget class="QPushButton" name="resetDtiestim_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="0">
+               <widget class="QPushButton" name="bet2_button">
+                <property name="text">
+                 <string>bet2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="13" column="2">
+               <widget class="QLineEdit" name="Neoseg_lineEdit"/>
+              </item>
+              <item row="13" column="0">
+               <widget class="QPushButton" name="Neoseg_button">
+                <property name="text">
+                 <string>Neoseg</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="3">
+               <widget class="QPushButton" name="resetUnu_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="3">
+               <widget class="QPushButton" name="resetITKTransformTools_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="3">
+               <widget class="QPushButton" name="resetSegPostProcessCLP_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="12" column="3">
+               <widget class="QPushButton" name="resetSpreadFA_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="14" column="2">
+               <widget class="QLineEdit" name="ReassignWhiteMatter_lineEdit"/>
+              </item>
+              <item row="16" column="0">
+               <widget class="QPushButton" name="InsightSNAP_button">
+                <property name="text">
+                 <string>InsightSNAP</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="0">
+               <widget class="QPushButton" name="unu_button">
+                <property name="text">
+                 <string>unu</string>
+                </property>
+               </widget>
+              </item>
+              <item row="9" column="3">
+               <widget class="QPushButton" name="resetResampleVolume2_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QPushButton" name="ITKTransformTools_button">
+                <property name="text">
+                 <string>ITKTransformTools</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="SegPostProcessCLP_button">
+                <property name="text">
+                 <string>SegPostProcessCLP</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="3">
+               <widget class="QPushButton" name="resetN4ITKBiasFieldCorrection_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="6" column="2">
+               <widget class="QLineEdit" name="dtiestim_lineEdit"/>
+              </item>
+              <item row="5" column="2">
+               <widget class="QLineEdit" name="unu_lineEdit"/>
+              </item>
+              <item row="9" column="0">
+               <widget class="QPushButton" name="ResampleVolume2_button">
+                <property name="text">
+                 <string>ResampleVolume2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="2">
+               <widget class="QLineEdit" name="python_lineEdit"/>
+              </item>
+              <item row="0" column="0">
+               <widget class="QPushButton" name="python_button">
+                <property name="text">
+                 <string>python</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="3">
+               <widget class="QPushButton" name="resetPython_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </widget>
            </item>
-           <item row="5" column="2">
-            <widget class="QLineEdit" name="unu_lineEdit"/>
-           </item>
-           <item row="11" column="2">
-            <widget class="QLineEdit" name="WeightedLabelsAverage_lineEdit"/>
-           </item>
-           <item row="8" column="0">
-            <widget class="QPushButton" name="ANTS_button">
-             <property name="text">
-              <string>ANTS</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QLineEdit" name="SegPostProcessCLP_lineEdit">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="2">
-            <widget class="QLineEdit" name="ResampleVolume2_lineEdit">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="2">
-            <widget class="QLineEdit" name="ANTS_lineEdit">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="0">
-            <widget class="QPushButton" name="ResampleVolume2_button">
-             <property name="text">
-              <string>ResampleVolume2</string>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="2">
-            <widget class="QLineEdit" name="ImageMath_lineEdit">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QPushButton" name="SegPostProcessCLP_button">
-             <property name="text">
-              <string>SegPostProcessCLP</string>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="0">
-            <widget class="QPushButton" name="ImageMath_button">
-             <property name="text">
-              <string>ImageMath</string>
-             </property>
-            </widget>
-           </item>
-           <item row="14" column="0">
-            <widget class="QPushButton" name="InsightSNAP_button">
-             <property name="text">
-              <string>InsightSNAP</string>
-             </property>
-            </widget>
-           </item>
-           <item row="14" column="2">
-            <widget class="QLineEdit" name="InsightSNAP_lineEdit">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
-            <widget class="QPushButton" name="resetSegPostProcessCLP_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="3">
-            <widget class="QPushButton" name="resetResampleVolume2_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="3">
-            <widget class="QPushButton" name="resetANTS_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QPushButton" name="bet2_button">
-             <property name="text">
-              <string>bet2</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="3">
-            <widget class="QPushButton" name="resetDtiestim_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="3">
-            <widget class="QPushButton" name="resetImageMath_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="2">
-            <widget class="QLineEdit" name="dtiestim_lineEdit"/>
-           </item>
-           <item row="14" column="3">
-            <widget class="QPushButton" name="resetInsightSNAP_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QPushButton" name="N4ITKBiasFieldCorrection_button">
-             <property name="text">
-              <string>N4ITKBiasFieldCorrection </string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="2">
-            <widget class="QLineEdit" name="N4ITKBiasFieldCorrection_lineEdit"/>
-           </item>
-           <item row="7" column="0">
-            <widget class="QPushButton" name="dtiprocess_button">
-             <property name="text">
-              <string>dtiprocess</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="2">
-            <widget class="QLineEdit" name="bet2_lineEdit"/>
-           </item>
-           <item row="7" column="2">
-            <widget class="QLineEdit" name="dtiprocess_lineEdit"/>
-           </item>
-           <item row="6" column="0">
-            <widget class="QPushButton" name="dtiestim_button">
-             <property name="text">
-              <string>dtiestim</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="2">
-            <widget class="QLineEdit" name="ITKTransformTools_lineEdit"/>
-           </item>
-           <item row="2" column="3">
-            <widget class="QPushButton" name="resetN4ITKBiasFieldCorrection_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="3">
-            <widget class="QPushButton" name="resetBet2_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="3">
-            <widget class="QPushButton" name="resetDtiprocess_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QPushButton" name="ITKTransformTools_button">
-             <property name="text">
-              <string>ITKTransformTools</string>
-             </property>
-            </widget>
-           </item>
-           <item row="15" column="3">
+           <item>
             <widget class="QPushButton" name="resetAllExecutables_button">
              <property name="text">
               <string>Reset all</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="3">
-            <widget class="QPushButton" name="resetITKTransformTools_button">
+          </layout>
+          <zorder>resetPython_button</zorder>
+          <zorder>python_button</zorder>
+          <zorder>python_lineEdit</zorder>
+          <zorder>widget_2</zorder>
+          <zorder>resetAllExecutables_button</zorder>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_17">
+          <property name="title">
+           <string>Library Directories</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_42">
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="FSL_lineEdit"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="FSL_button">
              <property name="text">
-              <string>Reset</string>
+              <string>FSL</string>
              </property>
             </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QPushButton" name="unu_button">
-             <property name="text">
-              <string>unu</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="3">
-            <widget class="QPushButton" name="resetUnu_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="11" column="3">
-            <widget class="QPushButton" name="resetWeightedLabelsAverage_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="12" column="0">
-            <widget class="QPushButton" name="ReassignWhiteMatter_button">
-             <property name="text">
-              <string>ReassignWhiteMatter</string>
-             </property>
-            </widget>
-           </item>
-           <item row="12" column="3">
-            <widget class="QPushButton" name="resetReassignWhiteMatter_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="12" column="2">
-            <widget class="QLineEdit" name="ReassignWhiteMatter_lineEdit"/>
-           </item>
-           <item row="13" column="0">
-            <widget class="QPushButton" name="Neoseg_button">
-             <property name="text">
-              <string>Neoseg</string>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="3">
-            <widget class="QPushButton" name="resetNeoseg_button">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="2">
-            <widget class="QLineEdit" name="Neoseg_lineEdit"/>
            </item>
           </layout>
          </widget>
@@ -2530,7 +3058,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>717</width>
+     <width>743</width>
      <height>22</height>
     </rect>
    </property>
@@ -2550,7 +3078,7 @@ p, li { white-space: pre-wrap; }
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionAbout"/>
+    <addaction name="about_action"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuHelp"/>
@@ -2586,7 +3114,7 @@ p, li { white-space: pre-wrap; }
   </widget>
   <action name="loadParametersConfiguration_action">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../NeoSegPipeline/resources.qrc">
      <normaloff>:/icons/icons/load.png</normaloff>:/icons/icons/load.png</iconset>
    </property>
    <property name="text">
@@ -2595,7 +3123,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="loadSoftwaresConfiguration_action">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../NeoSegPipeline/resources.qrc">
      <normaloff>:/icons/icons/load-softwares.png</normaloff>:/icons/icons/load-softwares.png</iconset>
    </property>
    <property name="text">
@@ -2604,7 +3132,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="saveParametersConfiguration_action">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../NeoSegPipeline/resources.qrc">
      <normaloff>:/icons/icons/save-3.png</normaloff>:/icons/icons/save-3.png</iconset>
    </property>
    <property name="text">
@@ -2613,7 +3141,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="saveSoftwaresConfiguration_action">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../NeoSegPipeline/resources.qrc">
      <normaloff>:/icons/icons/save-softwares.png</normaloff>:/icons/icons/save-softwares.png</iconset>
    </property>
    <property name="text">
@@ -2622,7 +3150,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="quit_action">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../NeoSegPipeline/resources.qrc">
      <normaloff>:/icons/icons/quit.png</normaloff>:/icons/icons/quit.png</iconset>
    </property>
    <property name="text">
@@ -2631,7 +3159,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="about_action">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../NeoSegPipeline/resources.qrc">
      <normaloff>:/icons/icons/info.png</normaloff>:/icons/icons/info.png</iconset>
    </property>
    <property name="text">
@@ -2640,7 +3168,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="runPipeline_action">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../NeoSegPipeline/resources.qrc">
      <normaloff>:/icons/icons/run-button.png</normaloff>:/icons/icons/run-button.png</iconset>
    </property>
    <property name="text">
@@ -2655,7 +3183,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="stopPipeline_action">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../NeoSegPipeline/resources.qrc">
      <normaloff>:/icons/icons/stop-button.png</normaloff>:/icons/icons/stop-button.png</iconset>
    </property>
    <property name="text">
@@ -2667,7 +3195,7 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="displayResults_action">
    <property name="icon">
-    <iconset resource="resources.qrc">
+    <iconset resource="../NeoSegPipeline/resources.qrc">
      <normaloff>:/icons/icons/eye.png</normaloff>:/icons/icons/eye.png</iconset>
    </property>
    <property name="text">
@@ -2684,7 +3212,7 @@ p, li { white-space: pre-wrap; }
   </action>
  </widget>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../NeoSegPipeline/resources.qrc"/>
  </resources>
  <connections/>
 </ui>

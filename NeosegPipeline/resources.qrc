@@ -1,7 +1,9 @@
 <RCC>
   <qresource prefix="icons">
-    <file>icons/logo.png</file>
+    <file>icons/Logo128*128.png</file>
+    <file>icons/LogoWithRing.png</file>
     <file>icons/eye.png</file>
+    <file>icons/logo.png</file>
     <file>icons/stop-button.png</file>
     <file>icons/run-button.png</file>
     <file>icons/run-5.png</file>
@@ -23,5 +25,8 @@
     <file>icons/run.png</file>
     <file>icons/save.png</file>
     <file>icons/stop.png</file>
+  </qresource>
+  <qresource prefix="newPrefix">
+    <file>icons/logo.png</file>
   </qresource>
 </RCC>

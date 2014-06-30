@@ -17,9 +17,7 @@ class NeosegPipelineTool
 
    public:
 
-      NeosegPipelineTool(); 
-
-      void setProgramPath(QString programPath);
+      NeosegPipelineTool(QString programPath); 
 
       void setOutput(QString output); 
       void setT1(QString T1);

@@ -9,10 +9,10 @@ ExecutablePaths::ExecutablePaths()
    m_splitPath.prepend(".");
 
    // Executables with version
-   m_executables_withVersionLongFlag << "SegPostProcessCLP" << "N4ITKBiasFieldCorrection" << "dtiestim" << "dtiprocess" << "ResampleVolume2" << "WeightedLabelsAverage" << "ReassignWhiteMatter";
+   m_executables_withVersionLongFlag << "SegPostProcessCLP" << "N4ITKBiasFieldCorrection" << "dtiestim" << "dtiprocess" << "ResampleVolume2" << "WeightedLabelsAverage" << "ReassignWhiteMatter" << "Neoseg";
    m_executables_withVersionShortFlag << "ImageMath";
    m_executables_withVersionArgument << "ITKTransformTools";
-   m_executables_withoutVersionFlag << "bet2" << "ANTS" << "ImageMath" << "SNAP" << "unu" << "Neoseg";
+   m_executables_withoutVersionFlag << "bet2" << "ANTS" << "SNAP" << "unu";
 }
 
 void ExecutablePaths::setProgramPath(QString programPath)
@@ -123,12 +123,11 @@ QString ExecutablePaths::checkExecutables()
       {
          errors += name + " path is empty\n";
       }      
-      /*else if(!checkExecutablePath(name, path))
+      else if(!checkExecutablePath(name, path))
       {
          errors += name + " path does not seem to be the good one\n";
-      }*/
+      }
    }
 
    return errors;
-
 }

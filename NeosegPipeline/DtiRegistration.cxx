@@ -8,6 +8,11 @@ DtiRegistration::DtiRegistration(QString module) : Script(module)
    m_registering_suffix = "-registered";
 }
 
+void DtiRegistration::setAntsParameters(AntsParameters* antsParameters)
+{
+   m_antsParameters = antsParameters; 
+}
+
 void DtiRegistration::initializeScript()
 {
    definePython();
@@ -54,21 +59,27 @@ void DtiRegistration::upsample(QString image)
    m_unnecessaryFiles << upsampledImage_path;
 }
 
-void DtiRegistration::generateDTI()
+void DtiRegistration::generateDTIAndb0()
 {
    QString DTI_name = m_prefix + "DTI" + m_suffix + ".nrrd";
    QString DTI_path = m_module_dir->filePath(DTI_name); 
 
-   m_log = "- Generating DTI";
+   QString b0_name = m_prefix + "b0" + m_suffix + ".nrrd";
+   QString b0_path = m_module_dir->filePath(b0_name); 
+
+   m_log = "- Generating DTI and b0";
    m_outputs.insert("DTI", DTI_path);
-   m_argumentsList << "dtiestim" << "'--dwi_image'" << "DWI" << "'--B0'" << "b0" << "'--tensor_output'" << "DTI"; 
+   m_outputs.insert("b0", b0_path);
+   m_argumentsList << "dtiestim" << "'--dwi_image'" << "DWI" << "'--B0'" << "b0" << "'--tensor_output'" << "DTI" << "'-m'" << "'wls'"; 
    execute(); 
 
    m_unnecessaryFiles << DTI_path;
+   m_unnecessaryFiles << b0_path;
 }
 
 void DtiRegistration::skullStripb0()
 {
+
    // Converting b0 in nifti
    QString b0Nifti_name = m_prefix + "b0" + m_suffix + ".nii.gz";
    QString b0Nifti_path = m_module_dir->filePath(b0Nifti_name); 
@@ -146,8 +157,14 @@ void DtiRegistration::generateAD()
 void DtiRegistration::calculateTransformations()
 {
    // Calculating transformations
-   QString modality1 = "CC[' + T2 + ',' + strippedb0 + ',1,2]";
-   QString modality2 = "CC[' + T2 + ',' + upsampledAD + ',1,2]";
+   QString modality1 = m_antsParameters->getImageMetric1() + "[' + T2 + ',' + strippedb0 + '," + QString::number(m_antsParameters->getWeight1()) + "," + QString::number(m_antsParameters->getRadius1()) + "]";
+   QString modality2 = m_antsParameters->getImageMetric2() + "[' + T2 + ',' + upsampledAD + '," + QString::number(m_antsParameters->getWeight2()) + "," + QString::number(m_antsParameters->getRadius2()) + "]";
+
+   QString iterations = QString::number(m_antsParameters->getIterationsJ()) + "x" + QString::number(m_antsParameters->getIterationsK()) + "x" + QString::number(m_antsParameters->getIterationsL());
+
+   QString regularization = m_antsParameters->getRegularizationType() + "[" + QString::number(m_antsParameters->getGradientFieldSigma()) + "," + QString::number(m_antsParameters->getDeformationFieldSigma()) + "]";
+
+   QString transformation = m_antsParameters->getTransformationType() + "[" + QString::number(m_antsParameters->getGradientStepLength()) + "]"; 
 
    QString output_name = "DTI_to_" + m_prefix + ".nii.gz";
    QString output_path = m_module_dir->filePath(output_name); 
@@ -167,7 +184,7 @@ void DtiRegistration::calculateTransformations()
    m_inputs.insert("output", output_path);
    m_outputs.insert("affine", affine_path); 
    m_outputs.insert("warp", warp_path);
-   m_argumentsList << "ANTS" << "'3'" << "'-m'" << "modality1" << "'-m'" << "modality2" << "'-o'" << "output" << "'-i'" << "'30x20x10'" << "'-r'" << "'Gauss[5,5]'" << "'-t'" << "'SyN[0.125]'"; 
+   m_argumentsList << "ANTS" << "'3'" << "'-m'" << "modality1" << "'-m'" << "modality2" << "'-o'" << "output" << "'-i'" << "'" + iterations + "'" << "'-r'" << "'" + regularization + "'" << "'-t'" << "'" + transformation + "'"; 
    execute(); 
 
    m_unnecessaryFiles << affine_path;
@@ -177,7 +194,7 @@ void DtiRegistration::calculateTransformations()
 
    // Normalizing affine file    
    m_log = "- Normalizing affine file";
-   m_argumentsList << "'text_subst.pl'" << "'MatrixOffsetTransformBase_double_3_3'" << "'AffineTransform_double_3_3'" << "affine"; 
+   m_argumentsList << "ITKTransformTools" << "'MO2Aff'" << "affine" << "affine"; 
    execute();
 }
 
@@ -226,13 +243,9 @@ void DtiRegistration::implementRun()
    m_script += "\tT1 = '" + m_neo.T1 + "'\n";
    m_script += "\tT2 = '" + m_neo.T2 + "'\n";
    m_script += "\tDWI = '" + m_neo.DWI + "'\n";
-   m_script += "\tb0 = '" + m_neo.b0 + "'\n";
 
-   m_script += "\n\t# Upsample b0 #\n";
-   upsample("b0"); 
-
-   m_script += "\n\t# Generate DTI #\n";
-   generateDTI(); 
+   m_script += "\n\t# Generate DTI amd b0 #\n";
+   generateDTIAndb0(); 
 
    m_script += "\n\t# Skull-Strip b0 #\n";
    skullStripb0(); 

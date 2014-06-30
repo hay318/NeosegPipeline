@@ -1,43 +1,41 @@
 # This is the root ITK CMakeList file: 
-cmake_minimum_required(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 # This project is designed to be built outside the Insight source tree.
-project(NeosegPipeline)
+PROJECT(NeosegPipeline)
 
 # Find Qt
 FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
-# Find Slicer3
-find_package(SlicerExecutionModel REQUIRED)
-include(${SlicerExecutionModel_USE_FILE})
-
-# Find GenerateCLP
-FIND_PACKAGE(GenerateCLP REQUIRED)
+#Find SlicerExecutionModel
+FIND_PACKAGE(SlicerExecutionModel REQUIRED)
+INCLUDE(${SlicerExecutionModel_USE_FILE})
 INCLUDE(${GenerateCLP_USE_FILE})
 
-# Find ITK
-find_package(ITK REQUIRED)
-INCLUDE (${ITK_USE_FILE})
+#Find ITK
+FIND_PACKAGE(ITK REQUIRED)
+INCLUDE(${ITK_USE_FILE})
 
 QT4_ADD_RESOURCES(RESOURCES resources.qrc)
-
-# MotherWindow.h generation
 QT4_WRAP_UI(UI_SOURCES Window.ui About.ui)
-
-# Meta Object Compiler
 QT4_WRAP_CPP(MOC_SOURCES DerivedWindow.h MainScriptThread.h)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_CURRENT_BINARY_DIR})
 
-GENERATECLP(NeosegPipeline_CLP NeosegPipeline.xml) 
-
-
-add_library(MinMax MinMax.h)
+# MinMax #
+ADD_LIBRARY(MinMax MinMax.h)
 SET_TARGET_PROPERTIES(MinMax PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(MinMax ${ITK_LIBRARIES})
+TARGET_LINK_LIBRARIES(MinMax ${ITK_LIBRARIES})
 
+# Origin #
+ADD_LIBRARY(Origin Origin.h)
+SET_TARGET_PROPERTIES(Origin PROPERTIES LINKER_LANGUAGE CXX)
+TARGET_LINK_LIBRARIES(Origin ${ITK_LIBRARIES})
+GENERATECLP(NeosegPipeline_CLP NeosegPipeline.xml)
 
+# NeosegPipeline #
 SET(NeosegPipeline_SOURCE  main.cxx
                            NeosegPipelineTool.cxx 
                            DerivedWindow.cxx
@@ -48,11 +46,13 @@ SET(NeosegPipeline_SOURCE  main.cxx
                            AntsParameters.cxx
                            NeosegParameters.cxx
                            ExecutablePaths.cxx
+                           LibraryPaths.cxx
                            Script.cxx
                            PreProcessingData.cxx
                            AtlasPopulationRegistration.cxx
                            AtlasRegistration.cxx
                            AtlasGeneration.cxx
+                           ExistingAtlasRegistration.cxx
                            NeosegExecution.cxx
                            DtiRegistration.cxx
                            MainScriptThread.cxx)
@@ -69,19 +69,29 @@ SET(NeosegPipeline_HEADERS NeosegPipelineTool.h
                            AntsParameters.h
                            NeosegParameters.h
                            ExecutablePaths.h
+                           LibraryPaths.h
                            Script.h
                            PreProcessingData.h
                            AtlasPopulationRegistration.h
                            AtlasRegistration.h
                            AtlasGeneration.h
+                           ExistingAtlasRegistration.h
                            NeosegExecution.h
                            DtiRegistration.h
                            PriorProbability.h
                            TemplateImage.h
                            MainScriptThread.h)
 
+FILE(READ NeosegPipeline.xml var)
 
+STRING(REGEX MATCH "<version>.*</version>" ext "${var}")
+STRING(REPLACE "<version>" "" version_number ${ext} )
+STRING(REPLACE "</version>" "" version_number ${version_number})
 
-add_executable(NeosegPipeline ${NeosegPipeline_SOURCE} ${NeosegPipeline_HEADERS} ${MOC_SOURCES} ${UI_SOURCES} ${NeosegPipeline_CLP} ${RESOURCES})
+ADD_DEFINITIONS(-DNEOSEGPIPELINE_VERSION="${version_number}")
 
-TARGET_LINK_LIBRARIES(NeosegPipeline ${QT_LIBRARIES} MinMax)
+ADD_EXECUTABLE(NeosegPipeline ${NeosegPipeline_SOURCE} ${NeosegPipeline_HEADERS} ${MOC_SOURCES} ${UI_SOURCES} ${NeosegPipeline_CLP} ${RESOURCES})
+TARGET_LINK_LIBRARIES(NeosegPipeline ${QT_LIBRARIES} MinMax Origin)
+
+INSTALL(TARGETS NeosegPipeline RUNTIME DESTINATION bin)
+

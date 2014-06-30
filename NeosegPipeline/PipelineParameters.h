@@ -17,7 +17,9 @@
 #include "AntsParameters.h" 
 #include "NeosegParameters.h" 
 #include "ExecutablePaths.h" 
+#include "LibraryPaths.h" 
 #include "MinMax.h"
+#include "Origin.h"
 
 
 class PipelineParameters
@@ -74,24 +76,31 @@ class PipelineParameters
    void setDWI(QString DWI);
    QString getDWI(); 
 
-   // b0 
-   bool checkb0(QString b0);
-   void setb0(QString b0);
-   QString getb0(); 
-
    // Neo
    void initializeNeo();
    void setNeo(Neo neo); 
    Neo getNeo(); 
 
+   // SkullStripping 
+   void setSkullStripping(bool skullStripping);
+   bool getSkullStripping(); 
+
+   // Correcting 
+   void setCorrecting(bool correcting);
+   bool getCorrecting();  
+
    // New Atlas    
    void setNewAtlas(bool newAtlas);
    bool getNewAtlas();
 
-   // Atlas
-   bool checkExistingAtlas(QString atlas);
-   void setAtlas(QString atlas);
-   QString getAtlas(); 
+   // Existing Atlas
+   bool checkExistingAtlas(QString existingAtlas);
+   void setExistingAtlas(QString existingAtlas);
+   QString getExistingAtlas(); 
+
+   // Existing Atlas
+   void setAtlasFormat();
+   QString getAtlasFormat(); 
 
    // Atlas Population Directory 
    bool checkAtlasPopulationDirectory(QString atlasPopulationDirectory);
@@ -113,7 +122,7 @@ class PipelineParameters
 
    // Smoothing 
    bool checkSmoothing(QString smoothing);
-   QString getSmoothingFlag(QString regularizationType);
+   QString getSmoothingFlag();
    void setSmoothing(QString smoothing);
    QString getSmoothing();
    int getSmoothingIndex();
@@ -217,13 +226,17 @@ class PipelineParameters
    int getNumberOfCores();
 
    // ANTS Parameters 
-   AntsParameters* getAntsParameters();  
+   AntsParameters* getAntsParametersDTI();  
+   AntsParameters* getAntsParametersAtlas();  
 
    // Neoseg Parameters
    NeosegParameters* getNeosegParameters(); 
 
    // Executable Paths 
    ExecutablePaths* getExecutablePaths(); 
+
+   // Library Paths 
+   LibraryPaths* getLibraryPaths();
 
    // Segmentation
    QString getSegmentation(); 
@@ -245,16 +258,27 @@ class PipelineParameters
    QString m_T2;
    QString m_mask; 
    QString m_DWI; 
-   QString m_b0; 
 
    Neo m_neo; 
+
+   // SkullStripping 
+   bool m_skullStripping_default; 
+   bool m_skullStripping;
+
+   // Correcting
+   bool m_correcting_default; 
+   bool m_correcting;    
 
    // New Atlas 
    bool m_newAtlas_default;
    bool m_newAtlas;
 
-   // Atlas
-   QString m_atlas; 
+   // Existing Atlas
+   QString m_existingAtlas; 
+
+   // Atlas Format
+   QString m_atlasFormat_default; 
+   QString m_atlasFormat; 
 
    // Atlas Population Directory
    QString m_atlasPopulationDirectory_default; 
@@ -366,13 +390,16 @@ class PipelineParameters
    int m_numberOfCores;
    
    // ANTS Parameters 
-   AntsParameters* m_antsParameters;
-
+   AntsParameters* m_antsParameters_DTI;
+   AntsParameters* m_antsParameters_atlas;
    // Neoseg Parameters
    NeosegParameters* m_neosegParameters;
 
    // Executable Paths 
    ExecutablePaths* m_executablePaths;
+
+   // Library Paths 
+   LibraryPaths* m_libraryPaths;
 };
 
 

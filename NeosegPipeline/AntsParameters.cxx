@@ -1,77 +1,107 @@
 #include "AntsParameters.h"
 
-AntsParameters::AntsParameters()
+AntsParameters::AntsParameters(QString type)
 {
-   m_imageMetric_values << "CC" << "MI" << "PR" << "MSQ"; 
-   m_imageMetric_default = m_imageMetric_values[0];
+   m_numberOfGB_min = 1;
+
+   m_imageMetric_values << "CC" << "MI" << "PR" << "MSQ";    
+   m_weight_min = 0;
+   m_radius_min = 0;
+
+   m_iterations_min = 0; 
+
+   m_transformationType_values << "SyN" << "Diff" << "Elast" << "Exp"; 
+
+   m_gradientStepLength_min = 0; 
+   m_numberOfTimeSteps_min = 0;
+   m_deltaTime_min = 0;
+
+   m_regularizationType_values << "Gauss" << "DMFFD"; 
+   m_gradientFieldSigma_min = 0;
+   m_deformationFieldSigma_min = 0;
+
+   if(type == "DTI")
+   {
+      m_name = "DTI";
+
+      m_imageMetric_default = m_imageMetric_values[0];
+      m_weight_default = 1; 
+      m_radius_default = 2;
+
+      m_iterationsJ_default = 30;
+      m_iterationsK_default = 20; 
+      m_iterationsL_default = 10;
+
+      m_tranformation_default = m_transformationType_values[0];
+      m_gradientStepLength_default = 0.125;   
+      m_numberOfTimeSteps_default = 2;
+      m_deltaTime_default = 0.01;
+
+      m_regularizationType_default = m_regularizationType_values[0];
+      m_gradientFieldSigma_default = 5;
+      m_deformationFieldSigma_default = 5;
+
+      m_usingMask_default = false;
+      m_usingSmoothedMask_default = false; 
+   }
+
+   if(type == "atlas")
+   {
+      m_name = "atlas";
+
+      m_numberOfRegistrations_default = 1;
+      m_numberOfCores_default = 1;
+      m_numberOfGB_default = 4;
+
+      m_imageMetric_default = m_imageMetric_values[0];
+      m_weight_default = 1; 
+      m_radius_default = 4;
+
+      m_iterationsJ_default = 200;
+      m_iterationsK_default = 75; 
+      m_iterationsL_default = 50;
+
+      m_tranformation_default = m_transformationType_values[0];
+      m_gradientStepLength_default = 0.125;   
+      m_numberOfTimeSteps_default = 2;
+      m_deltaTime_default = 0.01;
+
+      m_regularizationType_default = m_regularizationType_values[0];
+      m_gradientFieldSigma_default = 3;
+      m_deformationFieldSigma_default = 0;
+
+      m_usingMask_default = true;
+      m_usingSmoothedMask_default = false; 
+   }
+
+   m_numberOfRegistrations = m_numberOfRegistrations_default;
+   m_numberOfCores = m_numberOfCores_default;
+   m_numberOfGB = m_numberOfGB_default;
+
    m_imageMetric1 = m_imageMetric_default;
    m_imageMetric2 = m_imageMetric_default;
 
-   m_weight_min = 0;
-   //m_weight_max;
-   m_weight_default = 1; 
    m_weight1 = m_weight_default;
    m_weight2 = m_weight_default;
 
-   m_radius_min = 0;
-   //m_radius_max;
-   m_radius_default = 4;
    m_radius1 = m_radius_default;
    m_radius2 = m_radius_default;
 
-   m_iterations_min = 0; 
-   //m_iterations_max;
- 
-   m_iterationsJ_default = 200;
    m_iterationsJ = m_iterationsJ_default;
-
-   m_iterationsK_default = 75; 
    m_iterationsK = m_iterationsK_default;
-
-   m_iterationsL_default = 50;
    m_iterationsL = m_iterationsL_default;
 
-   m_transformationType_values << "SyN" << "Diff" << "Elast" << "Exp"; 
-   m_tranformation_default = m_transformationType_values[0];
    m_transformationType = m_tranformation_default;
-
-   m_gradientStepLength_min = 0;   
-   //m_gradientStepLength_max;   
-   m_gradientStepLength_default = 0.125;   
    m_gradientStepLength = m_gradientStepLength_default;
-
-   m_numberOfTimeSteps_min = 0;
-   //m_numberOfTimeSteps_max;
-   m_numberOfTimeSteps_default = 2;
    m_numberOfTimeSteps = m_numberOfTimeSteps_default;
-
-   m_deltaTime_min = 0;
-   //m_deltaTime_max;
-   m_deltaTime_default = 0.01;
    m_deltaTime = m_deltaTime_default;
 
-   m_regularizationType_values << "Gauss" << "DMFFD"; 
-   m_regularizationType_default = m_regularizationType_values[0];
    m_regularizationType = m_regularizationType_default;
-
-   m_gradientFieldSigma_min = 0;
-   //m_gradientFieldSigma_max;
-   m_gradientFieldSigma_default = 3;
    m_gradientFieldSigma = m_gradientFieldSigma_default;
-
-   m_deformationFieldSigma_min = 0;
-   //m_deformationFieldSigma_max;
-   m_deformationFieldSigma_default = 0;
    m_deformationFieldSigma = m_deformationFieldSigma_default;
 
-   m_usingMask_default = true; 
-   m_usingMask = m_usingMask_default; 
-
-   m_usingSmoothedMask_default = false; 
-   m_usingSmoothedMask = m_usingSmoothedMask_default; 
-
-   m_addingExtraCSF_default = false;
-   m_addingExtraCSF = m_addingExtraCSF_default;    
+   m_usingMask = m_usingMask_default;
+   m_usingSmoothedMask = m_usingSmoothedMask_default;
 }
 
 bool AntsParameters::isSuperior(int value, int min)
@@ -143,6 +173,44 @@ bool AntsParameters::isIn(QString item, QStringList list)
    return false; 
 }
 
+QString AntsParameters::getName()
+{
+   return m_name; 
+}
+
+// Number Of Registrations//  
+void AntsParameters::setNumberOfRegistrations(int numberOfRegistrations)
+{
+   m_numberOfRegistrations = numberOfRegistrations; 
+}
+int AntsParameters::getNumberOfRegistrations()
+{
+   return m_numberOfRegistrations; 
+}
+
+// Number Of Cores//  
+void AntsParameters::setNumberOfCores(int numberOfCores)
+{
+   m_numberOfCores = numberOfCores; 
+}
+int AntsParameters::getNumberOfCores()
+{
+   return m_numberOfCores; 
+}
+
+// Number of GB//  
+bool AntsParameters::checkNumberOfGB(int numberOfGB)
+{
+   return isSuperior(numberOfGB, m_numberOfGB_min); 
+}
+void AntsParameters::setNumberOfGB(int numberOfGB)
+{
+   m_numberOfGB = numberOfGB; 
+}
+int AntsParameters::getNumberOfGB()
+{
+   return m_numberOfGB;  
+}
 
 bool AntsParameters::checkImageMetric(QString imageMetric)
 {
@@ -430,13 +498,4 @@ void AntsParameters::setUsingSmoothedMask(bool usingSmoothedMask)
 bool AntsParameters::getUsingSmoothedMask()
 {
    return m_usingSmoothedMask; 
-}
-
-void AntsParameters::setAddingExtraCSF(bool addingExtraCSF)
-{
-   m_addingExtraCSF = addingExtraCSF; 
-}
-bool AntsParameters::getAddingExtraCSF()
-{
-   return m_addingExtraCSF; 
 }

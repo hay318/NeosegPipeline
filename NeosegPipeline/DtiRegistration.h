@@ -14,6 +14,7 @@
 // My Specific Librairies
 #include "Script.h"
 #include "Neo.h"
+#include "AntsParameters.h"
 #include "ExecutablePaths.h"
 
 
@@ -24,10 +25,13 @@ class DtiRegistration : public Script
    // Constructor
    DtiRegistration(QString module); 
 
+   // Set 
+   void setAntsParameters(AntsParameters* antsParameters);
+
    // Implementing Scripts 
    void initializeScript();
    void upsample(QString image); 
-   void generateDTI();
+   void generateDTIAndb0();
    void skullStripb0();
    void skullStripDTI();
    void generateFA();
@@ -47,6 +51,9 @@ class DtiRegistration : public Script
    QString m_upsampling_suffix; 
    QString m_stripping_suffix;       
    QString m_registering_suffix;
+
+   // Ants Parameters 
+   AntsParameters* m_antsParameters; 
 
    // Output 
    Neo      m_registeredNeo;

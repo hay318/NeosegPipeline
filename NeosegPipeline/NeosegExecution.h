@@ -15,6 +15,7 @@
 #include "Neo.h"
 #include "NeosegParameters.h"
 #include "ExecutablePaths.h"
+#include "Origin.h"
 
 
 class NeosegExecution : public Script 
@@ -26,7 +27,8 @@ class NeosegExecution : public Script
 
    // Setting Parameters
    void setNewAtlas(bool newAtlas); 
-   void setAtlas(QString atlas);  
+   void setExistingAtlas(QString atlas); 
+   void setAtlasFormat(QString atlasFormat);  
    void setUsingFA(bool usingFA);  
    void setUsingAD(bool usingAD);  
    void setNeosegParameters(NeosegParameters* parameters);
@@ -36,6 +38,10 @@ class NeosegExecution : public Script
 
    // Implementing Script 
    void initializeScript();
+   void addInputImages(); 
+   void addOutputImages(); 
+   void saveOrigin(); 
+   void changeOrigin(float origin[3]);
    void writeXMLFile();
    void implementWriteAffineTranformationFile();
    void writeAffineTranformationFiles();
@@ -52,9 +58,13 @@ class NeosegExecution : public Script
 
    private:
 
+   // Images 
+   QMap<QString, QString> m_images; 
+
    // Atlas
    bool m_newAtlas;
    QString m_atlas; 
+   QString m_atlasFormat;
 
    // Using FA
    bool m_usingFA; 

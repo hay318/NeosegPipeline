@@ -14,14 +14,19 @@
 
 // My Specific Librairies
 #include "ui_Window.h"
+#include "ui_About.h"
 #include "Pipeline.h"
 #include "XmlReader.h"
 #include "XmlWriter.h"
 #include "MainScriptThread.h"
 #include "ExecutablePaths.h" 
+#include "LibraryPaths.h"
 #include "About.h" 
 
 
+#ifndef NEOSEGPIPELINE_VERSION
+#define NEOSEGPIPELINE_VERSION "unknown"
+#endif
 
 class DerivedWindow : public QMainWindow , public Ui_Window
 {
@@ -32,6 +37,12 @@ class DerivedWindow : public QMainWindow , public Ui_Window
       QPushButton* select_button;
       QLineEdit* enter_lineEdit; 
       QPushButton* reset_button; 
+   };
+
+   struct Library
+   {
+      QPushButton* select_button;
+      QLineEdit* enter_lineEdit; 
    };
 
    struct Image
@@ -55,7 +66,8 @@ class DerivedWindow : public QMainWindow , public Ui_Window
 
    // Initialization
    void initializeImagesMap();
-   void initializeExecutablesMap();   
+   void initializeExecutablesMap();
+   void initializeLibrariesMap();   
    void initializeParameters();
    void initializeExecutables(); 
 
@@ -105,14 +117,15 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void selectExistingAtlas();
    void enterExistingAtlas();
 
+   // Computing System
+   void changeComputingSystem(int index);
+
    // Parameters
    void selectParameters(); 
-   //void enterParameters();
    void saveParameters();  
 
    // Executables
    void selectExecutables(); 
-   //void enterExecutables(); 
    void saveExecutables(); 
 
    // Executables 
@@ -120,6 +133,10 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void enterExecutable(QString executable_name);
    void resetExecutable(QString executable_name);
    void resetAllExecutables(); 
+
+   // Executables 
+   void selectLibrary(QString library_name);
+   void enterLibrary(QString library_name);
 
    // Run Pipeline
    void runPipeline();
@@ -157,14 +174,15 @@ class DerivedWindow : public QMainWindow , public Ui_Window
 
    // Parameters
    PipelineParameters* m_parameters;
-   AntsParameters* m_antsParameters; 
+   AntsParameters* m_antsParameters_DTI; 
+   AntsParameters* m_antsParameters_atlas; 
    NeosegParameters* m_neosegParameters; 
 
    // Executables 
    ExecutablePaths* m_executables; 
 
-   std::map<QString, QLineEdit*> m_images;
-   //QMap<QString, QLineEdit*> m_executables_lineEdit;
+   // Libraries
+   LibraryPaths* m_libraries;
 
    QString m_tests_path;
    QString m_data_path;
@@ -181,6 +199,7 @@ class DerivedWindow : public QMainWindow , public Ui_Window
 
    QMap<QString, Image> m_images_map; 
    QMap<QString, Executable> m_executables_map; 
+   QMap<QString, Library> m_libraries_map; 
 
    struct Logging
    {

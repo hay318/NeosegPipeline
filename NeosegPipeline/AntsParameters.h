@@ -11,7 +11,7 @@ class AntsParameters
    public:
 
    // Constructor 
-   AntsParameters();
+   AntsParameters(QString type);
 
    // Tests
    bool isSuperior(int value, int min);
@@ -27,6 +27,22 @@ class AntsParameters
 
    bool checkImageMetric(QString imageMetric);
    QStringList getImageMetricValues(); 
+
+   // Name 
+   QString getName(); 
+
+   // Number of Registrations
+   void setNumberOfRegistrations(int numberOfRegistrations);
+   int getNumberOfRegistrations(); 
+
+   // Number of Cores 
+   void setNumberOfCores(int numberOfCores);
+   int getNumberOfCores(); 
+
+   // Number of GB
+   bool checkNumberOfGB(int numberOfGB);
+   void setNumberOfGB(int numberOfGB);
+   int getNumberOfGB(); 
 
    // Image Metric 1 
    void setImageMetric1(QString imageMetric1);
@@ -131,12 +147,26 @@ class AntsParameters
    void setUsingSmoothedMask(bool usingSmoothedMask); 
    bool getUsingSmoothedMask();
 
-   // Adding extra CSF
-   void setAddingExtraCSF(bool addingExtraCSF); 
-   bool getAddingExtraCSF();
 
    private:
    
+   // Number of Registrations  
+   int m_numberOfRegistrations_default;   
+   int m_numberOfRegistrations;   
+
+   // Number of Cores Requested 
+   int m_numberOfCores_min; 
+   int m_numberOfCores_default; 
+   int m_numberOfCores; 
+
+   // Number Of GB
+   int m_numberOfGB_min; 
+   int m_numberOfGB_default;
+   int m_numberOfGB;
+
+   // Name 
+   QString m_name; 
+
    // Image Metrics
    QStringList m_imageMetric_values; 
    QString m_imageMetric_default;
@@ -222,10 +252,6 @@ class AntsParameters
    // Using Smoothed Mask
    bool m_usingSmoothedMask_default;
    bool m_usingSmoothedMask; 
-
-   // Adding Extra CSF
-   bool m_addingExtraCSF_default;
-   bool m_addingExtraCSF; 
 
 }; 
 

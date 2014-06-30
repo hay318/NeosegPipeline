@@ -4,14 +4,23 @@ PreProcessingData::PreProcessingData(QString module) : Script(module)
 {
    m_skullStripping_suffix = "-stripped";
    m_rescaling_suffix = "-rescaled";
+   m_positive_suffix = "-positive";
    m_converting_suffix = "-converted";
    m_correcting_suffix = "-corrected";
    m_closing_suffix = "-closed";
 }
 
-void PreProcessingData::setAddingExtraCSF(bool addingExtraCSF)
+void PreProcessingData::setSkullStripping(bool skullStripping)
 {
-   m_addingExtraCSF = addingExtraCSF; 
+   m_skullStripping = skullStripping; 
+}
+void PreProcessingData::setCorrecting(bool correcting)
+{
+   m_correcting = correcting; 
+}
+void PreProcessingData::setUsingSmoothedMask(bool usingSmoothedMask)
+{
+   m_usingSmoothedMask = usingSmoothedMask; 
 }
 
 void PreProcessingData::initializeScript()
@@ -24,11 +33,9 @@ void PreProcessingData::initializeScript()
    m_script += "import csv\n";
   
    defineExecutable("ImageMath");
-   defineExecutable("ImageStat");
    defineExecutable("SegPostProcessCLP");
    defineExecutable("unu");
    defineExecutable("N4ITKBiasFieldCorrection");
-   defineExecutable("CleanRingMask");
 
    m_script += "logger = logging.getLogger('NeosegPipeline')\n\n"; 
 
@@ -53,18 +60,38 @@ QString PreProcessingData::skullStripImage(QString image)
 
 QString PreProcessingData::correctImage(QString image)
 {
-   QString convertedImage_name = m_prefix + image + m_skullStripping_suffix + m_converting_suffix + m_suffix + ".nrrd";
+   QString basename; 
+   if(m_skullStripping)
+   {
+      basename = m_prefix + image + m_skullStripping_suffix;
+   }
+   else
+   {
+      basename = m_prefix + image;   
+   }
+
+   QString positiveImage_name = basename + m_positive_suffix + m_suffix + ".nrrd";
+   QString positiveImage_path = m_module_dir->filePath(positiveImage_name); 
+
+   m_outputs.insert(image + "_positive", positiveImage_path);  
+   m_log = "- Removing negative values in " + image;
+   m_argumentsList << "ImageMath" << image + "_stripped" << "'-threshMask'" << "'0,100000'" << "'-outfile'" << image + "_positive";
+   execute(); 
+
+   m_unnecessaryFiles << positiveImage_path; 
+
+   QString convertedImage_name = basename + m_converting_suffix + m_suffix + ".nrrd";
    QString convertedImage_path = m_module_dir->filePath(convertedImage_name); 
 
    m_outputs.insert(image + "_converted", convertedImage_path);  
    m_log = "- Converting the " + image + " in float";
-   m_argumentsList_1 << "unu" << "'convert'" << "'-i'" << image + "_stripped" << "'-t'" << "'float'"; 
+   m_argumentsList_1 << "unu" << "'convert'" << "'-i'" << image + "_positive" << "'-t'" << "'float'"; 
    m_argumentsList_2 << "unu" << "'save'" << "'-e'" << "'gzip'" << "'-f'" << "'nrrd'" << "'-o'" << image + "_converted"; 
    executePipe(); 
 
    m_unnecessaryFiles << convertedImage_path; 
 
-   QString correctedImage_name = m_prefix + image + m_skullStripping_suffix + m_correcting_suffix + m_suffix + ".nrrd";
+   QString correctedImage_name = basename + m_correcting_suffix + m_suffix + ".nrrd";
    QString correctedImage_path = m_module_dir->filePath(correctedImage_name);
 
    m_log = "- Correcting the inhomogeneity of the " + image;
@@ -75,85 +102,20 @@ QString PreProcessingData::correctImage(QString image)
    return correctedImage_path;
 }
 
-QString PreProcessingData::dilateMask()
+QString PreProcessingData::smoothMask()
 {
-   // Dilate Mask
-   QString dilatedMask_name = m_prefix + "mask-dilated" + m_suffix + ".nrrd";
-   QString dilatedMask_path = m_module_dir->filePath(dilatedMask_name);
+   QString smoothedMask_name = m_prefix + "mask-smoothed" + m_suffix + ".nrrd";
+   QString smoothedMask_path = m_module_dir->filePath(smoothedMask_name); 
 
-   m_log = "Dilated mask";
+   m_log = "Smoothing mask";
    m_inputs.insert("mask", m_neo.mask);   
-   m_outputs.insert("dilatedMask", dilatedMask_path); 
-   m_argumentsList << "ImageMath" << "mask" << "'-dilate'" << "'3,1'" << "'-outfile'" << "dilatedMask";
+   m_outputs.insert("smoothedMask", smoothedMask_path); 
+   m_argumentsList << "ImageMath" << "mask" << "'-smooth'" << "'-gauss'" << "'-size'" << "'1'" << "'-outfile'" << "smoothedMask";
    execute(); 
 
-   return dilatedMask_path;
-}
+   m_unnecessaryFiles << smoothedMask_path;
 
-QString PreProcessingData::addExtraCSF()
-{
-   // Sum Mask
-   QString sumMask_name = m_prefix + "mask-sum" + m_suffix + ".nrrd";
-   QString sumMask_path = m_module_dir->filePath(sumMask_name);
-
-   m_log = "Sum both masks";   
-   m_outputs.insert("sumMask", sumMask_path); 
-   m_argumentsList << "ImageMath" << "mask" << "'-add'" << "dilatedMask" << "'-outfile'" << "sumMask";
-   execute(); 
-
-   // Ring Mask
-   QString ringMask_name = m_prefix + "mask-ring" + m_suffix + ".nrrd";
-   QString ringMask_path = m_module_dir->filePath(ringMask_name);
-
-   m_log = "Computing ring mask";   
-   m_outputs.insert("ringMask", ringMask_path); 
-   m_argumentsList << "ImageMath" << "sumMask" << "'-extractLabel'" << "'1'" << "'-outfile'" << "ringMask";
-   execute(); 
-
-   // Clean Ring Mask 
-   QString cleanedRingMask_name = m_prefix + "mask-ring-cleaned" + m_suffix + ".nrrd";
-   QString cleanedRingMask_path = m_module_dir->filePath(cleanedRingMask_name);
-
-   m_log = "- Cleaning ring mask";
-   m_outputs.insert("cleanedRingMask", cleanedRingMask_path);
-   m_argumentsList << "CleanRingMask" << "'--input'" << "ringMask" << "'--output'" << "cleanedRingMask";
-   execute(); 
-
-   // CSF intensity
-   QString outbase_name = m_prefix + "T2-"; 
-   QString outbase_path = m_module_dir->filePath(outbase_name);
-
-   m_log = "Computing CSF intensity on T2"; 
-   m_outputs.insert("outbase", outbase_path);
-   m_argumentsList << "ImageStat" << "T2" << "'-label'" << "mask" << "'-intensitySummary'" << "'-outbase'" << "outbase";
-   execute();
-
-   // CSF ring
-   QString csv_name = outbase_name + "_intensitySummary.csv"; 
-   QString csv_path = m_module_dir->filePath(csv_name);
-
-   QString oper = "2,' + str([row for row in csv.reader(open(csv_file, 'rb'))][9][2]) + '";
-
-   QString CSFRing_name = m_prefix + "CSF-ring" + m_suffix + ".nrrd";
-   QString CSFRing_path = m_module_dir->filePath(CSFRing_name);
-
-   m_log = "Multyplying ring mask by CSF intensity value";
-   m_inputs.insert("csv_file", csv_path);
-   m_inputs.insert("oper", oper);
-   m_outputs.insert("CSFRing", CSFRing_path); 
-   m_argumentsList << "ImageMath" << "ringMask" << "'-constOper'" << "oper" << "'-type'" << "'float'" << "'-outfile'" << "CSFRing";
-   execute(); 
-
-   // T2 with extra CSF
-   QString T2WithExtraCSF_name = m_prefix + "T2-extraCSF" + m_suffix + ".nrrd";
-   QString T2WithExtraCSF_path = m_module_dir->filePath(T2WithExtraCSF_name);
-
-   m_log = "Adding CSF ring to T2"; 
-   m_outputs.insert("T2Atlas_withExtraCSF", T2WithExtraCSF_path); 
-   m_argumentsList << "ImageMath" << "T2" << "'-add'" << "CSFRing" << "'-type'" << "'float'" << "'-outfile'" << "T2Atlas_withExtraCSF";
-   execute();
-
-   return T2WithExtraCSF_path;
+   return smoothedMask_path;
 }
 
 void PreProcessingData::implementRun()
@@ -181,17 +143,32 @@ void PreProcessingData::implementRun()
 
    m_script += "\tlogger.info('')\n";
 
-   m_neo.T1 = skullStripImage("T1");
-   m_neo.T2 = skullStripImage("T2");
-
-   m_neo.T1 = correctImage("T1");
-   m_neo.T2 = correctImage("T2");
-
-   if(m_addingExtraCSF)
+   if(m_skullStripping)
    {
-      m_neo.dilatedMask = dilateMask(); 
-      m_neo.T2Modified = addExtraCSF(); 
+      m_neo.T1 = skullStripImage("T1");
+      m_neo.T2 = skullStripImage("T2");
    }
+
+   if(m_correcting)
+   {
+      m_neo.T1 = correctImage("T1");
+      m_neo.T2 = correctImage("T2");
+   }
+
+   if(m_usingSmoothedMask)
+   {
+      m_neo.smoothedMask = smoothMask(); 
+   }
+
+   // Cleaning for keven data
+   m_unnecessaryFiles << m_module_dir->filePath(m_prefix + "mask-dilated" + m_suffix + ".nrrd");
+   m_unnecessaryFiles << m_module_dir->filePath(m_prefix + "mask-sum" + m_suffix + ".nrrd");
+   m_unnecessaryFiles << m_module_dir->filePath(m_prefix + "mask-ring" + m_suffix + ".nrrd");
+   m_unnecessaryFiles << m_module_dir->filePath(m_prefix + "mask-ring-cleaned" + m_suffix + ".nrrd");
+   m_unnecessaryFiles << m_module_dir->filePath(m_prefix + "CSF-ring" + m_suffix + ".nrrd");
+   m_unnecessaryFiles << m_module_dir->filePath(m_prefix + "T2-extraCSF" + m_suffix + ".nrrd");
+   m_unnecessaryFiles << m_module_dir->filePath(m_prefix + "T2-_intensitySummary.csv");
+
 }
 
 void PreProcessingData::update()

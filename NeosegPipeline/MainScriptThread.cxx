@@ -16,8 +16,7 @@ void MainScriptThread::run()
 
 void MainScriptThread::terminate()
 {
-   QProcess* mainScriptProcess = m_pipeline->getMainScriptProcess(); 
-   mainScriptProcess->terminate(); 
+   m_pipeline->stopPipeline(); 
 
    QThread::terminate();
 }

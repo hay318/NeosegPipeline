@@ -24,7 +24,9 @@
 #include "AtlasPopulationRegistration.h"
 #include "AtlasRegistration.h"
 #include "AtlasGeneration.h"
+#include "ExistingAtlasRegistration.h"
 #include "NeosegExecution.h"
+#include "XmlWriter.h"
 
 
 class Pipeline
@@ -45,13 +47,17 @@ class Pipeline
    // Process
    QProcess* getMainScriptProcess();
 
+   // Write XML Files
+   void writeXMLFiles(); 
+
    // Write Pipeline 
    void writePipeline(); 
-
-   // Run Pipeline
    void runPipeline();
+   void stopPipeline(); 
 
    private: 
+
+
 
    // Create Directories
    void createProcessingDirectory();
@@ -63,6 +69,7 @@ class Pipeline
    void writeAtlasPopulationRegistration();
    void writeDTIRegistration();   
    void writeAtlasGeneration();
+   void writeExistingAtlasRegistration();
    void writeNeosegExecution();
 
    // Write Main Script 
@@ -77,14 +84,13 @@ class Pipeline
    void cleanUp(); 
 
 
-
-
    // Neoseg Pipeline Steps
    PreProcessingData* m_preProcessingData;
    DtiRegistration* m_dtiRegistration; 
    AtlasRegistration* m_atlasRegistration; 
    AtlasPopulationRegistration* m_atlasPopulationRegistration; 
    AtlasGeneration* m_atlasGeneration; 
+   ExistingAtlasRegistration* m_existingAtlasRegistration; 
    NeosegExecution* m_neosegExecution; 
 
    PipelineParameters* m_parameters; 
@@ -99,6 +105,8 @@ class Pipeline
    QString m_main_path;
 
    QString m_log_path; 
+
+   QString m_jobID;
 
    // QProcess
    QProcess* m_mainScriptProcess;

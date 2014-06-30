@@ -81,6 +81,29 @@ DerivedWindow::DerivedWindow() : Ui_Window()
       connect(executable.reset_button, SIGNAL(clicked()), resetExecutable_signalMapper, SLOT(map()));      
    }
 
+   // Select Library Signal Mapper
+   QSignalMapper* selectLibrary_signalMapper = new QSignalMapper(this);
+   connect(selectLibrary_signalMapper, SIGNAL(mapped(QString)), this, SLOT(selectLibrary(QString)));
+
+   // Enter Library Signal Mapper
+   QSignalMapper* enterLibrary_signalMapper = new QSignalMapper(this);
+   connect(enterLibrary_signalMapper, SIGNAL(mapped(QString)), this, SLOT(enterLibrary(QString)));
+
+   // Connect Library Signal/Slot
+   initializeLibrariesMap(); 
+   QMap<QString, Library>::iterator it_lib; 
+   for(it_lib = m_libraries_map.begin(); it_lib != m_libraries_map.end(); ++it_lib)
+   {
+      QString name = it_lib.key(); 
+      Library library = it_lib.value();  
+
+      selectLibrary_signalMapper->setMapping(library.select_button, name);
+      connect(library.select_button, SIGNAL(clicked()), selectLibrary_signalMapper, SLOT(map())); 
+
+      enterLibrary_signalMapper->setMapping(library.enter_lineEdit, name);
+      connect(library.enter_lineEdit, SIGNAL(editingFinished()), enterLibrary_signalMapper, SLOT(map())); 
+   }
+
    // OutputDir //
    connect(output_button, SIGNAL(clicked()), this, SLOT(selectOuput()));
    connect(output_lineEdit, SIGNAL(returnPressed()), this, SLOT(enterOutput()));
@@ -105,6 +128,9 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    connect(existingAtlas_button, SIGNAL(clicked()), this, SLOT(selectExistingAtlas()));
    connect(existingAtlas_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterExistingAtlas()));      
    
+   // Computing System
+   connect(computingSystem_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeComputingSystem(int))); 
+
    // Reset all executables 
    connect(resetAllExecutables_button, SIGNAL(clicked()), this, SLOT(resetAllExecutables()));
 
@@ -121,6 +147,8 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    // Display Results  
    connect(displayResults_button, SIGNAL(clicked()), this, SLOT(displayResults())); 
    
+   numberOfRegistrations_spinBox->setEnabled(true); 
+   numberOfGB_spinBox->setEnabled(false); 
 
    stopPipeline_action->setEnabled(false);
 
@@ -139,15 +167,16 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    registrations_comboBox->setEnabled(false); 
 
    this->adjustSize();
-
 }
 
 void DerivedWindow::setPipelineParameters(PipelineParameters* parameters)
 {  
    m_parameters = parameters;
-   m_antsParameters = m_parameters->getAntsParameters(); 
+   m_antsParameters_DTI = m_parameters->getAntsParametersDTI(); 
+   m_antsParameters_atlas = m_parameters->getAntsParametersAtlas(); 
    m_neosegParameters = m_parameters->getNeosegParameters(); 
    m_executables = m_parameters->getExecutablePaths();
+   m_libraries = m_parameters->getLibraryPaths();
    initializeParameters();
 }
 
@@ -178,15 +207,15 @@ void DerivedWindow::initializeImagesMap()
    Image mask = {mask_button, mask_lineEdit}; 
    m_images_map.insert("mask", mask);
 
-   Image b0 = {b0_button, b0_lineEdit}; 
-   m_images_map.insert("b0", b0);
-
    Image DWI = {DWI_button, DWI_lineEdit}; 
    m_images_map.insert("DWI", DWI);
 }
 
 void DerivedWindow::initializeExecutablesMap()
 {
+   Executable python = {python_button, python_lineEdit, resetPython_button};
+   m_executables_map.insert("python", python);
+
    Executable SegPostProcessCLP = {SegPostProcessCLP_button, SegPostProcessCLP_lineEdit, resetSegPostProcessCLP_button};
    m_executables_map.insert("SegPostProcessCLP", SegPostProcessCLP);
 
@@ -220,6 +249,9 @@ void DerivedWindow::initializeExecutablesMap()
    Executable WeightedLabelsAverage = {WeightedLabelsAverage_button, WeightedLabelsAverage_lineEdit, resetWeightedLabelsAverage_button};
    m_executables_map.insert("WeightedLabelsAverage", WeightedLabelsAverage);
 
+   Executable SpreadFA = {SpreadFA_button, SpreadFA_lineEdit, resetSpreadFA_button};
+   m_executables_map.insert("SpreadFA", SpreadFA);
+
    Executable ReassignWhiteMatter = {ReassignWhiteMatter_button, ReassignWhiteMatter_lineEdit, resetReassignWhiteMatter_button};
    m_executables_map.insert("ReassignWhiteMatter", ReassignWhiteMatter);
 
@@ -230,10 +262,18 @@ void DerivedWindow::initializeExecutablesMap()
    m_executables_map.insert("InsightSNAP", InsightSNAP);
 }
 
+void DerivedWindow::initializeLibrariesMap()
+{
+   Library FSL = {FSL_button, FSL_lineEdit};
+   m_libraries_map.insert("FSL", FSL);
+}
+
+
 void DerivedWindow::about()
 {
-   m_about = new::About(); 
-   m_about->show();    
+   m_about = new::About();   
+   m_about->setVersion(NEOSEGPIPELINE_VERSION); 
+   m_about->show();  
 }
 
 
@@ -384,9 +424,7 @@ void DerivedWindow::selectNewOrExistingAtlas()
       existingAtlas_widget->show();
    } 
 
-   //QApplication::sendPostedEvents(this, QEvent::LayoutRequest);  
    tabs->adjustSize();
-   //this->adjustSize();
 }
 
 //***** Atlas Population Directory *****//
@@ -531,10 +569,29 @@ void DerivedWindow::enterExistingAtlas()
    }
 }
 
+
+//***** Computing System *****//
+void DerivedWindow::changeComputingSystem(int index)
+{
+   if(index == 0)
+   {
+      numberOfRegistrations_spinBox->setEnabled(true); 
+      numberOfGB_spinBox->setEnabled(false);       
+   }
+   else
+   {
+      numberOfRegistrations_spinBox->setEnabled(false); 
+      numberOfRegistrations_spinBox->setValue(0); 
+      numberOfGB_spinBox->setEnabled(true); 
+   }
+}
+
+
 //***** Parameters Configuration File *****//
 void DerivedWindow::selectParameters()
 {
 	QString parameters = QFileDialog::getOpenFileName(this, tr("Open file"), m_data_path,"XML (*.xml)");
+
    if(!parameters.isEmpty())
    {
       XmlReader xmlReader;
@@ -565,7 +622,6 @@ void DerivedWindow::selectExecutables()
       QMessageBox::critical(this, tr("Errors in XML file"), executablesErrors);  
    }
 }
-
 
 // Executables 
 void DerivedWindow::selectExecutable(QString executable_name)
@@ -609,8 +665,7 @@ void DerivedWindow::enterExecutable(QString executable_name)
             QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable, enter a new executable path"));            
          }
       }
-
-      else 
+      else if(!executable_path.isEmpty())
       {
          (executable.enter_lineEdit)->clear();
          QMessageBox::critical(this, executable_name, executable_path + tr("\ndoes not exist, enter a new file path"));
@@ -624,6 +679,7 @@ void DerivedWindow::resetExecutable(QString executable_name)
 }
 void DerivedWindow::resetAllExecutables()
 {
+   resetExecutable("python"); 
    resetExecutable("SegPostProcessCLP"); 
    resetExecutable("N4ITKBiasFieldCorrection"); 
    resetExecutable("ITKTransformTools"); 
@@ -635,10 +691,63 @@ void DerivedWindow::resetAllExecutables()
    resetExecutable("ResampleVolume2"); 
    resetExecutable("ImageMath"); 
    resetExecutable("WeightedLabelsAverage"); 
-   resetExecutable("ReassignWhiteMatter"); 
+   resetExecutable("SpreadFA");
    resetExecutable("Neoseg"); 
+   resetExecutable("ReassignWhiteMatter"); 
    resetExecutable("InsightSNAP");
 }
+
+
+// Libraries
+void DerivedWindow::selectLibrary(QString library_name)
+{   
+   Library library = m_libraries_map[library_name];
+
+   QString library_path = (library.enter_lineEdit)->text(); 
+   QString dir_path = ""; 
+
+   if(!(library_path.isEmpty()))
+   {
+      dir_path = (QFileInfo(library_path).dir()).absolutePath(); 
+   }
+
+	library_path = QFileDialog::getOpenFileName(this, tr("Select library"), dir_path);
+   if(!library_path.isEmpty())
+   {
+      if(QFileInfo(library_path).isDir())
+      {
+         (library.enter_lineEdit)->setText(library_path);
+      }
+      else
+      {
+         QMessageBox::critical(this, library_name, library_path + tr("\nis not a directory"));      
+      }
+   }
+}
+void DerivedWindow::enterLibrary(QString library_name)
+{
+   Library library = m_libraries_map[library_name];   
+
+   QString library_path = (library.enter_lineEdit)->text();
+
+   if(!library_name.isEmpty()) 
+   {  
+      if(QFileInfo(library_name).exists())
+      {
+         if(!QFileInfo(library_name).isDir())
+         {
+            (library.enter_lineEdit)->clear();
+            QMessageBox::critical(this, library_name, library_path + tr("\nis not a directory, enter a new executable path"));            
+         }
+      }
+      else if(!library_path.isEmpty())
+      {
+         (library.enter_lineEdit)->clear();
+         QMessageBox::critical(this, library_name, library_path + tr("\ndoes not exist, enter a new file path"));
+      }
+   }   
+}
+
 
 void DerivedWindow::initializeParameters()
 {
@@ -649,51 +758,56 @@ void DerivedWindow::initializeParameters()
    T2_lineEdit->setText(m_parameters->getT2());
    mask_lineEdit->setText(m_parameters->getMask());
    DWI_lineEdit->setText(m_parameters->getDWI());
-   b0_lineEdit->setText(m_parameters->getb0());
    
+   skullStripping_checkBox->setChecked(m_parameters->getSkullStripping());   
+   correcting_checkBox->setChecked(m_parameters->getCorrecting());
+
    if(m_parameters->getNewAtlas())
    {
       newAtlas_radioButton->setChecked(true);
       existingAtlas_radioButton->setChecked(false);
+      newAtlas_widget->show();
+      existingAtlas_widget->hide();
+
+      atlasPopulationDirectory_lineEdit->setText(m_parameters->getAtlasPopulationDirectory()); 
+      checkAtlases();  
+      displayAtlases();
+     
+      if(!(m_parameters->getSelectedAtlases()).empty())
+      {
+         m_selectedAtlases = m_parameters->getSelectedAtlases();
+      }
+      else
+      {
+         m_selectedAtlases = m_goodAtlases;
+      }
+      checkSelectedAtlases(); 
+
+      smoothing_comboBox->insertItems(0, m_parameters->getSmoothingValues()); 
+      smoothing_comboBox->setCurrentIndex(m_parameters->getSmoothingIndex()); 
+      smoothingSize_spinBox->setValue(m_parameters->getSmoothingSize());
+
+      computingWeights_checkBox->setChecked(m_parameters->getComputingWeights()); 
+      weightsModality_comboBox->insertItems(0,m_parameters->getWeightsModalityValues());
+      weightsModality_comboBox->setCurrentIndex(m_parameters->getWeightsModalityIndex());
+      weightsRadius_spinBox->setValue(m_parameters->getWeightsRadius());    
+      weightsRadiusUnit_comboBox->insertItems(0, m_parameters->getWeightsRadiusUnitValues()); 
+      weightsRadiusUnit_comboBox->setCurrentIndex(m_parameters->getWeightsRadiusUnitIndex());
+     
+      includingFA_checkBox->setChecked(m_parameters->getIncludingFA()); 
+      FAShift_spinBox->setValue(m_parameters->getFAShift());
+      FASigmaScale_spinBox->setValue(m_parameters->getFASigmaScale());
+      FAWeight_spinBox->setValue(m_parameters->getFAWeight());
+      FASmoothingSize_spinBox->setValue(m_parameters->getFASmoothingSize());
    } 
    else
    {
       newAtlas_radioButton->setChecked(false);
       existingAtlas_radioButton->setChecked(true);
+      newAtlas_widget->hide();
+      existingAtlas_widget->show(); 
+      existingAtlas_lineEdit->setText(m_parameters->getExistingAtlas()); 
    } 
-
-   atlasPopulationDirectory_lineEdit->setText(m_parameters->getAtlasPopulationDirectory()); 
-   existingAtlas_lineEdit->setText(m_parameters->getAtlas()); 
-   checkAtlases();  
-   displayAtlases();
-  
-   if(!(m_parameters->getSelectedAtlases()).empty())
-   {
-      m_selectedAtlases = m_parameters->getSelectedAtlases();
-   }
-   else
-   {
-      m_selectedAtlases = m_goodAtlases;
-   }
-
-   checkSelectedAtlases(); 
-
-   smoothing_comboBox->insertItems(0, m_parameters->getSmoothingValues()); 
-   smoothing_comboBox->setCurrentIndex(m_parameters->getSmoothingIndex()); 
-   smoothingSize_spinBox->setValue(m_parameters->getSmoothingSize());
-
-   computingWeights_checkBox->setChecked(m_parameters->getComputingWeights()); 
-   weightsModality_comboBox->insertItems(0,m_parameters->getWeightsModalityValues());
-   weightsModality_comboBox->setCurrentIndex(m_parameters->getWeightsModalityIndex());
-   weightsRadius_spinBox->setValue(m_parameters->getWeightsRadius());    
-   weightsRadiusUnit_comboBox->insertItems(0, m_parameters->getWeightsRadiusUnitValues()); 
-   weightsRadiusUnit_comboBox->setCurrentIndex(m_parameters->getWeightsRadiusUnitIndex());
-  
-   includingFA_checkBox->setChecked(m_parameters->getIncludingFA()); 
-   FAShift_spinBox->setValue(m_parameters->getFAShift());
-   FASigmaScale_spinBox->setValue(m_parameters->getFASigmaScale());
-   FAWeight_spinBox->setValue(m_parameters->getFAWeight());
-   FASmoothingSize_spinBox->setValue(m_parameters->getFASmoothingSize());
 
    usingFA_checkBox->setChecked(m_parameters->getUsingFA()); 
    usingAD_checkBox->setChecked(m_parameters->getUsingAD()); 
@@ -707,37 +821,71 @@ void DerivedWindow::initializeParameters()
 
    computingSystem_comboBox->insertItems(0, m_parameters->getComputingSystemValues()); 
    computingSystem_comboBox->setCurrentIndex(m_parameters->getComputingSystemIndex());
-   numberOfCores_spinBox->setValue(m_parameters->getNumberOfCores());   
 
    // ANTS
-   imageMetric1_comboBox->insertItems(0, m_antsParameters->getImageMetricValues()); 
-   imageMetric1_comboBox->setCurrentIndex(m_antsParameters->getImageMetric1Index()); 
-   weight1_spinBox->setValue(m_antsParameters->getWeight1());
-   radius1_spinBox->setValue(m_antsParameters->getRadius1());
 
-   imageMetric2_comboBox->insertItems(0, m_antsParameters->getImageMetricValues()); 
-   imageMetric2_comboBox->setCurrentIndex(m_antsParameters->getImageMetric2Index()); 
-   weight2_spinBox->setValue(m_antsParameters->getWeight2());
-   radius2_spinBox->setValue(m_antsParameters->getRadius2());
+   imageMetric1_DTI_comboBox->insertItems(0, m_antsParameters_DTI->getImageMetricValues()); 
+   imageMetric1_DTI_comboBox->setCurrentIndex(m_antsParameters_DTI->getImageMetric1Index()); 
+   weight1_DTI_spinBox->setValue(m_antsParameters_DTI->getWeight1());
+   radius1_DTI_spinBox->setValue(m_antsParameters_DTI->getRadius1());
+
+   imageMetric2_DTI_comboBox->insertItems(0, m_antsParameters_DTI->getImageMetricValues()); 
+   imageMetric2_DTI_comboBox->setCurrentIndex(m_antsParameters_DTI->getImageMetric2Index()); 
+   weight2_DTI_spinBox->setValue(m_antsParameters_DTI->getWeight2());
+   radius2_DTI_spinBox->setValue(m_antsParameters_DTI->getRadius2());
    
-   iterationsJ_spinBox->setValue(m_antsParameters->getIterationsJ());   
-   iterationsK_spinBox->setValue(m_antsParameters->getIterationsK());
-   iterationsL_spinBox->setValue(m_antsParameters->getIterationsL());
+   iterationsJ_DTI_spinBox->setValue(m_antsParameters_DTI->getIterationsJ());   
+   iterationsK_DTI_spinBox->setValue(m_antsParameters_DTI->getIterationsK());
+   iterationsL_DTI_spinBox->setValue(m_antsParameters_DTI->getIterationsL());
 
-   transformationType_comboBox->insertItems(0, m_antsParameters->getTransformationTypeValues());
-   transformationType_comboBox->setCurrentIndex(m_antsParameters->getTransformationTypeIndex());
-   gradientStepLength_spinBox->setValue(m_antsParameters->getGradientStepLength());
-   numberOfTimeSteps_spinBox->setValue(m_antsParameters->getNumberOfTimeSteps());
-   deltaTime_spinBox->setValue(m_antsParameters->getDeltaTime());
+   transformationType_DTI_comboBox->insertItems(0, m_antsParameters_DTI->getTransformationTypeValues());
+   transformationType_DTI_comboBox->setCurrentIndex(m_antsParameters_DTI->getTransformationTypeIndex());
+   gradientStepLength_DTI_spinBox->setValue(m_antsParameters_DTI->getGradientStepLength());
+   numberOfTimeSteps_DTI_spinBox->setValue(m_antsParameters_DTI->getNumberOfTimeSteps());
+   deltaTime_DTI_spinBox->setValue(m_antsParameters_DTI->getDeltaTime());
 
-   regularizationType_comboBox->insertItems(0, m_antsParameters->getRegularizationTypeValues());
-   regularizationType_comboBox->setCurrentIndex(m_antsParameters->getRegularizationTypeIndex());
-   gradientFieldSigma_spinBox->setValue(m_antsParameters->getGradientFieldSigma());
-   deformationFieldSigma_spinBox->setValue(m_antsParameters->getDeformationFieldSigma());
+   regularizationType_DTI_comboBox->insertItems(0, m_antsParameters_DTI->getRegularizationTypeValues());
+   regularizationType_DTI_comboBox->setCurrentIndex(m_antsParameters_DTI->getRegularizationTypeIndex());
+   gradientFieldSigma_DTI_spinBox->setValue(m_antsParameters_DTI->getGradientFieldSigma());
+   deformationFieldSigma_DTI_spinBox->setValue(m_antsParameters_DTI->getDeformationFieldSigma());
 
-   usingMask_checkBox->setChecked(m_antsParameters->getUsingMask());
-   usingSmoothedMask_checkBox->setChecked(m_antsParameters->getUsingSmoothedMask());
-   addingExtraCSF_checkBox->setChecked(m_antsParameters->getAddingExtraCSF());
+   noMask_DTI_checkBox->setChecked(!(m_antsParameters_DTI->getUsingMask() || m_antsParameters_DTI->getUsingSmoothedMask()));
+   usingMask_DTI_checkBox->setChecked(m_antsParameters_DTI->getUsingMask());
+   usingSmoothedMask_DTI_checkBox->setChecked(m_antsParameters_DTI->getUsingSmoothedMask());
+
+   // ANTS
+   numberOfRegistrations_spinBox->setValue(m_antsParameters_atlas->getNumberOfRegistrations());
+   numberOfCores_spinBox->setValue(m_antsParameters_atlas->getNumberOfCores());
+   numberOfGB_spinBox->setValue(m_antsParameters_atlas->getNumberOfGB());
+
+   imageMetric1_atlas_comboBox->insertItems(0, m_antsParameters_atlas->getImageMetricValues()); 
+   imageMetric1_atlas_comboBox->setCurrentIndex(m_antsParameters_atlas->getImageMetric1Index()); 
+   weight1_atlas_spinBox->setValue(m_antsParameters_atlas->getWeight1());
+   radius1_atlas_spinBox->setValue(m_antsParameters_atlas->getRadius1());
+
+   imageMetric2_atlas_comboBox->insertItems(0, m_antsParameters_atlas->getImageMetricValues()); 
+   imageMetric2_atlas_comboBox->setCurrentIndex(m_antsParameters_atlas->getImageMetric2Index()); 
+   weight2_atlas_spinBox->setValue(m_antsParameters_atlas->getWeight2());
+   radius2_atlas_spinBox->setValue(m_antsParameters_atlas->getRadius2());
+   
+   iterationsJ_atlas_spinBox->setValue(m_antsParameters_atlas->getIterationsJ());   
+   iterationsK_atlas_spinBox->setValue(m_antsParameters_atlas->getIterationsK());
+   iterationsL_atlas_spinBox->setValue(m_antsParameters_atlas->getIterationsL());
+
+   transformationType_atlas_comboBox->insertItems(0, m_antsParameters_atlas->getTransformationTypeValues());
+   transformationType_atlas_comboBox->setCurrentIndex(m_antsParameters_atlas->getTransformationTypeIndex());
+   gradientStepLength_atlas_spinBox->setValue(m_antsParameters_atlas->getGradientStepLength());
+   numberOfTimeSteps_atlas_spinBox->setValue(m_antsParameters_atlas->getNumberOfTimeSteps());
+   deltaTime_atlas_spinBox->setValue(m_antsParameters_atlas->getDeltaTime());
+
+   regularizationType_atlas_comboBox->insertItems(0, m_antsParameters_atlas->getRegularizationTypeValues());
+   regularizationType_atlas_comboBox->setCurrentIndex(m_antsParameters_atlas->getRegularizationTypeIndex());
+   gradientFieldSigma_atlas_spinBox->setValue(m_antsParameters_atlas->getGradientFieldSigma());
+   deformationFieldSigma_atlas_spinBox->setValue(m_antsParameters_atlas->getDeformationFieldSigma());
+
+   noMask_atlas_checkBox->setChecked(!(m_antsParameters_atlas->getUsingMask() || m_antsParameters_atlas->getUsingSmoothedMask()));
+   usingMask_atlas_checkBox->setChecked(m_antsParameters_atlas->getUsingMask());
+   usingSmoothedMask_atlas_checkBox->setChecked(m_antsParameters_atlas->getUsingSmoothedMask());
 
    //Neoseg 
    referenceModality_comboBox->insertItems(0, m_neosegParameters->getReferenceImageValues());
@@ -761,6 +909,7 @@ void DerivedWindow::initializeParameters()
    initialParzenKernelWidth_spinBox->setValue(m_neosegParameters->getInitialParzenKernelWidth());  
 
    // Executables 
+   python_lineEdit->setText(m_executables->getExecutablePath("python"));
    SegPostProcessCLP_lineEdit->setText(m_executables->getExecutablePath("SegPostProcessCLP"));
    N4ITKBiasFieldCorrection_lineEdit->setText(m_executables->getExecutablePath("N4ITKBiasFieldCorrection"));
    ITKTransformTools_lineEdit->setText(m_executables->getExecutablePath("ITKTransformTools"));
@@ -772,9 +921,13 @@ void DerivedWindow::initializeParameters()
    ResampleVolume2_lineEdit->setText(m_executables->getExecutablePath("ResampleVolume2"));
    ImageMath_lineEdit->setText(m_executables->getExecutablePath("ImageMath"));
    WeightedLabelsAverage_lineEdit->setText(m_executables->getExecutablePath("WeightedLabelsAverage"));
+   SpreadFA_lineEdit->setText(m_executables->getExecutablePath("SpreadFA"));
    ReassignWhiteMatter_lineEdit->setText(m_executables->getExecutablePath("ReassignWhiteMatter"));
    Neoseg_lineEdit->setText(m_executables->getExecutablePath("Neoseg"));
    InsightSNAP_lineEdit->setText(m_executables->getExecutablePath("InsightSNAP"));
+
+   // Libraries
+   FSL_lineEdit->setText(m_libraries->getLibraryPath("FSL"));
 }
 
 
@@ -785,8 +938,7 @@ void DerivedWindow::setData()
    m_parameters->setT2(T2_lineEdit->text());
    m_parameters->setMask(mask_lineEdit->text());
    m_parameters->setDWI(DWI_lineEdit->text());
-   m_parameters->setb0(b0_lineEdit->text());
- 
+
    // Output
    m_parameters->setPrefix(prefix_lineEdit->text()); 
    m_parameters->setSuffix(suffix_lineEdit->text()); 
@@ -799,6 +951,10 @@ void DerivedWindow::setData()
 
 void DerivedWindow::setParameters()
 {
+   // PreProcessing Data
+   m_parameters->setSkullStripping(skullStripping_checkBox->isChecked()); 
+   m_parameters->setCorrecting(correcting_checkBox->isChecked());    
+
    //Atlas Population 
    if (newAtlas_radioButton->isChecked()) 
    {
@@ -828,7 +984,7 @@ void DerivedWindow::setParameters()
    else 
    {
       m_parameters->setNewAtlas(false);  
-      m_parameters->setAtlas(existingAtlas_lineEdit->text());    
+      m_parameters->setExistingAtlas(existingAtlas_lineEdit->text()); 
    }
 
    m_parameters->setUsingFA(usingFA_checkBox->isChecked());
@@ -844,34 +1000,60 @@ void DerivedWindow::setParameters()
    m_parameters->setCleaningUp(cleaningUp_checkBox->isChecked());
    m_parameters->setStoppingIfError(stoppingIfError_checkBox->isChecked()); 
    m_parameters->setComputingSystem(computingSystem_comboBox->currentText());
-   m_parameters->setNumberOfCores(numberOfCores_spinBox->value());
 
+   // ANTS parameters for DTI Registration
+   m_antsParameters_DTI->setImageMetric1(imageMetric1_DTI_comboBox->currentText());
+   m_antsParameters_DTI->setWeight1(weight1_DTI_spinBox->value());
+   m_antsParameters_DTI->setRadius1(radius1_DTI_spinBox->value());
 
-   //ANTS parameters 
-   m_antsParameters->setImageMetric1(imageMetric1_comboBox->currentText());
-   m_antsParameters->setWeight1(weight1_spinBox->value());
-   m_antsParameters->setRadius1(radius1_spinBox->value());
+   m_antsParameters_DTI->setImageMetric2(imageMetric2_DTI_comboBox->currentText());
+   m_antsParameters_DTI->setWeight2(weight2_DTI_spinBox->value());
+   m_antsParameters_DTI->setRadius2(radius2_DTI_spinBox->value());
 
-   m_antsParameters->setImageMetric2(imageMetric2_comboBox->currentText());
-   m_antsParameters->setWeight2(weight2_spinBox->value());
-   m_antsParameters->setRadius2(radius2_spinBox->value());
+   m_antsParameters_DTI->setIterationsJ(iterationsJ_DTI_spinBox->value());
+   m_antsParameters_DTI->setIterationsK(iterationsK_DTI_spinBox->value());
+   m_antsParameters_DTI->setIterationsL(iterationsL_DTI_spinBox->value());
 
-   m_antsParameters->setIterationsJ(iterationsJ_spinBox->value());
-   m_antsParameters->setIterationsK(iterationsK_spinBox->value());
-   m_antsParameters->setIterationsL(iterationsL_spinBox->value());
+   m_antsParameters_DTI->setTransformationType(transformationType_DTI_comboBox->currentText());
+   m_antsParameters_DTI->setGradientStepLength(gradientStepLength_DTI_spinBox->value());
+   m_antsParameters_DTI->setNumberOfTimeSteps(numberOfTimeSteps_DTI_spinBox->value());
+   m_antsParameters_DTI->setDeltaTime(deltaTime_DTI_spinBox->value());
 
-   m_antsParameters->setTransformationType(transformationType_comboBox->currentText());
-   m_antsParameters->setGradientStepLength(gradientStepLength_spinBox->value());
-   m_antsParameters->setNumberOfTimeSteps(numberOfTimeSteps_spinBox->value());
-   m_antsParameters->setDeltaTime(deltaTime_spinBox->value());
+   m_antsParameters_DTI->setRegularizationType(regularizationType_DTI_comboBox->currentText());  
+   m_antsParameters_DTI->setGradientFieldSigma(gradientFieldSigma_DTI_spinBox->value());
+   m_antsParameters_DTI->setDeformationFieldSigma(deformationFieldSigma_DTI_spinBox->value());
 
-   m_antsParameters->setRegularizationType(regularizationType_comboBox->currentText());  
-   m_antsParameters->setGradientFieldSigma(gradientFieldSigma_spinBox->value());
-   m_antsParameters->setDeformationFieldSigma(deformationFieldSigma_spinBox->value());
+   m_antsParameters_DTI->setUsingMask(usingMask_DTI_checkBox->isChecked());
+   m_antsParameters_DTI->setUsingSmoothedMask(usingSmoothedMask_DTI_checkBox->isChecked());  
 
-   m_antsParameters->setUsingMask(usingMask_checkBox->isChecked());
-   m_antsParameters->setUsingSmoothedMask(usingSmoothedMask_checkBox->isChecked());
-   m_antsParameters->setAddingExtraCSF(addingExtraCSF_checkBox->isChecked());
+   //ANTS parameters for Atlas Population Registration 
+   m_antsParameters_atlas->setNumberOfRegistrations(numberOfRegistrations_spinBox->value());
+   m_antsParameters_atlas->setNumberOfCores(numberOfCores_spinBox->value());
+   m_antsParameters_atlas->setNumberOfGB(numberOfGB_spinBox->value());
+
+   m_antsParameters_atlas->setImageMetric1(imageMetric1_atlas_comboBox->currentText());
+   m_antsParameters_atlas->setWeight1(weight1_atlas_spinBox->value());
+   m_antsParameters_atlas->setRadius1(radius1_atlas_spinBox->value());
+
+   m_antsParameters_atlas->setImageMetric2(imageMetric2_atlas_comboBox->currentText());
+   m_antsParameters_atlas->setWeight2(weight2_atlas_spinBox->value());
+   m_antsParameters_atlas->setRadius2(radius2_atlas_spinBox->value());
+
+   m_antsParameters_atlas->setIterationsJ(iterationsJ_atlas_spinBox->value());
+   m_antsParameters_atlas->setIterationsK(iterationsK_atlas_spinBox->value());
+   m_antsParameters_atlas->setIterationsL(iterationsL_atlas_spinBox->value());
+
+   m_antsParameters_atlas->setTransformationType(transformationType_atlas_comboBox->currentText());
+   m_antsParameters_atlas->setGradientStepLength(gradientStepLength_atlas_spinBox->value());
+   m_antsParameters_atlas->setNumberOfTimeSteps(numberOfTimeSteps_atlas_spinBox->value());
+   m_antsParameters_atlas->setDeltaTime(deltaTime_atlas_spinBox->value());
+
+   m_antsParameters_atlas->setRegularizationType(regularizationType_atlas_comboBox->currentText());  
+   m_antsParameters_atlas->setGradientFieldSigma(gradientFieldSigma_atlas_spinBox->value());
+   m_antsParameters_atlas->setDeformationFieldSigma(deformationFieldSigma_atlas_spinBox->value());
+
+   m_antsParameters_atlas->setUsingMask(usingMask_atlas_checkBox->isChecked());
+   m_antsParameters_atlas->setUsingSmoothedMask(usingSmoothedMask_atlas_checkBox->isChecked());
 
    // Neoseg parameters 
    m_neosegParameters->setReferenceImage(referenceModality_comboBox->currentText()); 
@@ -898,6 +1080,7 @@ void DerivedWindow::setParameters()
 void DerivedWindow::setExecutables()
 {
    // Executables
+   m_executables->setExecutablePath("python", python_lineEdit->text()); 
    m_executables->setExecutablePath("SegPostProcessCLP", SegPostProcessCLP_lineEdit->text()); 
    m_executables->setExecutablePath("N4ITKBiasFieldCorrection", N4ITKBiasFieldCorrection_lineEdit->text()); 
    m_executables->setExecutablePath("N4ITKBiasFieldCorrection", N4ITKBiasFieldCorrection_lineEdit->text()); 
@@ -909,9 +1092,13 @@ void DerivedWindow::setExecutables()
    m_executables->setExecutablePath("ResampleVolume2", ResampleVolume2_lineEdit->text()); 
    m_executables->setExecutablePath("ImageMath", ImageMath_lineEdit->text()); 
    m_executables->setExecutablePath("WeightedLabelsAverage", WeightedLabelsAverage_lineEdit->text()); 
+   m_executables->setExecutablePath("SpreadFA", SpreadFA_lineEdit->text()); 
    m_executables->setExecutablePath("ReassignWhiteMatter", ReassignWhiteMatter_lineEdit->text()); 
    m_executables->setExecutablePath("Neoseg", Neoseg_lineEdit->text()); 
    m_executables->setExecutablePath("InsightSNAP", InsightSNAP_lineEdit->text()); 
+
+   m_libraries->setLibraryPath("FSL", FSL_lineEdit->text());    
+
    m_executablesSet = true;
 }
 
@@ -1000,11 +1187,11 @@ void DerivedWindow::runPipeline()
 
    QString imagesErrors = m_parameters->checkImages(); 
    QString executablesErrors = m_executables->checkExecutables(); 
+   QString librariesErrors = m_libraries->checkLibraries(); 
 
-   std::cout<<executablesErrors.toStdString()<<std::endl; 
-
-   if(imagesErrors.isEmpty() && executablesErrors.isEmpty())
+   if(imagesErrors.isEmpty() && executablesErrors.isEmpty() && librariesErrors.isEmpty())
    {
+      m_pipeline->writeXMLFiles(); 
       m_pipeline->writePipeline();
 
       initializePipelineLogging();
@@ -1032,7 +1219,7 @@ void DerivedWindow::runPipeline()
    }
    else
    {
-      QMessageBox::critical(this, tr("Errors"), imagesErrors + "\n" + executablesErrors);
+      QMessageBox::critical(this, tr("Errors"), imagesErrors + "\n" + executablesErrors + "\n" + librariesErrors);
    }
 }
 
@@ -1129,14 +1316,16 @@ void DerivedWindow::printPipelineLog()
 {  
    QScrollBar *scrollBar = m_log_plainTextEdit->verticalScrollBar();
 
+   QString line = m_log_textStream->readAll();
+
    if(scrollBar->value() == scrollBar->maximum())
    {
-      m_log_plainTextEdit->insertPlainText((m_log_textStream->readAll()));
+      m_log_plainTextEdit->insertPlainText(line);
       scrollBar->setValue(scrollBar->maximum());
    }
    else
    {
-      m_log_plainTextEdit->insertPlainText((m_log_textStream->readAll()));
+      m_log_plainTextEdit->insertPlainText(line);
    }
 }
 
@@ -1245,7 +1434,6 @@ void DerivedWindow::displayResults()
    while (!insightSNAP_process.waitForFinished())
    {
    } 
- 
 }
 
 void DerivedWindow::closeEvent(QCloseEvent *event)

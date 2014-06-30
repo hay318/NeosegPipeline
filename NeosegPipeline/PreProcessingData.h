@@ -24,14 +24,15 @@ class PreProcessingData : public Script
    PreProcessingData(QString module);
 
    // Set 
-   void setAddingExtraCSF(bool addingExtraCSF); 
+   void setSkullStripping(bool skullStripping);
+   void setCorrecting(bool correcting);
+   void setUsingSmoothedMask(bool usingSmoothMask);
 
    // Implementing Script 
    void initializeScript();
    QString skullStripImage(QString image);
    QString correctImage(QString image);
-   QString dilateMask();
-   QString addExtraCSF();
+   QString smoothMask(); 
    void implementRun();
 
    // Updating & Getting Output 
@@ -40,11 +41,14 @@ class PreProcessingData : public Script
 
    private: 
 
-   // Paraneters
-   bool              m_addingExtraCSF; 
+   // Parameters 
+   bool              m_skullStripping; 
+   bool              m_correcting; 
+   bool              m_usingSmoothedMask; 
 
    // Suffix
    QString           m_skullStripping_suffix;
+   QString           m_positive_suffix;
    QString           m_converting_suffix;
    QString           m_correcting_suffix;
    QString           m_rescaling_suffix;

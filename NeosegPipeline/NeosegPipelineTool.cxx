@@ -1,8 +1,9 @@
 #include "NeosegPipelineTool.h"
 
-NeosegPipelineTool::NeosegPipelineTool()
+NeosegPipelineTool::NeosegPipelineTool(QString programPath)
 {
    m_parameters = new::PipelineParameters();
+   m_parameters->setProgramPath(programPath);
 
    m_pipeline = new::Pipeline();
    m_pipeline->setPipelineParameters(m_parameters); 
@@ -11,10 +12,6 @@ NeosegPipelineTool::NeosegPipelineTool()
    m_executablesErrors = "";
 }
 
-void NeosegPipelineTool::setProgramPath(QString programPath)
-{
-   m_parameters->setProgramPath(programPath);
-}
 void NeosegPipelineTool::setOutput(QString output)
 {
    m_parameters->setOutput(output);
@@ -75,20 +72,6 @@ void NeosegPipelineTool::setDWI(QString DWI)
       }
    }
 }
-void NeosegPipelineTool::setb0(QString b0)
-{
-   if(!b0.isEmpty())
-   {
-      if(m_parameters->checkb0(b0))
-      {
-         m_parameters->setb0(b0);
-      }
-      else
-      {
-         m_errors += b0 + " does not exist\n";
-      }
-   }
-}
 void NeosegPipelineTool::setParametersFile(QString xmlFile) 
 {
    if(!xmlFile.isEmpty())
@@ -115,6 +98,8 @@ void NeosegPipelineTool::setExecutablesFile(QString xml_CLI)
 
       if(!xml_ENV.isEmpty())
       {
+         std::cout<<"environnement variable"<<std::endl; 
+
          m_executablesErrors = m_xmlReader.readExecutablesConfigurationFile(xml_ENV);
       }
    }

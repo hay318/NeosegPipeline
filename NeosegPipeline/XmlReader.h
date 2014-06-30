@@ -6,6 +6,8 @@
 #include "PipelineParameters.h"
 #include "AntsParameters.h"
 #include "NeosegParameters.h"
+#include "ExecutablePaths.h"
+#include "LibraryPaths.h"
 
 class XmlReader
 {
@@ -17,14 +19,20 @@ class XmlReader
    bool isBoolean(int value);
 
    QString readParametersConfigurationFile(QString file_path); 
+   void readGeneralParameters(QXmlStreamReader* stream, QString errors);
+   void readAntsParameters(QXmlStreamReader* stream, QString errors, AntsParameters* antsParameters);
+   void readNeosegParameters(QXmlStreamReader* stream, QString errors);
+
    QString readExecutablesConfigurationFile(QString file_path);
 
    private:
 
    PipelineParameters* m_parameters; 
-   AntsParameters* m_antsParameters;  
+   AntsParameters* m_antsParameters_DTI;  
+   AntsParameters* m_antsParameters_atlas;  
    NeosegParameters* m_neosegParameters; 
    ExecutablePaths* m_executablePaths;
+   LibraryPaths* m_libraryPaths;
    
    QStringList m_selectedAtlases; 
 
