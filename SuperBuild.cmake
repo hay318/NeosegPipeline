@@ -306,7 +306,7 @@ ExternalProject_Add(${proj}
     ${CMAKE_OSX_EXTERNAL_PROJECT_ARGS}
     ${${PROJECT_NAME}_EXTERNAL_PROJECT_ARGS}
     -D${PRIMARY_PROJECT_NAME}_SUPERBUILD:BOOL=OFF    #NOTE: VERY IMPORTANT reprocess top level CMakeList.txt
-    -DCMAKE_INSTALL_PREFIX:PATH=${PRIMARY_PROJECT_NAME}-install
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/${PRIMARY_PROJECT_NAME}-install
     -DBUILD_NeosegPipeline:BOOL=${BUILD_NeosegPipeline}
     -DBUILD_WeightedLabelsAverage:BOOL=${BUILD_WeightedLabelsAverage}
     -DBUILD_SpreadFA:BOOL=${BUILD_SpreadFA}
@@ -337,43 +337,43 @@ if(BUILD_ANTs)
 endif()
 
 if(BUILD_ITKTransformTools)
-   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/ITKTransformTools-install/bin/ITKTransformTools DESTINATION bin)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/ITKTransformTools-install/bin/ITKTransformTools DESTINATION bin)
 endif()
 
 if(BUILD_niral_utilities)
-   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/niral_utilities-install/bin/ImageMath DESTINATION bin)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/niral_utilities-install/bin/ImageMath DESTINATION bin)
 endif()
 
 if(BUILD_SlicerCLI)
-   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/SlicerCLI-install/bin/ResampleScalarVectorDWIVolume DESTINATION bin)
-   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/SlicerCLI-install/bin/N4ITKBiasFieldCorrection DESTINATION bin)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/SlicerCLI-install/bin/ResampleScalarVectorDWIVolume DESTINATION bin)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/SlicerCLI-install/bin/N4ITKBiasFieldCorrection DESTINATION bin)
 endif()
 
 if(BUILD_python)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/python-install/bin/python DESTINATION bin)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/python-install/bin/python DESTINATION bin)
 endif()
 
 if(BUILD_SPHARM-PDM)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/SPHARM-PDM-install/bin/SegPostProcessCLP DESTINATION bin)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/SPHARM-PDM-install/bin/SegPostProcessCLP DESTINATION bin)
 endif()
 
 if(BUILD_teem)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/teem-install/bin/unu DESTINATION bin)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/teem-install/bin/unu DESTINATION bin)
 endif()
 
 if(BUILD_NeosegPipeline)
-install(PROGRAMS ${PRIMARY_PROJECT_NAME}-install/bin/NeosegPipeline DESTINATION bin)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PRIMARY_PROJECT_NAME}-install/bin/NeosegPipeline DESTINATION bin)
 endif()
 
 if(BUILD_WeightedLabelsAverage)
-install(PROGRAMS ${PRIMARY_PROJECT_NAME}-install/bin/WeightedLabelsAverage DESTINATION bin)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PRIMARY_PROJECT_NAME}-install/bin/WeightedLabelsAverage DESTINATION bin)
 endif()
 
 if(BUILD_SpreadFA)
-install(PROGRAMS ${PRIMARY_PROJECT_NAME}-install/bin/SpreadFA DESTINATION bin)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PRIMARY_PROJECT_NAME}-install/bin/SpreadFA DESTINATION bin)
 endif()
 
 if(BUILD_ReassignWhiteMatter)
-install(PROGRAMS ${PRIMARY_PROJECT_NAME}-install/bin/ReassignWhiteMatter DESTINATION bin)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PRIMARY_PROJECT_NAME}-install/bin/ReassignWhiteMatter DESTINATION bin)
 endif()
 
