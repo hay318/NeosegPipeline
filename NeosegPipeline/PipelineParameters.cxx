@@ -15,7 +15,7 @@ PipelineParameters::PipelineParameters()
    m_newAtlas_default = true; 
    m_newAtlas = m_newAtlas_default;
 
-   m_atlasFormat_default = ".nrrd"; 
+   m_atlasFormat_default = "nrrd"; 
    m_atlasFormat = m_atlasFormat_default;
 
    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
