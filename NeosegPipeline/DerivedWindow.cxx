@@ -178,6 +178,7 @@ void DerivedWindow::setPipelineParameters(PipelineParameters* parameters)
    m_executables = m_parameters->getExecutablePaths();
    m_libraries = m_parameters->getLibraryPaths();
    initializeParameters();
+   initializeExecutables();
 }
 
 void DerivedWindow::setPipeline(Pipeline* pipeline) 
@@ -240,8 +241,8 @@ void DerivedWindow::initializeExecutablesMap()
    Executable ANTS = {ANTS_button, ANTS_lineEdit, resetANTS_button};
    m_executables_map.insert("ANTS", ANTS);
 
-   Executable ResampleVolume2 = {ResampleVolume2_button, ResampleVolume2_lineEdit, resetResampleVolume2_button};
-   m_executables_map.insert("ResampleVolume2", ResampleVolume2);
+   Executable ResampleScalarVectorDWIVolume = {ResampleScalarVectorDWIVolume_button, ResampleScalarVectorDWIVolume_lineEdit, resetResampleScalarVectorDWIVolume_button};
+   m_executables_map.insert("ResampleScalarVectorDWIVolume", ResampleScalarVectorDWIVolume);
 
    Executable ImageMath = {ImageMath_button, ImageMath_lineEdit, resetImageMath_button};
    m_executables_map.insert("ImageMath", ImageMath);
@@ -256,7 +257,7 @@ void DerivedWindow::initializeExecutablesMap()
    m_executables_map.insert("ReassignWhiteMatter", ReassignWhiteMatter);
 
    Executable Neoseg = {Neoseg_button, Neoseg_lineEdit, resetNeoseg_button};
-   m_executables_map.insert("Neoseg", Neoseg);
+   m_executables_map.insert("neoseg", Neoseg);
 
    Executable InsightSNAP = {InsightSNAP_button, InsightSNAP_lineEdit, resetInsightSNAP_button};
    m_executables_map.insert("InsightSNAP", InsightSNAP);
@@ -590,37 +591,43 @@ void DerivedWindow::changeComputingSystem(int index)
 //***** Parameters Configuration File *****//
 void DerivedWindow::selectParameters()
 {
-	QString parameters = QFileDialog::getOpenFileName(this, tr("Open file"), m_data_path,"XML (*.xml)");
-
-   if(!parameters.isEmpty())
-   {
-      XmlReader xmlReader;
-      xmlReader.setPipelineParameters(m_parameters);
-      QString parametersErrors = xmlReader.readParametersConfigurationFile(parameters); 
-
-      parametersErrors = tr("Errors in the parameters configuration :\n") + parametersErrors; 
-      parametersErrors += tr("\n");
-      parametersErrors += tr("All the parameters that are nor valid, are left to their default value\n");
-      QMessageBox::critical(this, tr("Errors in XML file"), parametersErrors);   
-   }
+	QString parameters = QFileDialog::getOpenFileName( this , tr( "Open file" ) , m_data_path , "XML (*.xml)" ) ;
+  if(!parameters.isEmpty())
+  {
+    XmlReader xmlReader ;
+    xmlReader.setPipelineParameters( m_parameters ) ;
+    QString parametersErrors = xmlReader.readParametersConfigurationFile( parameters ) ;
+    initializeParameters() ;
+    if( !parametersErrors.isEmpty() )
+    {
+      parametersErrors = tr( "Errors in the parameters configuration :\n" ) + parametersErrors ;
+      parametersErrors += tr( "\n" ) ;
+      parametersErrors += tr( "All the parameters that are nor valid, are left to their default value\n") ;
+      QMessageBox::critical( this , tr("Errors in XML file") , parametersErrors ) ;
+    }
+  }
 }
 
 
 //***** Executables Configuration File *****//
 void DerivedWindow::selectExecutables()
 {
-	QString executables = QFileDialog::getOpenFileName(this, tr("Open file"), m_data_path,"XML (*.xml)");
-   if(!executables.isEmpty())
-   {
-      XmlReader xmlReader;
-      xmlReader.setPipelineParameters(m_parameters);
-      QString executablesErrors = xmlReader.readParametersConfigurationFile(executables); 
-
-      executablesErrors = tr("Errors in the parameters configuration :\n") + executablesErrors; 
-      executablesErrors += tr("\n");
-      executablesErrors += tr("All the parameters that are nor valid, are left to their default value\n");
-      QMessageBox::critical(this, tr("Errors in XML file"), executablesErrors);  
-   }
+std::cout<<"selectExecutables"<<std::endl;
+	QString executables = QFileDialog::getOpenFileName( this , tr( "Open file" ) , m_data_path , "XML (*.xml)" ) ;
+  if( !executables.isEmpty() )
+  {
+    XmlReader xmlReader ;
+    xmlReader.setPipelineParameters( m_parameters ) ;
+    QString executablesErrors = xmlReader.readExecutablesConfigurationFile( executables ) ;
+    initializeExecutables() ;
+    if( !executablesErrors.isEmpty() )
+    {
+      executablesErrors = tr( "Errors in the parameters configuration :\n" ) + executablesErrors ;
+      executablesErrors += tr( "\n" ) ;
+      executablesErrors += tr( "All the parameters that are nor valid, are left to their default value\n" ) ;
+      QMessageBox::critical( this , tr( "Errors in XML file" ) , executablesErrors ) ;
+    }
+  }
 }
 
 // Executables 
@@ -688,11 +695,11 @@ void DerivedWindow::resetAllExecutables()
    resetExecutable("dtiestim"); 
    resetExecutable("dtiprocess"); 
    resetExecutable("ANTS"); 
-   resetExecutable("ResampleVolume2"); 
+   resetExecutable("ResampleScalarVectorDWIVolume"); 
    resetExecutable("ImageMath"); 
    resetExecutable("WeightedLabelsAverage"); 
    resetExecutable("SpreadFA");
-   resetExecutable("Neoseg"); 
+   resetExecutable("neoseg"); 
    resetExecutable("ReassignWhiteMatter"); 
    resetExecutable("InsightSNAP");
 }
@@ -907,7 +914,10 @@ void DerivedWindow::initializeParameters()
 
    refinement_checkBox->setChecked(m_neosegParameters->getRefinement());
    initialParzenKernelWidth_spinBox->setValue(m_neosegParameters->getInitialParzenKernelWidth());  
+}
 
+void DerivedWindow::initializeExecutables()
+{
    // Executables 
    python_lineEdit->setText(m_executables->getExecutablePath("python"));
    SegPostProcessCLP_lineEdit->setText(m_executables->getExecutablePath("SegPostProcessCLP"));
@@ -918,12 +928,12 @@ void DerivedWindow::initializeParameters()
    dtiestim_lineEdit->setText(m_executables->getExecutablePath("dtiestim"));
    dtiprocess_lineEdit->setText(m_executables->getExecutablePath("dtiprocess"));
    ANTS_lineEdit->setText(m_executables->getExecutablePath("ANTS"));
-   ResampleVolume2_lineEdit->setText(m_executables->getExecutablePath("ResampleVolume2"));
+   ResampleScalarVectorDWIVolume_lineEdit->setText(m_executables->getExecutablePath("ResampleScalarVectorDWIVolume"));
    ImageMath_lineEdit->setText(m_executables->getExecutablePath("ImageMath"));
    WeightedLabelsAverage_lineEdit->setText(m_executables->getExecutablePath("WeightedLabelsAverage"));
    SpreadFA_lineEdit->setText(m_executables->getExecutablePath("SpreadFA"));
    ReassignWhiteMatter_lineEdit->setText(m_executables->getExecutablePath("ReassignWhiteMatter"));
-   Neoseg_lineEdit->setText(m_executables->getExecutablePath("Neoseg"));
+   Neoseg_lineEdit->setText(m_executables->getExecutablePath("neoseg"));
    InsightSNAP_lineEdit->setText(m_executables->getExecutablePath("InsightSNAP"));
 
    // Libraries
@@ -1089,12 +1099,12 @@ void DerivedWindow::setExecutables()
    m_executables->setExecutablePath("dtiestim", dtiestim_lineEdit->text()); 
    m_executables->setExecutablePath("dtiprocess", dtiprocess_lineEdit->text()); 
    m_executables->setExecutablePath("ANTS", ANTS_lineEdit->text()); 
-   m_executables->setExecutablePath("ResampleVolume2", ResampleVolume2_lineEdit->text()); 
+   m_executables->setExecutablePath("ResampleScalarVectorDWIVolume", ResampleScalarVectorDWIVolume_lineEdit->text()); 
    m_executables->setExecutablePath("ImageMath", ImageMath_lineEdit->text()); 
    m_executables->setExecutablePath("WeightedLabelsAverage", WeightedLabelsAverage_lineEdit->text()); 
    m_executables->setExecutablePath("SpreadFA", SpreadFA_lineEdit->text()); 
    m_executables->setExecutablePath("ReassignWhiteMatter", ReassignWhiteMatter_lineEdit->text()); 
-   m_executables->setExecutablePath("Neoseg", Neoseg_lineEdit->text()); 
+   m_executables->setExecutablePath("neoseg", Neoseg_lineEdit->text()); 
    m_executables->setExecutablePath("InsightSNAP", InsightSNAP_lineEdit->text()); 
 
    m_libraries->setLibraryPath("FSL", FSL_lineEdit->text());    

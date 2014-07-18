@@ -93,7 +93,7 @@ void AtlasGeneration::initializeScript()
    importXmlModules();
   
    defineExecutable("ImageMath");
-   defineExecutable("ResampleVolume2");
+   defineExecutable("ResampleScalarVectorDWIVolume");
    defineExecutable("unu");
    defineExecutable("SpreadFA");
    defineExecutable("WeightedLabelsAverage");
@@ -414,7 +414,7 @@ void AtlasGeneration::copyFinalPriorProbability(PriorProbability& priorProbabili
    QString finalProbability = m_module_dir->filePath(priorProbability.name + ".nrrd");  
    m_outputs.insert(priorProbability.output, finalProbability); 
 
-   m_argumentsList << "ResampleVolume2" << priorProbability.input << priorProbability.output;
+   m_argumentsList << "ResampleScalarVectorDWIVolume" << priorProbability.input << priorProbability.output;
    execute(); 
 } 
 

@@ -212,7 +212,7 @@ void PipelineParameters::setProgramPath(QString programPath)
    m_executablePaths->setDefaultExecutablePath("SegPostProcessCLP");
    m_executablePaths->setDefaultExecutablePath("N4ITKBiasFieldCorrection");
    m_executablePaths->setDefaultExecutablePath("ANTS");
-   m_executablePaths->setDefaultExecutablePath("ResampleVolume2");
+   m_executablePaths->setDefaultExecutablePath("ResampleScalarVectorDWIVolume");
    m_executablePaths->setDefaultExecutablePath("ImageMath");
    m_executablePaths->setDefaultExecutablePath("ITKTransformTools");
    m_executablePaths->setDefaultExecutablePath("dtiestim");
@@ -221,7 +221,7 @@ void PipelineParameters::setProgramPath(QString programPath)
    m_executablePaths->setDefaultExecutablePath("unu");
    m_executablePaths->setDefaultExecutablePath("InsightSNAP");
    m_executablePaths->setDefaultExecutablePath("SpreadFA");
-   m_executablePaths->setDefaultExecutablePath("Neoseg");
+   m_executablePaths->setDefaultExecutablePath("neoseg");
    m_executablePaths->setDefaultExecutablePath("WeightedLabelsAverage");
    m_executablePaths->setDefaultExecutablePath("ReassignWhiteMatter");
 

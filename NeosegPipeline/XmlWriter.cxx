@@ -222,8 +222,9 @@ void XmlWriter::writeParametersConfiguration(QString file_path)
 void XmlWriter::writeExecutables(QXmlStreamWriter* stream)
 {
    ExecutablePaths* executablePaths = m_parameters->getExecutablePaths();
-
-   stream->writeStartElement("Executables"); 
+   stream->writeStartElement("Tools-Paths");
+   stream->writeStartElement("Executables");
+   writeElement(stream, "python", "path", executablePaths->getExecutablePath("python"));
    writeElement(stream, "SegPostProcessCLP", "path", executablePaths->getExecutablePath("SegPostProcessCLP")); 
    writeElement(stream, "N4ITKBiasFieldCorrection", "path", executablePaths->getExecutablePath("N4ITKBiasFieldCorrection")); 
    writeElement(stream, "ANTS", "path", executablePaths->getExecutablePath("ANTS")); 
@@ -231,9 +232,13 @@ void XmlWriter::writeExecutables(QXmlStreamWriter* stream)
    writeElement(stream, "dtiestim", "path", executablePaths->getExecutablePath("dtiestim")); 
    writeElement(stream, "dtiprocess", "path", executablePaths->getExecutablePath("dtiprocess")); 
    writeElement(stream, "bet2", "path", executablePaths->getExecutablePath("bet2")); 
+   writeElement(stream, "SpreadFA", "path", executablePaths->getExecutablePath("SpreadFA"));
    writeElement(stream, "unu", "path", executablePaths->getExecutablePath("unu")); 
-   writeElement(stream, "ResampleVolume2", "path", executablePaths->getExecutablePath("ResampleVolume2")); 
-   writeElement(stream, "ImageMath", "path", executablePaths->getExecutablePath("ImageMath")); 
+   writeElement(stream, "ResampleScalarVectorDWIVolume", "path", executablePaths->getExecutablePath("ResampleScalarVectorDWIVolume")); 
+   writeElement(stream, "ImageMath", "path", executablePaths->getExecutablePath("ImageMath"));
+   writeElement(stream, "WeightedLabelsAverage", "path", executablePaths->getExecutablePath("WeightedLabelsAverage")); 
+   writeElement(stream, "neoseg", "path", executablePaths->getExecutablePath("neoseg"));
+   writeElement(stream, "ReassignWhiteMatter", "path", executablePaths->getExecutablePath("ReassignWhiteMatter"));
    writeElement(stream, "InsightSNAP", "path", executablePaths->getExecutablePath("InsightSNAP"));
    stream->writeEndElement(); 
 
@@ -241,6 +246,7 @@ void XmlWriter::writeExecutables(QXmlStreamWriter* stream)
 
    stream->writeStartElement("Library-directories"); 
    writeElement(stream, "FSL", "path", libraryPaths->getLibraryPath("FSL")); 
+   stream->writeEndElement(); 
    stream->writeEndElement(); 
 }
 

@@ -9,7 +9,7 @@ ExecutablePaths::ExecutablePaths()
    m_splitPath.prepend(".");
 
    // Executables with version
-   m_executables_withVersionLongFlag << "SegPostProcessCLP" << "N4ITKBiasFieldCorrection" << "dtiestim" << "dtiprocess" << "ResampleVolume2" << "WeightedLabelsAverage" << "ReassignWhiteMatter" << "Neoseg";
+   m_executables_withVersionLongFlag << "SegPostProcessCLP" << "N4ITKBiasFieldCorrection" << "dtiestim" << "dtiprocess" << "ResampleScalarVectorDWIVolume" << "WeightedLabelsAverage" << "ReassignWhiteMatter" << "neoseg";
    m_executables_withVersionShortFlag << "ImageMath";
    m_executables_withVersionArgument << "ITKTransformTools";
    m_executables_withoutVersionFlag << "bet2" << "ANTS" << "SNAP" << "unu";
@@ -24,10 +24,12 @@ void ExecutablePaths::setProgramPath(QString programPath)
 QString ExecutablePaths::findExecutablePath(QString executableName)
 {
    QStringList::iterator it;
+   std::cout<<executableName.toStdString()<<std::endl;
    for(it = m_splitPath.begin(); it != m_splitPath.end(); ++it)
    {
       if(QFileInfo(QDir(*it).filePath(executableName)).isExecutable())
       {
+         std::cout<<"Executables path : "<< QDir(*it).filePath(executableName).toStdString() <<std::endl;
          return QDir(*it).filePath(executableName);
       }
    }   
@@ -42,7 +44,6 @@ bool ExecutablePaths::checkExecutablePath(QString executable_name, QString execu
    }
    
    QString command;
-
    if(m_executables_withVersionLongFlag.contains(executable_name))
    {
       command =  executable_path + " --version "; 
@@ -62,33 +63,18 @@ bool ExecutablePaths::checkExecutablePath(QString executable_name, QString execu
 
    QProcess test_process;   
    test_process.start(command);
+   std::cout<<command.toStdString()<<std::endl;
    while (!test_process.waitForFinished())
    {
-   } 
-   
-   QString output(test_process.readAllStandardOutput());
-   QString error(test_process.readAllStandardError());
-   output = output + error; 
-
-   QString subString; 
-   if(executable_name == "InsightSNAP")
+   }
+   if( !test_process.exitStatus() )
    {
-      subString = "SNAP"; 
+     return true ;
    }
    else
    {
-      subString = executable_name; 
+     return false ;
    }
-
-   if(output.contains(subString, Qt::CaseInsensitive))
-   {
-      return true;
-   }
-   else
-   {
-      return false;
-   }
- 
 }
 
 void ExecutablePaths::setDefaultExecutablePath(QString name)
@@ -103,6 +89,7 @@ QString ExecutablePaths::getDefaultExecutablePath(QString name)
 void ExecutablePaths::setExecutablePath(QString name, QString path)
 {
    m_executables[name]=path;
+   std::cout<<"plop "<< m_executables[name].toStdString() << " " << name.toStdString() << std::endl;
 }
 QString ExecutablePaths::getExecutablePath(QString name)
 {
@@ -112,7 +99,6 @@ QString ExecutablePaths::getExecutablePath(QString name)
 QString ExecutablePaths::checkExecutables()
 {
    QString errors;
-
    QMap<QString, QString>::iterator it; 
    for(it = m_executables.begin(); it != m_executables.end(); ++it)
    {

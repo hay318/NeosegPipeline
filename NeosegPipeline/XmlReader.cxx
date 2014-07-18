@@ -23,7 +23,6 @@ bool XmlReader::isBoolean(int value)
 QString XmlReader::readParametersConfigurationFile(QString file_path)
 {
    QFile* file = new::QFile(file_path);
-
    if(!file->exists())
    {
       return " - " + file_path + " does not exist\n";
@@ -795,10 +794,100 @@ void XmlReader::readNeosegParameters(QXmlStreamReader* stream, QString errors)
 }
 
 
+
 QString XmlReader::readExecutablesConfigurationFile(QString file_path)
 {
    QFile* file = new::QFile(file_path);
+   QString currentSection = "" ;
+   QStringList levelOne = QStringList() << QString( "Executables" ) << QString( "Library-directories" ) ;
+   QString errors ;
+   if(!file->exists())
+   {
+      errors = " - " + file_path + " does not exist\n" ;
+      return errors ;
+   }
+   else
+   {
+      int sectionHierarchy = 0 ;
+      file->open(QIODevice::ReadOnly);
+      QXmlStreamReader* stream = new::QXmlStreamReader(file);
+      while(!stream->atEnd())
+      {
+         stream->readNext();
+         if(stream->isStartElement())
+         {
+            sectionHierarchy++ ;
+            QXmlStreamAttributes attributes = stream->attributes();
+            if( stream->name().toString() == "Tools-Paths" )
+            {
+               if( sectionHierarchy != 1 )
+               {
+                  stream->raiseError( "Tools-Paths has to be the root" ) ;
+               }
+            }
+            else if( levelOne.contains( stream->name().toString() ) )
+            {
+               currentSection = stream->name().toString() ;
+            }
+            else
+            {
+               if( currentSection == "" )
+               {
+                  stream->raiseError( "Unknown XML section" ) ;
+               }
+               QString name = (stream->name()).toString(); 
+               QString path = (attributes.value("path")).toString(); 
+              std::cout<<name.toStdString()<<" "<<path.toStdString()<<std::endl;
+               if( currentSection == "Executables" )
+               {
+                  if(m_executablePaths->checkExecutablePath(name, path))
+                  {
+std::cout<<"plop"<<std::endl;
+                     m_executablePaths->setExecutablePath(name, path);    
+                  }
+                  else
+                  {
+                     errors += " - " + name + " path is not valid\n"; 
+                  }
+               }
+               else if( currentSection == "Library-directories" )
+               {
+                  if(m_libraryPaths->checkLibraryPath(name, path))
+                  {
+                     m_libraryPaths->setLibraryPath(name, path);    
+                  }
+                  else
+                  {
+                     errors += " - " + name + " path is not valid\n"; 
+                  }
+               }
+               else
+               {
+                  stream->raiseError( QString( "Unknown attribute: " ) + stream->name().toString() ) ;
+               }
+            }
+         }
+         if( stream->isEndElement() )
+         {
+            sectionHierarchy-- ;
+            if( sectionHierarchy == 1 )
+            {
+               currentSection = "" ;
+            }
+         }
+      }
+      if( stream->error() != QXmlStreamReader::NoError )
+      {
+        errors = stream->errorString() ;
+      }
+   }
+   return errors; 
+}
 
+/*
+QString XmlReader::readExecutablesConfigurationFile(QString file_path)
+{
+   QFile* file = new::QFile(file_path);
    if(!file->exists())
    {
       return " - " + file_path + " does not exist\n"; 
@@ -810,20 +899,16 @@ QString XmlReader::readExecutablesConfigurationFile(QString file_path)
       QXmlStreamReader* stream = new::QXmlStreamReader(file);
 
       QString errors;
-
       while(!stream->atEnd())
       {
          stream->readNext();
-
          if(stream->isStartElement())
          {
             QXmlStreamAttributes attributes = stream->attributes();
-      
             if((stream->name()).toString()!="Executables")
             {
                QString name = (stream->name()).toString(); 
                QString path = (attributes.value("path")).toString(); 
-
                if(m_executablePaths->checkExecutablePath(name, path))
                {
                   m_executablePaths->setExecutablePath(name, path);    
@@ -849,8 +934,7 @@ QString XmlReader::readExecutablesConfigurationFile(QString file_path)
             }
          }
       }
-
       return errors; 
    }
 }
-
+*/
