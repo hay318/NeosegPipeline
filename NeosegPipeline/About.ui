@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>844</width>
+    <width>861</width>
     <height>438</height>
    </rect>
   </property>
@@ -54,7 +54,7 @@
             </font>
            </property>
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;NeosegPipeline_VERSION&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Available on &lt;a href=&quot;http://www.nitrc.org/projects/neosegpipeline/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NITRC&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;For more information please contact cherel@email.unc.edu&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;NeosegPipeline VERSION&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Available on &lt;a href=&quot;http://www.nitrc.org/projects/neosegpipeline/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;NITRC&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p&gt;For more information please contact cherel@email.unc.edu&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="margin">
             <number>10</number>

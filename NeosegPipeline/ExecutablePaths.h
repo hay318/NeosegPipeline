@@ -11,6 +11,7 @@
 #include <QFileInfoListIterator>
 #include <QProcessEnvironment>
 #include <QMap>
+#include <QtGlobal>
 
 
 class ExecutablePaths
@@ -18,7 +19,7 @@ class ExecutablePaths
    public:
 
    ExecutablePaths();
-
+   
    void setProgramPath(QString programPath);
 
    bool checkExecutablePath(QString name, QString path);

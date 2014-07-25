@@ -642,7 +642,7 @@ void DerivedWindow::selectExecutable(QString executable_name)
       dir_path = (QFileInfo(executable_path).dir()).absolutePath(); 
    }
 
-	executable_path = QFileDialog::getOpenFileName(this, tr("Select executable"), dir_path);
+	 executable_path = QFileDialog::getOpenFileName(this, tr("Select executable"), dir_path);
    if(!executable_path.isEmpty())
    {
       if(QFileInfo(executable_path).isExecutable())
@@ -663,20 +663,17 @@ void DerivedWindow::enterExecutable(QString executable_name)
 
    if(!executable_path.isEmpty()) 
    {  
-      if(QFileInfo(executable_path).exists())
-      {
-         if(!QFileInfo(executable_path).isExecutable())
-         {
-            (executable.enter_lineEdit)->clear();
-            QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable, enter a new executable path"));            
-         }
-      }
-      else if(!executable_path.isEmpty())
+      if( !QFileInfo(executable_path).exists() || !QFileInfo(executable_path).isExecutable() )
       {
          (executable.enter_lineEdit)->clear();
-         QMessageBox::critical(this, executable_name, executable_path + tr("\ndoes not exist, enter a new file path"));
+         QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable, enter a new executable path") ) ;
       }
-   }   
+      //else everything is ok, let's do nothing
+   }
+   else
+   {
+      QMessageBox::critical(this, executable_name, tr("Please enter a file path"));
+   }
 }
 void DerivedWindow::resetExecutable(QString executable_name)
 {
@@ -717,7 +714,7 @@ void DerivedWindow::selectLibrary(QString library_name)
       dir_path = (QFileInfo(library_path).dir()).absolutePath(); 
    }
 
-	library_path = QFileDialog::getOpenFileName(this, tr("Select library"), dir_path);
+	library_path =  QFileDialog::getExistingDirectory (this, tr("Select library"), dir_path);
    if(!library_path.isEmpty())
    {
       if(QFileInfo(library_path).isDir())
@@ -733,25 +730,20 @@ void DerivedWindow::selectLibrary(QString library_name)
 void DerivedWindow::enterLibrary(QString library_name)
 {
    Library library = m_libraries_map[library_name];   
-
    QString library_path = (library.enter_lineEdit)->text();
-
    if(!library_name.isEmpty()) 
    {  
-      if(QFileInfo(library_name).exists())
-      {
-         if(!QFileInfo(library_name).isDir())
-         {
-            (library.enter_lineEdit)->clear();
-            QMessageBox::critical(this, library_name, library_path + tr("\nis not a directory, enter a new executable path"));            
-         }
-      }
-      else if(!library_path.isEmpty())
+      if( !QFileInfo(library_path).exists() || !QFileInfo(library_path).isDir() )
       {
          (library.enter_lineEdit)->clear();
-         QMessageBox::critical(this, library_name, library_path + tr("\ndoes not exist, enter a new file path"));
+         QMessageBox::critical(this, library_name, library_path + tr("\nis not a directory, enter a new path"));            
       }
-   }   
+      //else everything is good
+   }
+   else
+   {
+      QMessageBox::critical(this, library_name, tr("Please enter a directory name"));
+   }
 }
 
 

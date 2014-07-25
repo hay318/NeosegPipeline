@@ -5,8 +5,12 @@ ExecutablePaths::ExecutablePaths()
    // Path
    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
    QString path = env.value("PATH", QString::null);
-   m_splitPath = path.split(":");
-   m_splitPath.prepend(".");
+   #ifdef Q_OS_WIN
+   const char separator = ';';
+   #else
+   const char separator = ':';
+   #endif
+   m_splitPath = path.split(separator);
 
    // Executables with version
    m_executables_withVersionLongFlag << "SegPostProcessCLP" << "N4ITKBiasFieldCorrection" << "dtiestim" << "dtiprocess" << "ResampleScalarVectorDWIVolume" << "WeightedLabelsAverage" << "ReassignWhiteMatter" << "neoseg";
