@@ -5,11 +5,15 @@ ExecutablePaths::ExecutablePaths()
    // Path
    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
    QString path = env.value("PATH", QString::null);
-   m_splitPath = path.split(":");
-   m_splitPath.prepend(".");
+   #ifdef Q_OS_WIN
+   const char separator = ';';
+   #else
+   const char separator = ':';
+   #endif
+   m_splitPath = path.split(separator);
 
    // Executables with version
-   m_executables_withVersionLongFlag << "SegPostProcessCLP" << "N4ITKBiasFieldCorrection" << "dtiestim" << "dtiprocess" << "ResampleVolume2" << "WeightedLabelsAverage" << "ReassignWhiteMatter" << "Neoseg";
+   m_executables_withVersionLongFlag << "SegPostProcessCLP" << "N4ITKBiasFieldCorrection" << "dtiestim" << "dtiprocess" << "ResampleScalarVectorDWIVolume" << "WeightedLabelsAverage" << "ReassignWhiteMatter" << "neoseg";
    m_executables_withVersionShortFlag << "ImageMath";
    m_executables_withVersionArgument << "ITKTransformTools";
    m_executables_withoutVersionFlag << "bet2" << "ANTS" << "SNAP" << "unu";
@@ -42,7 +46,6 @@ bool ExecutablePaths::checkExecutablePath(QString executable_name, QString execu
    }
    
    QString command;
-
    if(m_executables_withVersionLongFlag.contains(executable_name))
    {
       command =  executable_path + " --version "; 
@@ -64,31 +67,15 @@ bool ExecutablePaths::checkExecutablePath(QString executable_name, QString execu
    test_process.start(command);
    while (!test_process.waitForFinished())
    {
-   } 
-   
-   QString output(test_process.readAllStandardOutput());
-   QString error(test_process.readAllStandardError());
-   output = output + error; 
-
-   QString subString; 
-   if(executable_name == "InsightSNAP")
+   }
+   if( !test_process.exitStatus() )
    {
-      subString = "SNAP"; 
+     return true ;
    }
    else
    {
-      subString = executable_name; 
+     return false ;
    }
-
-   if(output.contains(subString, Qt::CaseInsensitive))
-   {
-      return true;
-   }
-   else
-   {
-      return false;
-   }
- 
 }
 
 void ExecutablePaths::setDefaultExecutablePath(QString name)
@@ -112,7 +99,6 @@ QString ExecutablePaths::getExecutablePath(QString name)
 QString ExecutablePaths::checkExecutables()
 {
    QString errors;
-
    QMap<QString, QString>::iterator it; 
    for(it = m_executables.begin(); it != m_executables.end(); ++it)
    {

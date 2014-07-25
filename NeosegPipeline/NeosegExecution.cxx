@@ -47,7 +47,7 @@ void NeosegExecution::initializeScript()
    importXmlModules();
   
    defineExecutable("ImageMath");
-   defineExecutable("Neoseg");
+   defineExecutable("neoseg");
    defineExecutable("ReassignWhiteMatter"); 
 
    m_script += "logger = logging.getLogger('NeosegPipeline')\n\n";

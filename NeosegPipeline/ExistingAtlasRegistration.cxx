@@ -26,7 +26,7 @@ void ExistingAtlasRegistration::initializeScript()
    m_script += "import time\n";
 
    defineExecutable("ANTS");
-   defineExecutable("ResampleVolume2");
+   defineExecutable("ResampleScalarVectorDWIVolume");
    defineExecutable("ImageMath");
    defineExecutable("ImageStat");
    defineExecutable("unu");
@@ -162,7 +162,7 @@ void ExistingAtlasRegistration::implementRun()
 
    m_log = "Applying transformations to template T1";
    m_outputs.insert("T1Reg", templateT1Reg_path); 
-   m_argumentsList << "ResampleVolume2" << "templateT1" << "T1Reg" << "'--Reference'" << "T1" << "'-i'" << "'bs'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+   m_argumentsList << "ResampleScalarVectorDWIVolume" << "templateT1" << "T1Reg" << "'--Reference'" << "T1" << "'-i'" << "'bs'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
    execute();
 
    // Applying transformations to template T2
@@ -171,7 +171,7 @@ void ExistingAtlasRegistration::implementRun()
 
    m_log = "Applying transformations to template T2";
    m_outputs.insert("T2Reg", templateT2Reg_path); 
-   m_argumentsList << "ResampleVolume2" << "templateT2" << "T2Reg" << "'--Reference'" << "T2" << "'-i'" << "'bs'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+   m_argumentsList << "ResampleScalarVectorDWIVolume" << "templateT2" << "T2Reg" << "'--Reference'" << "T2" << "'-i'" << "'bs'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
    execute(); 
 
    // Applying transformations to the white probability 
@@ -182,7 +182,7 @@ void ExistingAtlasRegistration::implementRun()
    m_log = "Applying transformations to the white probability";
    m_inputs.insert("white", white_path);
    m_outputs.insert("whiteReg", whiteReg_path); 
-   m_argumentsList << "ResampleVolume2" << "white" << "whiteReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+   m_argumentsList << "ResampleScalarVectorDWIVolume" << "white" << "whiteReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
    execute(); 
 
    // Applying transformations to the gray probability 
@@ -193,7 +193,7 @@ void ExistingAtlasRegistration::implementRun()
    m_log = "Applying transformations to the gray probability";
    m_inputs.insert("gray", gray_path);
    m_outputs.insert("grayReg", grayReg_path);
-   m_argumentsList << "ResampleVolume2" << "gray" << "grayReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+   m_argumentsList << "ResampleScalarVectorDWIVolume" << "gray" << "grayReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
    execute(); 
 
    // Applying transformations to the CSF probability 
@@ -204,7 +204,7 @@ void ExistingAtlasRegistration::implementRun()
    m_log = "Applying transformations to the CSF probability";
    m_inputs.insert("csf", csf_path);
    m_outputs.insert("csfReg", csfReg_path);
-   m_argumentsList << "ResampleVolume2" << "csf" << "csfReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+   m_argumentsList << "ResampleScalarVectorDWIVolume" << "csf" << "csfReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
    execute(); 
 
    // Applying transformations to the Rest probability 
@@ -215,7 +215,7 @@ void ExistingAtlasRegistration::implementRun()
    m_log = "Applying transformations to the CSF probability";
    m_inputs.insert("rest", rest_path); 
    m_outputs.insert("restReg", restReg_path);
-   m_argumentsList << "ResampleVolume2" << "rest" << "restReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
+   m_argumentsList << "ResampleScalarVectorDWIVolume" << "rest" << "restReg" << "'--Reference'" << "T2" << "'-i'" << "'nn'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine";
    execute(); 
 }
 

@@ -22,7 +22,7 @@ void DtiRegistration::initializeScript()
    m_script += "import array \n\n";
 
    defineExecutable("ANTS");
-   defineExecutable("ResampleVolume2");
+   defineExecutable("ResampleScalarVectorDWIVolume");
    defineExecutable("ITKTransformTools");
    defineExecutable("dtiestim");
    defineExecutable("ImageMath");
@@ -53,7 +53,7 @@ void DtiRegistration::upsample(QString image)
 
    m_log = "- Upsampling " + image;
    m_outputs.insert("upsampled" + image, upsampledImage_path); 
-   m_argumentsList << "ResampleVolume2" << "'-R'" << "grid" + image << "'-i'" << "'linear'" << image << "upsampled" + image; 
+   m_argumentsList << "ResampleScalarVectorDWIVolume" << "'-R'" << "grid" + image << "'-i'" << "'linear'" << image << "upsampled" + image; 
    execute();
 
    m_unnecessaryFiles << upsampledImage_path;
@@ -86,7 +86,7 @@ void DtiRegistration::skullStripb0()
 
    m_log = "- Converting the b0 in nifti";
    m_outputs.insert("b0Nifti", b0Nifti_path); 
-   m_argumentsList << "ResampleVolume2" << "b0" << "b0Nifti"; 
+   m_argumentsList << "ResampleScalarVectorDWIVolume" << "b0" << "b0Nifti"; 
    execute();
 
    m_unnecessaryFiles << b0Nifti_path;
@@ -206,7 +206,7 @@ void DtiRegistration::applyTransformations(QString image)
 
    m_log = "- Applying transformations to " + image;
    m_outputs.insert("registered" + image, registeredImage_path); 
-   m_argumentsList << "ResampleVolume2" << "upsampled" + image << "registered" + image << "'--Reference'" << "T1" << "'-i'" << "'linear'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine"; 
+   m_argumentsList << "ResampleScalarVectorDWIVolume" << "upsampled" + image << "registered" + image << "'--Reference'" << "T1" << "'-i'" << "'linear'" << "'--hfieldtype'" << "'displacement'" << "'--defField'" << "warp" << "'--transformationFile'" << "affine"; 
    execute(); 
 
    if(image == "FA")
