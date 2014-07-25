@@ -75,6 +75,7 @@ set( ListProjects
   SPHARM-PDM 
   SlicerCLI
   teem
+  neoseg
 )
 
  foreach( var ${ListProjects})
@@ -377,3 +378,6 @@ if(BUILD_ReassignWhiteMatter)
   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PRIMARY_PROJECT_NAME}-install/bin/ReassignWhiteMatter DESTINATION bin)
 endif()
 
+if(BUILD_neoseg)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/neoseg-install/bin/neoseg DESTINATION bin)
+endif()
