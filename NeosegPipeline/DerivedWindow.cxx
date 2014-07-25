@@ -612,7 +612,6 @@ void DerivedWindow::selectParameters()
 //***** Executables Configuration File *****//
 void DerivedWindow::selectExecutables()
 {
-std::cout<<"selectExecutables"<<std::endl;
 	QString executables = QFileDialog::getOpenFileName( this , tr( "Open file" ) , m_data_path , "XML (*.xml)" ) ;
   if( !executables.isEmpty() )
   {

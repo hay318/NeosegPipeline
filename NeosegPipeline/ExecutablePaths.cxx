@@ -24,12 +24,10 @@ void ExecutablePaths::setProgramPath(QString programPath)
 QString ExecutablePaths::findExecutablePath(QString executableName)
 {
    QStringList::iterator it;
-   std::cout<<executableName.toStdString()<<std::endl;
    for(it = m_splitPath.begin(); it != m_splitPath.end(); ++it)
    {
       if(QFileInfo(QDir(*it).filePath(executableName)).isExecutable())
       {
-         std::cout<<"Executables path : "<< QDir(*it).filePath(executableName).toStdString() <<std::endl;
          return QDir(*it).filePath(executableName);
       }
    }   
@@ -63,7 +61,6 @@ bool ExecutablePaths::checkExecutablePath(QString executable_name, QString execu
 
    QProcess test_process;   
    test_process.start(command);
-   std::cout<<command.toStdString()<<std::endl;
    while (!test_process.waitForFinished())
    {
    }
@@ -89,7 +86,6 @@ QString ExecutablePaths::getDefaultExecutablePath(QString name)
 void ExecutablePaths::setExecutablePath(QString name, QString path)
 {
    m_executables[name]=path;
-   std::cout<<"plop "<< m_executables[name].toStdString() << " " << name.toStdString() << std::endl;
 }
 QString ExecutablePaths::getExecutablePath(QString name)
 {

@@ -837,12 +837,10 @@ QString XmlReader::readExecutablesConfigurationFile(QString file_path)
                }
                QString name = (stream->name()).toString(); 
                QString path = (attributes.value("path")).toString(); 
-              std::cout<<name.toStdString()<<" "<<path.toStdString()<<std::endl;
                if( currentSection == "Executables" )
                {
                   if(m_executablePaths->checkExecutablePath(name, path))
                   {
-std::cout<<"plop"<<std::endl;
                      m_executablePaths->setExecutablePath(name, path);    
                   }
                   else
