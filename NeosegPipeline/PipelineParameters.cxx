@@ -446,7 +446,7 @@ void PipelineParameters::setExistingAtlas(QString existingAtlas)
 
    QDir* atlas_dir = new QDir(m_existingAtlas);
    QFileInfoList templateT1 = find(atlas_dir, "templateT1");
-   if(templateT1.size() == 1)
+   if(templateT1.size() > 0 )
    {
       m_atlasFormat = templateT1[0].completeSuffix();
    }
