@@ -34,7 +34,7 @@ class PipelineParameters
    bool isBetween(int value, int min, int max);
    bool isBetween(double value, double min, double max);
    bool isIn(QString item, QStringList list);
-   QFileInfoList find(QDir* dir, QString name);
+   QFileInfoList find(QDir &dir, QString name);
 
    // Current Directory
    void setProgramPath(QString programPath); 
@@ -95,7 +95,7 @@ class PipelineParameters
 
    // Existing Atlas
    bool checkExistingAtlas(QString existingAtlas);
-   void setExistingAtlas(QString existingAtlas);
+   int setExistingAtlas( QString existingAtlas ) ;
    QString getExistingAtlas(); 
 
    // Existing Atlas

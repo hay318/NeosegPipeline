@@ -179,13 +179,12 @@ bool PipelineParameters::isIn(QString item, QStringList list)
    return false; 
 }
 
-QFileInfoList PipelineParameters::find(QDir* dir, QString name)
+QFileInfoList PipelineParameters::find( QDir &dir, QString name )
 {
-   name = "*" + name + "*";
-   QStringList* filter = new QStringList(name);
-   QFileInfoList foundFile_list = dir->entryInfoList(*filter);
-
-   return foundFile_list;
+   name = "*" + name + "*" ;
+   QStringList filter( name ) ;
+   QFileInfoList foundFile_list = dir.entryInfoList( filter ) ;
+   return foundFile_list ;
 } 
 
 
@@ -420,9 +419,9 @@ bool PipelineParameters::getNewAtlas()
 // Atlas
 bool PipelineParameters::checkExistingAtlas(QString atlas)
 {
-   QDir* atlas_dir = new QDir(atlas);
+   QDir atlas_dir(atlas);
 
-   if(atlas_dir->exists())
+   if(atlas_dir.exists())
    {
       QFileInfoList templateT1 = find(atlas_dir, "templateT1");
       QFileInfoList templateT2 = find(atlas_dir, "templateT2");
@@ -437,18 +436,24 @@ bool PipelineParameters::checkExistingAtlas(QString atlas)
          return true;
       }
    }
-
    return false;
 }
-void PipelineParameters::setExistingAtlas(QString existingAtlas)
+
+int PipelineParameters::setExistingAtlas(QString existingAtlas)
 {
    m_existingAtlas = existingAtlas;
 
-   QDir* atlas_dir = new QDir(m_existingAtlas);
-   QFileInfoList templateT1 = find(atlas_dir, "templateT1");
-   if(templateT1.size() > 0 )
+   QDir atlas_dir( m_existingAtlas ) ;
+   QFileInfoList templateT1 = find( atlas_dir , "templateT1" ) ;
+   m_atlasFormat = "" ;
+   if( templateT1.size() == 1 )
    {
-      m_atlasFormat = templateT1[0].completeSuffix();
+      m_atlasFormat = templateT1[0].completeSuffix() ;
+      return 0 ;
+   }
+   else
+   {
+      return 1 ;
    }
 }
 QString PipelineParameters::getExistingAtlas()
@@ -492,10 +497,10 @@ QMap<QString,QFileInfoList> PipelineParameters::findAtlasFiles(QString atlas_nam
 {
    QMap<QString,QFileInfoList> atlasFiles;
  
-   QDir* atlasPopulation_dir = new QDir(m_atlasPopulationDirectory);
-   QString atlas_path = atlasPopulation_dir->filePath(atlas_name);
+   QDir atlasPopulation_dir(m_atlasPopulationDirectory);
+   QString atlas_path = atlasPopulation_dir.filePath(atlas_name);
 
-   QDir* atlas_dir = new QDir(atlas_path);
+   QDir atlas_dir(atlas_path);
 
    atlasFiles.insert("T1",find(atlas_dir, "T1"));
    atlasFiles.insert("T2",find(atlas_dir, "T2"));

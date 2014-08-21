@@ -107,12 +107,12 @@ void NeosegExecution::addInputImages()
 
    QDir atlas_dir(m_atlas);
 
-   m_images.insert("templateT1", atlas_dir.filePath("templateT1" + m_atlasFormat));
-   m_images.insert("templateT2", atlas_dir.filePath("templateT2" + m_atlasFormat));
-   m_images.insert("white", atlas_dir.filePath("white" + m_atlasFormat));
-   m_images.insert("gray", atlas_dir.filePath("gray" + m_atlasFormat));
-   m_images.insert("csf", atlas_dir.filePath("csf" + m_atlasFormat));
-   m_images.insert("rest", atlas_dir.filePath("rest" + m_atlasFormat));
+   m_images.insert("templateT1", atlas_dir.filePath("templateT1" + QString(".") + m_atlasFormat));
+   m_images.insert("templateT2", atlas_dir.filePath("templateT2" + QString(".") + m_atlasFormat));
+   m_images.insert("white", atlas_dir.filePath("white" + QString(".") + m_atlasFormat));
+   m_images.insert("gray", atlas_dir.filePath("gray" + QString(".") +  m_atlasFormat));
+   m_images.insert("csf", atlas_dir.filePath("csf" + QString(".") +  m_atlasFormat));
+   m_images.insert("rest", atlas_dir.filePath("rest" + QString(".") +  m_atlasFormat));
 }
 
 void NeosegExecution::addOutputImages()
