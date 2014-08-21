@@ -546,10 +546,13 @@ void DerivedWindow::selectAtlas(QListWidgetItem* item)
 void DerivedWindow::selectExistingAtlas()
 {
    QString existingAtlas = QFileDialog::getExistingDirectory (0, tr("Open Directory"), m_existingAtlases_path, QFileDialog::ShowDirsOnly);
-
+   std::string errorMessage = std::string( "\nis not a valid atlas. It should contain all the following files:\n" )
+                          + std::string( "templateT1.*, templateT2.*, white.*, gray.*, csf.*, rest.*" )
+                          + std::string( "\nAll files must have the same extension." )
+                          + std::string( "\nNone of these files should be in the folder multiple times with different extensions." ) ;
    if(m_parameters->checkExistingAtlas(existingAtlas)==false)
    {
-      QMessageBox::critical(this, tr("Atlas Directory"), existingAtlas + tr("\nis not a valid atlas"));
+      QMessageBox::critical( this , tr( "Atlas Directory" ) , existingAtlas + tr( errorMessage.c_str() ) ) ;
    }
    else
    {
@@ -559,13 +562,16 @@ void DerivedWindow::selectExistingAtlas()
 void DerivedWindow::enterExistingAtlas()
 {
    QString existingAtlas = existingAtlas_lineEdit->text();
-
+   std::string errorMessage = std::string( "\nis not a valid atlas. It should contain all the following files:\n" )
+                          + std::string( "templateT1.*, templateT2.*, white.*, gray.*, csf.*, rest.*" )
+                          + std::string( "\nAll files must have the same extension." )
+                          + std::string( "\nNone of these files should be in the folder multiple times with different extensions." ) ;
    if(!existingAtlas.isEmpty()) 
    {
       if (!m_parameters->checkExistingAtlas(existingAtlas))
       {
          existingAtlas_lineEdit->clear();
-         QMessageBox::critical(this, tr("Atlas Directory"), existingAtlas + tr("\nis not a valid atlas"));
+         QMessageBox::critical( this , tr( "Atlas Directory" ) , existingAtlas + tr( errorMessage.c_str() ) ) ;
       } 
    }
 }

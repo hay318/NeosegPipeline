@@ -181,7 +181,7 @@ bool PipelineParameters::isIn(QString item, QStringList list)
 
 QFileInfoList PipelineParameters::find( QDir &dir, QString name )
 {
-   name = "*" + name + "*" ;
+   name = name + ".*" ;
    QStringList filter( name ) ;
    QFileInfoList foundFile_list = dir.entryInfoList( filter ) ;
    return foundFile_list ;
