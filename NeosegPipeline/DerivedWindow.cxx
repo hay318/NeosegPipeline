@@ -821,15 +821,17 @@ void DerivedWindow::initializeParameters()
          m_selectedAtlases = m_goodAtlases;
       }
       checkSelectedAtlases(); 
-
+      smoothing_comboBox->clear() ;
       smoothing_comboBox->insertItems(0, m_parameters->getSmoothingValues()); 
       smoothing_comboBox->setCurrentIndex(m_parameters->getSmoothingIndex()); 
       smoothingSize_spinBox->setValue(m_parameters->getSmoothingSize());
 
       computingWeights_checkBox->setChecked(m_parameters->getComputingWeights()); 
+      weightsModality_comboBox->clear() ;
       weightsModality_comboBox->insertItems(0,m_parameters->getWeightsModalityValues());
       weightsModality_comboBox->setCurrentIndex(m_parameters->getWeightsModalityIndex());
-      weightsRadius_spinBox->setValue(m_parameters->getWeightsRadius());    
+      weightsRadius_spinBox->setValue(m_parameters->getWeightsRadius());
+      weightsRadiusUnit_comboBox->clear() ;
       weightsRadiusUnit_comboBox->insertItems(0, m_parameters->getWeightsRadiusUnitValues()); 
       weightsRadiusUnit_comboBox->setCurrentIndex(m_parameters->getWeightsRadiusUnitIndex());
      
@@ -858,16 +860,18 @@ void DerivedWindow::initializeParameters()
    cleaningUp_checkBox->setChecked(m_parameters->getCleaningUp()); 
    stoppingIfError_checkBox->setChecked(m_parameters->getStoppingIfError());
 
+   computingSystem_comboBox->clear() ;
    computingSystem_comboBox->insertItems(0, m_parameters->getComputingSystemValues()); 
    computingSystem_comboBox->setCurrentIndex(m_parameters->getComputingSystemIndex());
 
    // ANTS
-
+   imageMetric1_DTI_comboBox->clear() ;
    imageMetric1_DTI_comboBox->insertItems(0, m_antsParameters_DTI->getImageMetricValues()); 
    imageMetric1_DTI_comboBox->setCurrentIndex(m_antsParameters_DTI->getImageMetric1Index()); 
    weight1_DTI_spinBox->setValue(m_antsParameters_DTI->getWeight1());
    radius1_DTI_spinBox->setValue(m_antsParameters_DTI->getRadius1());
 
+   imageMetric2_DTI_comboBox->clear() ;
    imageMetric2_DTI_comboBox->insertItems(0, m_antsParameters_DTI->getImageMetricValues()); 
    imageMetric2_DTI_comboBox->setCurrentIndex(m_antsParameters_DTI->getImageMetric2Index()); 
    weight2_DTI_spinBox->setValue(m_antsParameters_DTI->getWeight2());
@@ -877,12 +881,14 @@ void DerivedWindow::initializeParameters()
    iterationsK_DTI_spinBox->setValue(m_antsParameters_DTI->getIterationsK());
    iterationsL_DTI_spinBox->setValue(m_antsParameters_DTI->getIterationsL());
 
+   transformationType_DTI_comboBox->clear() ;
    transformationType_DTI_comboBox->insertItems(0, m_antsParameters_DTI->getTransformationTypeValues());
    transformationType_DTI_comboBox->setCurrentIndex(m_antsParameters_DTI->getTransformationTypeIndex());
    gradientStepLength_DTI_spinBox->setValue(m_antsParameters_DTI->getGradientStepLength());
    numberOfTimeSteps_DTI_spinBox->setValue(m_antsParameters_DTI->getNumberOfTimeSteps());
    deltaTime_DTI_spinBox->setValue(m_antsParameters_DTI->getDeltaTime());
 
+   regularizationType_DTI_comboBox->clear() ;
    regularizationType_DTI_comboBox->insertItems(0, m_antsParameters_DTI->getRegularizationTypeValues());
    regularizationType_DTI_comboBox->setCurrentIndex(m_antsParameters_DTI->getRegularizationTypeIndex());
    gradientFieldSigma_DTI_spinBox->setValue(m_antsParameters_DTI->getGradientFieldSigma());
@@ -896,11 +902,13 @@ void DerivedWindow::initializeParameters()
    numberOfCores_spinBox->setValue(m_antsParameters_atlas->getNumberOfCores());
    numberOfGB_spinBox->setValue(m_antsParameters_atlas->getNumberOfGB());
 
+   imageMetric1_atlas_comboBox->clear() ;
    imageMetric1_atlas_comboBox->insertItems(0, m_antsParameters_atlas->getImageMetricValues()); 
    imageMetric1_atlas_comboBox->setCurrentIndex(m_antsParameters_atlas->getImageMetric1Index()); 
    weight1_atlas_spinBox->setValue(m_antsParameters_atlas->getWeight1());
    radius1_atlas_spinBox->setValue(m_antsParameters_atlas->getRadius1());
 
+   imageMetric2_atlas_comboBox->clear() ;
    imageMetric2_atlas_comboBox->insertItems(0, m_antsParameters_atlas->getImageMetricValues()); 
    imageMetric2_atlas_comboBox->setCurrentIndex(m_antsParameters_atlas->getImageMetric2Index()); 
    weight2_atlas_spinBox->setValue(m_antsParameters_atlas->getWeight2());
@@ -910,12 +918,14 @@ void DerivedWindow::initializeParameters()
    iterationsK_atlas_spinBox->setValue(m_antsParameters_atlas->getIterationsK());
    iterationsL_atlas_spinBox->setValue(m_antsParameters_atlas->getIterationsL());
 
+   transformationType_atlas_comboBox->clear() ;
    transformationType_atlas_comboBox->insertItems(0, m_antsParameters_atlas->getTransformationTypeValues());
    transformationType_atlas_comboBox->setCurrentIndex(m_antsParameters_atlas->getTransformationTypeIndex());
    gradientStepLength_atlas_spinBox->setValue(m_antsParameters_atlas->getGradientStepLength());
    numberOfTimeSteps_atlas_spinBox->setValue(m_antsParameters_atlas->getNumberOfTimeSteps());
    deltaTime_atlas_spinBox->setValue(m_antsParameters_atlas->getDeltaTime());
 
+   regularizationType_atlas_comboBox->clear() ;
    regularizationType_atlas_comboBox->insertItems(0, m_antsParameters_atlas->getRegularizationTypeValues());
    regularizationType_atlas_comboBox->setCurrentIndex(m_antsParameters_atlas->getRegularizationTypeIndex());
    gradientFieldSigma_atlas_spinBox->setValue(m_antsParameters_atlas->getGradientFieldSigma());
@@ -924,10 +934,12 @@ void DerivedWindow::initializeParameters()
    usingMask_atlas_checkBox->setChecked(m_antsParameters_atlas->getUsingMask());
    usingSmoothedMask_atlas_checkBox->setChecked(m_antsParameters_atlas->getUsingSmoothedMask());
 
-   //Neoseg 
+   //Neoseg
+   referenceModality_comboBox->clear() ;
    referenceModality_comboBox->insertItems(0, m_neosegParameters->getReferenceImageValues());
    referenceModality_comboBox->setCurrentIndex(m_neosegParameters->getReferenceImageIndex());
 
+   filterMethod_comboBox->clear() ;
    filterMethod_comboBox->insertItems(0, m_neosegParameters->getFilterMethodValues()); 
    filterMethod_comboBox->setCurrentIndex(m_neosegParameters->getFilterMethodIndex()); 
    numberOfIterations_spinBox->setValue(m_neosegParameters->getNumberOfIterations()); 
