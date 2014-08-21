@@ -10,6 +10,7 @@ NeosegPipelineTool::NeosegPipelineTool(QString programPath)
 
    m_parametersErrors = ""; 
    m_executablesErrors = "";
+   m_Force = false ;
 }
 
 void NeosegPipelineTool::setOutput(QString output)
@@ -20,6 +21,11 @@ void NeosegPipelineTool::setOutput(QString output)
 void NeosegPipelineTool::setPrefix(QString prefix)
 {
    m_parameters->setPrefix(prefix);
+}
+
+void NeosegPipelineTool::setForce(bool force)
+{
+   m_Force = force ;
 }
 
 void NeosegPipelineTool::setSuffix(QString suffix)
@@ -142,7 +148,7 @@ void NeosegPipelineTool::printErrors()
    }
 }
 
-void NeosegPipelineTool::launch(int argc, char *argv[], bool gui)
+int NeosegPipelineTool::launch(int argc, char *argv[], bool gui)
 {
    printErrors();
 
@@ -167,49 +173,37 @@ void NeosegPipelineTool::launch(int argc, char *argv[], bool gui)
    }
    else
    {
-      QString output = m_parameters->getOutput();    
-
-      if(!(QFileInfo(output).exists()))
-      { 
-         std::cout<<output.toStdString()<<" does not exist, do you want to create it? (y/n) : "; 
-
-         std::string answer;
-         std::cin>>answer;
-
-         if(answer == "y")
-         {
-            bool result = (QDir::root()).mkpath(output);
-            if(!result)
-            {
-               std::cout<<output.toStdString()<<" can not be created, Please try again with a new directory path"<<std::endl; 
-               return; 
-            }            
-         }
-         else
-         {
-            return; 
-         }
-
-      }
-
       if(!m_errors.isEmpty())
       {
-         std::cout<<m_errors.toStdString()<<std::endl; 
-         std::cout<<"Do you want to run the pipeline anyway? (y/n) : "; 
-
-         std::string answer;
-         std::cin>>answer;
-
-         if(answer != "y")
+         std::cerr << m_errors.toStdString() << std::endl ;
+         if( !m_Force )
          {
-            return;
+             return 2 ;
          }
       }
-
-      m_pipeline->writePipeline(); 
-      m_pipeline->runPipeline();
-
-      return; 
-   }   
+      if( m_parameters->getT1() == ""
+          || m_parameters->getT2() == ""
+          || m_parameters->getMask() == ""
+          || m_parameters->getOutput() == ""
+        )
+      {
+         std::cerr << "When running from command line: T1, T2, mask and output need to be specified" << std::endl ;
+         return 3 ;
+      }
+      QString output = m_parameters->getOutput();
+      if(!(QFileInfo(output).exists()))
+      { 
+         std::cout << output.toStdString() << " does not exist. Creating it" << std::endl ; 
+         bool result = (QDir::root()).mkpath( output ) ;
+         if( !result )
+         {
+            std::cerr << output.toStdString() << " can not be created, Please try again with a new directory path" << std::endl ;
+            return 1 ;
+         }
+      }
+      m_pipeline->writePipeline() ;
+      m_pipeline->runPipeline() ;
+   }
+   return 0 ;
 }
 	 

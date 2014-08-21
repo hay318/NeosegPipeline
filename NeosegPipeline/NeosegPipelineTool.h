@@ -27,13 +27,14 @@ class NeosegPipelineTool
       void setb0(QString b0);
       void setPrefix(QString prefix);
       void setSuffix(QString suffix);
+      void setForce(bool force);
 
       void setParametersFile(QString xmlFile);
       void setExecutablesFile(QString xmlFile);
 
       void printErrors();
 
-      void launch(int argc, char *argv[], bool gui);
+      int launch(int argc, char *argv[], bool gui);
 
    private:
 
@@ -42,7 +43,8 @@ class NeosegPipelineTool
 
       QString m_parametersErrors; 
       QString m_executablesErrors; 
-      QString m_errors; 
+      QString m_errors;
+      bool m_Force ;
 }; 
 
 #endif

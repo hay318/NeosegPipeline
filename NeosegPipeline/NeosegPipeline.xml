@@ -66,5 +66,12 @@
          <longflag>suffix</longflag>
          <label>suffix</label>
       </string>
+      <boolean>
+         <name>force</name>
+         <description>Runs the tool even if errors are detected while loading parameter files</description>
+         <longflag>force</longflag>
+         <label>Force Running</label>
+         <default>false</default>
+      </boolean>
    </parameters>
 </executable>

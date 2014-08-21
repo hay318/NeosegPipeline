@@ -17,11 +17,11 @@ int main(int argc, char *argv[])
    tool.setDWI(QString::fromStdString(DWI));
    tool.setPrefix(QString::fromStdString(prefix));
    tool.setSuffix(QString::fromStdString(suffix));
+   tool.setForce(force);
    
    tool.setParametersFile(QString::fromStdString(parameters));
    tool.setExecutablesFile(QString::fromStdString(executables));
 
-   tool.launch(argc, argv, !noGUI);
+   return tool.launch(argc, argv, !noGUI);
 
-   return 0;
 }
