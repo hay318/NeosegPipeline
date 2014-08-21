@@ -980,8 +980,8 @@ void DerivedWindow::setData()
    m_parameters->setDWI(DWI_lineEdit->text());
 
    // Output
-   m_parameters->setPrefix(prefix_lineEdit->text()); 
-   m_parameters->setSuffix(suffix_lineEdit->text()); 
+   m_parameters->setPrefix(prefix_lineEdit->text());
+   m_parameters->setSuffix(suffix_lineEdit->text());
    if(!m_parameters->checkOutput(output_lineEdit->text()))
    {
       createOutput(output_lineEdit->text()); 

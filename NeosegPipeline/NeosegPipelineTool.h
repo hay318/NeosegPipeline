@@ -25,6 +25,8 @@ class NeosegPipelineTool
       void setMask(QString mask);    
       void setDWI(QString DWI);
       void setb0(QString b0);
+      void setPrefix(QString prefix);
+      void setSuffix(QString suffix);
 
       void setParametersFile(QString xmlFile);
       void setExecutablesFile(QString xmlFile);

@@ -16,6 +16,17 @@ void NeosegPipelineTool::setOutput(QString output)
 {
    m_parameters->setOutput(output);
 }
+
+void NeosegPipelineTool::setPrefix(QString prefix)
+{
+   m_parameters->setPrefix(prefix);
+}
+
+void NeosegPipelineTool::setSuffix(QString suffix)
+{
+   m_parameters->setSuffix(suffix);
+}
+
 void NeosegPipelineTool::setT1(QString T1)
 {
    if(!T1.isEmpty())

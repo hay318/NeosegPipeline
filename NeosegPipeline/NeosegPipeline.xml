@@ -3,7 +3,7 @@
    <title>NeosegPipeline</title>
    <description>A tool to create an sharp atlas specific atlas for Neoseg. For any suggestion or question, please contact cherel[at]unc.edu</description>
    <contributor>Marie Cherel, Francois Budin</contributor>
-   <version>1.0.2</version>
+   <version>1.0.3</version>
    <parameters>
       <boolean>
          <name>noGUI</name>
@@ -13,16 +13,16 @@
          <default>false</default>
       </boolean>
       <file>
-	 <name>executables</name>
-	 <description>Path of the XML file that contains the executables configuration</description>
-	 <longflag>executables</longflag>
-	 <label>xml file</label>
+         <name>executables</name>
+         <description>Path of the XML file that contains the executables configuration</description>
+         <longflag>executables</longflag>
+         <label>xml file</label>
       </file>
       <file>
-	 <name>parameters</name>	
-	 <description>Path of the XML file that contains the parameters configuration</description>
-	 <longflag>parameters</longflag>
-	 <label>xml file</label>
+         <name>parameters</name>  
+         <description>Path of the XML file that contains the parameters configuration</description>
+         <longflag>parameters</longflag>
+         <label>xml file</label>
       </file>
       <image>
          <name>DWI</name>
@@ -31,28 +31,40 @@
          <label>DWI image</label>
       </image>
       <image>
-      	  <name>mask</name>
-	  <description>Path of the brain mask</description>
-	  <longflag>mask</longflag>
-	  <label>brain mask</label>
+         <name>mask</name>
+         <description>Path of the brain mask</description>
+         <longflag>mask</longflag>
+         <label>brain mask</label>
       </image>
       <image>
-	  <name>T2</name>
-	  <description>Path of the T2 image to segment</description>
- 	  <longflag>T2</longflag>
-	  <label>T2 image</label>
+         <name>T2</name>
+         <description>Path of the T2 image to segment</description>
+         <longflag>T2</longflag>
+         <label>T2 image</label>
       </image>
       <image>
-          <name>T1</name>
-	  <description>Path of the T1 image to segment</description>
-	  <longflag>T1</longflag>
-	  <label>T1 image</label>
+         <name>T1</name>
+         <description>Path of the T1 image to segment</description>
+         <longflag>T1</longflag>
+      <label>T1 image</label>
       </image>
       <directory>
-          <name>output</name>
-	  <description>Path of the output directory where all files will be written</description>
-	  <longflag>output</longflag>
-	  <label>output directory</label>
-       </directory>
+         <name>output</name>
+         <description>Path of the output directory where all files will be written</description>
+         <longflag>output</longflag>
+         <label>output directory</label>
+      </directory>
+      <string>
+         <name>prefix</name>
+         <description>Prefix added to output files</description>
+         <longflag>prefix</longflag>
+         <label>prefix</label>
+      </string>
+      <string>
+         <name>suffix</name>
+         <description>Suffix added to output files</description>
+         <longflag>suffix</longflag>
+         <label>suffix</label>
+      </string>
    </parameters>
 </executable>

@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
    tool.setT2(QString::fromStdString(T2));
    tool.setMask(QString::fromStdString(mask));
    tool.setDWI(QString::fromStdString(DWI));
+   tool.setPrefix(QString::fromStdString(prefix));
+   tool.setSuffix(QString::fromStdString(suffix));
    
    tool.setParametersFile(QString::fromStdString(parameters));
    tool.setExecutablesFile(QString::fromStdString(executables));
