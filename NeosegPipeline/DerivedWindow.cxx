@@ -290,7 +290,7 @@ void DerivedWindow::selectImage(QString image_name)
       dir_path = (QFileInfo(image_path).dir()).absolutePath(); 
    }
 
-	image_path = QFileDialog::getOpenFileName(this, "Open file", dir_path,"Images (*.gipl *.gipl.gz *.nrrd *.nii *.nii.gz)");
+	image_path = QFileDialog::getOpenFileName(this, "Open file", dir_path,"Images (*.gipl *.gipl.gz *.nhdr *.nrrd *.mha *.mhd *.hdr *.nii *.nii.gz);; All files (*.*)");
 
    if(!image_path.isEmpty())
    {
