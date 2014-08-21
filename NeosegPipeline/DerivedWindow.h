@@ -117,6 +117,12 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void selectExistingAtlas();
    void enterExistingAtlas();
 
+   // Preprocessing Data //
+   void changeUsingMaskDTI(bool) ;
+
+   // Atlas Registration //
+   void changeUsingMaskAtlas(bool) ;
+
    // Computing System
    void changeComputingSystem(int index);
 

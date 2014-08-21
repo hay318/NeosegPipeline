@@ -34,7 +34,7 @@ class PipelineParameters
    bool isBetween(int value, int min, int max);
    bool isBetween(double value, double min, double max);
    bool isIn(QString item, QStringList list);
-   QFileInfoList find(QDir &dir, QString name);
+   QFileInfoList find(QDir &dir, QString name , QString pre , QString post ) ;
 
    // Current Directory
    void setProgramPath(QString programPath); 

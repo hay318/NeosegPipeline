@@ -179,9 +179,9 @@ bool PipelineParameters::isIn(QString item, QStringList list)
    return false; 
 }
 
-QFileInfoList PipelineParameters::find( QDir &dir, QString name )
+QFileInfoList PipelineParameters::find( QDir &dir, QString name , QString pre , QString post )
 {
-   name = name + ".*" ;
+   name = pre + name + post ;
    QStringList filter( name ) ;
    QFileInfoList foundFile_list = dir.entryInfoList( filter ) ;
    return foundFile_list ;
@@ -423,13 +423,13 @@ bool PipelineParameters::checkExistingAtlas(QString atlas)
 
    if(atlas_dir.exists())
    {
-      QFileInfoList templateT1 = find(atlas_dir, "templateT1");
-      QFileInfoList templateT2 = find(atlas_dir, "templateT2");
+      QFileInfoList templateT1 = find(atlas_dir, "templateT1" , "" , ".*" );
+      QFileInfoList templateT2 = find(atlas_dir, "templateT2" , "" , ".*" );
 
-      QFileInfoList white = find(atlas_dir, "white");
-      QFileInfoList gray = find(atlas_dir, "gray");
-      QFileInfoList csf = find(atlas_dir, "csf");
-      QFileInfoList rest = find(atlas_dir, "rest");
+      QFileInfoList white = find(atlas_dir, "white" , "" , ".*" );
+      QFileInfoList gray = find(atlas_dir, "gray" , "" , ".*" );
+      QFileInfoList csf = find(atlas_dir, "csf" , "" , ".*" );
+      QFileInfoList rest = find(atlas_dir, "rest" , "" , ".*" );
 
       if (templateT1.size()==1 && templateT2.size()==1 && white.size()==1 && gray.size()==1 && csf.size()==1 && rest.size()) 
       {
@@ -444,7 +444,7 @@ int PipelineParameters::setExistingAtlas(QString existingAtlas)
    m_existingAtlas = existingAtlas;
 
    QDir atlas_dir( m_existingAtlas ) ;
-   QFileInfoList templateT1 = find( atlas_dir , "templateT1" ) ;
+   QFileInfoList templateT1 = find( atlas_dir , "templateT1" , "" , ".*"  ) ;
    m_atlasFormat = "" ;
    if( templateT1.size() == 1 )
    {
@@ -502,12 +502,12 @@ QMap<QString,QFileInfoList> PipelineParameters::findAtlasFiles(QString atlas_nam
 
    QDir atlas_dir(atlas_path);
 
-   atlasFiles.insert("T1",find(atlas_dir, "T1"));
-   atlasFiles.insert("T2",find(atlas_dir, "T2"));
-   atlasFiles.insert("seg",find(atlas_dir, "seg"));
-   atlasFiles.insert("white",find(atlas_dir, "white"));
-   atlasFiles.insert("gray",find(atlas_dir, "gray"));
-   atlasFiles.insert("csf",find(atlas_dir, "csf"));
+   atlasFiles.insert("T1",find(atlas_dir, "T1" , "*" , "*" ) ) ;
+   atlasFiles.insert("T2",find(atlas_dir, "T2" , "*" , "*" ) ) ;
+   atlasFiles.insert("seg",find(atlas_dir, "seg" , "*" , "*" ) ) ;
+   atlasFiles.insert("white",find(atlas_dir, "white" , "*" , "*" ) ) ;
+   atlasFiles.insert("gray",find(atlas_dir, "gray" , "*" , "*" ) ) ;
+   atlasFiles.insert("csf",find(atlas_dir, "csf" , "*" , "*" ) ) ;
 
    return atlasFiles;
 }

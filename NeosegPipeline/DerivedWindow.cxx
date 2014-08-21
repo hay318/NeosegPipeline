@@ -128,6 +128,12 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    connect(existingAtlas_button, SIGNAL(clicked()), this, SLOT(selectExistingAtlas()));
    connect(existingAtlas_lineEdit, SIGNAL(editingFinished()), this, SLOT(enterExistingAtlas()));      
    
+   // Preprocessing Data //
+   connect(usingMask_DTI_checkBox, SIGNAL(clicked(bool)), this, SLOT( changeUsingMaskDTI(bool) ) ) ;
+
+   // Atlas Registration //
+   connect(usingMask_atlas_checkBox, SIGNAL(clicked(bool)), this, SLOT( changeUsingMaskAtlas(bool) ) ) ;
+
    // Computing System
    connect(computingSystem_comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeComputingSystem(int))); 
 
@@ -576,6 +582,35 @@ void DerivedWindow::enterExistingAtlas()
    }
 }
 
+//***** Preprocessing Data *****//
+void DerivedWindow::changeUsingMaskDTI(bool checked)
+{
+  usingSmoothedMask_DTI_checkBox->setCheckable( checked ) ;
+  if( !checked )
+  {
+    usingSmoothedMask_DTI_checkBox->setChecked( Qt::Unchecked ) ;
+    usingSmoothedMask_DTI_checkBox->setDisabled( true ) ;
+  }
+  else
+  {
+    usingSmoothedMask_DTI_checkBox->setDisabled( false ) ;
+  }
+}
+
+//***** Atlas Registration *****//
+void DerivedWindow::changeUsingMaskAtlas(bool checked)
+{
+  usingSmoothedMask_atlas_checkBox->setCheckable( checked ) ;
+  if( !checked )
+  {
+    usingSmoothedMask_atlas_checkBox->setChecked( Qt::Unchecked ) ;
+    usingSmoothedMask_atlas_checkBox->setDisabled( true ) ;
+  }
+  else
+  {
+    usingSmoothedMask_atlas_checkBox->setDisabled( false ) ;
+  }
+}
 
 //***** Computing System *****//
 void DerivedWindow::changeComputingSystem(int index)
@@ -853,7 +888,6 @@ void DerivedWindow::initializeParameters()
    gradientFieldSigma_DTI_spinBox->setValue(m_antsParameters_DTI->getGradientFieldSigma());
    deformationFieldSigma_DTI_spinBox->setValue(m_antsParameters_DTI->getDeformationFieldSigma());
 
-   noMask_DTI_checkBox->setChecked(!(m_antsParameters_DTI->getUsingMask() || m_antsParameters_DTI->getUsingSmoothedMask()));
    usingMask_DTI_checkBox->setChecked(m_antsParameters_DTI->getUsingMask());
    usingSmoothedMask_DTI_checkBox->setChecked(m_antsParameters_DTI->getUsingSmoothedMask());
 
@@ -887,7 +921,6 @@ void DerivedWindow::initializeParameters()
    gradientFieldSigma_atlas_spinBox->setValue(m_antsParameters_atlas->getGradientFieldSigma());
    deformationFieldSigma_atlas_spinBox->setValue(m_antsParameters_atlas->getDeformationFieldSigma());
 
-   noMask_atlas_checkBox->setChecked(!(m_antsParameters_atlas->getUsingMask() || m_antsParameters_atlas->getUsingSmoothedMask()));
    usingMask_atlas_checkBox->setChecked(m_antsParameters_atlas->getUsingMask());
    usingSmoothedMask_atlas_checkBox->setChecked(m_antsParameters_atlas->getUsingSmoothedMask());
 

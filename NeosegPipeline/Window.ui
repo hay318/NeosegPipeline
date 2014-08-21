@@ -1066,30 +1066,23 @@ p, li { white-space: pre-wrap; }
               <string>Constraints</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_39">
-              <item row="0" column="1">
+              <item row="0" column="0">
                <widget class="QCheckBox" name="usingMask_DTI_checkBox">
                 <property name="text">
                  <string>Use the brain mask</string>
                 </property>
                 <property name="autoExclusive">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
-              <item row="0" column="2" alignment="Qt::AlignRight">
+              <item row="0" column="1" alignment="Qt::AlignRight">
                <widget class="QCheckBox" name="usingSmoothedMask_DTI_checkBox">
                 <property name="text">
                  <string>Use a smoothed brain mask</string>
                 </property>
                 <property name="autoExclusive">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QCheckBox" name="noMask_DTI_checkBox">
-                <property name="text">
-                 <string>No mask</string>
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
@@ -1525,30 +1518,23 @@ p, li { white-space: pre-wrap; }
               <string>Constraints</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_30">
-              <item row="0" column="1">
+              <item row="0" column="0">
                <widget class="QCheckBox" name="usingMask_atlas_checkBox">
                 <property name="text">
                  <string>Use the brain mask</string>
                 </property>
                 <property name="autoExclusive">
-                 <bool>true</bool>
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
-              <item row="0" column="2" alignment="Qt::AlignRight">
+              <item row="0" column="1" alignment="Qt::AlignRight">
                <widget class="QCheckBox" name="usingSmoothedMask_atlas_checkBox">
                 <property name="text">
                  <string>Use a smoothed brain mask</string>
                 </property>
                 <property name="autoExclusive">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
-               <widget class="QCheckBox" name="noMask_atlas_checkBox">
-                <property name="text">
-                 <string>No mask</string>
+                 <bool>false</bool>
                 </property>
                </widget>
               </item>
