@@ -22,25 +22,16 @@ class Origin
    typedef itk::ImageFileReader <InputImageType>         ImageFileReaderType; 
    typedef typename ImageFileReaderType::Pointer         ImageFileReaderPointerType; 
 
-   Origin(std::string image_path)
-   {
-      ImageFileReaderPointerType imageFileReader = ImageFileReaderType::New();
-      imageFileReader->SetFileName(image_path);
-      imageFileReader->Update();
+   Origin(std::string image_path) ;
 
-      m_image = InputImageType::New();
-      m_image = imageFileReader->GetOutput();
-   }
-
-   InputImagePointType GetOrigin()
-   {
-      return m_image->GetOrigin();
-   }
+   InputImagePointType GetOrigin();
      
    private :
 
    InputImagePointerType m_image; 
    
    };
+
+#include "Origin.txx"
 
 #endif

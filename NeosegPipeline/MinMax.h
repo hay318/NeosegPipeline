@@ -29,27 +29,11 @@
       typedef itk::MinimumMaximumImageCalculator <InputImageType>       MinMaxImageCalculatorType;
       typedef typename MinMaxImageCalculatorType::Pointer          MinMaxImageCalculatorPointerType;
 
-      MinMax(std::string image_path)
-      {
-         ImageFileReaderPointerType imageFileReader = ImageFileReaderType::New(); 
-         imageFileReader->SetFileName(image_path);  
-         imageFileReader->Update();  
+      MinMax(std::string image_path);
 
-         m_MinMaxImageCalculator = MinMaxImageCalculatorType::New();     
-         m_MinMaxImageCalculator->SetImage(imageFileReader->GetOutput());
-      }
-
-      InputImagePixelType GetMin()
-      {
-         m_MinMaxImageCalculator->ComputeMinimum();
-         return m_MinMaxImageCalculator->GetMinimum(); 
-      }
+      InputImagePixelType GetMin();
  
-      InputImagePixelType GetMax()
-      {
-         m_MinMaxImageCalculator->ComputeMaximum();
-         return m_MinMaxImageCalculator->GetMaximum();
-      }
+      InputImagePixelType GetMax();
      
       private :
 
@@ -58,4 +42,7 @@
    };
 
 //}
+
+#include "MinMax.txx"
+
 #endif

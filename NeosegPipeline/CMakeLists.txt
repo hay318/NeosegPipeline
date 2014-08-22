@@ -24,15 +24,6 @@ QT4_WRAP_CPP(MOC_SOURCES DerivedWindow.h MainScriptThread.h)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR})
 
-# MinMax #
-ADD_LIBRARY(MinMax MinMax.h)
-SET_TARGET_PROPERTIES(MinMax PROPERTIES LINKER_LANGUAGE CXX)
-TARGET_LINK_LIBRARIES(MinMax ${ITK_LIBRARIES})
-
-# Origin #
-ADD_LIBRARY(Origin Origin.h)
-SET_TARGET_PROPERTIES(Origin PROPERTIES LINKER_LANGUAGE CXX)
-TARGET_LINK_LIBRARIES(Origin ${ITK_LIBRARIES})
 GENERATECLP(NeosegPipeline_CLP NeosegPipeline.xml)
 
 # NeosegPipeline #
@@ -55,7 +46,8 @@ SET(NeosegPipeline_SOURCE  main.cxx
                            ExistingAtlasRegistration.cxx
                            NeosegExecution.cxx
                            DtiRegistration.cxx
-                           MainScriptThread.cxx)
+                           MainScriptThread.cxx
+)
 
 SET(NeosegPipeline_HEADERS NeosegPipelineTool.h
                            DerivedWindow.h
@@ -80,7 +72,10 @@ SET(NeosegPipeline_HEADERS NeosegPipelineTool.h
                            DtiRegistration.h
                            PriorProbability.h
                            TemplateImage.h
-                           MainScriptThread.h)
+                           MainScriptThread.h
+                           Origin.h
+                           MinMax.h
+)
 
 FILE(READ NeosegPipeline.xml var)
 
@@ -91,7 +86,7 @@ STRING(REPLACE "</version>" "" version_number ${version_number})
 ADD_DEFINITIONS(-DNEOSEGPIPELINE_VERSION="${version_number}")
 
 ADD_EXECUTABLE(NeosegPipeline ${NeosegPipeline_SOURCE} ${NeosegPipeline_HEADERS} ${MOC_SOURCES} ${UI_SOURCES} ${NeosegPipeline_CLP} ${RESOURCES})
-TARGET_LINK_LIBRARIES(NeosegPipeline ${QT_LIBRARIES} MinMax Origin)
+TARGET_LINK_LIBRARIES(NeosegPipeline ${QT_LIBRARIES} ${ITK_LIBRARIES} )
 
 INSTALL(TARGETS NeosegPipeline RUNTIME DESTINATION bin)
 
