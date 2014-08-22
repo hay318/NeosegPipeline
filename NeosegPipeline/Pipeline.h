@@ -9,6 +9,7 @@
 #include <vector>
 #include <utility>
 #include <sys/stat.h>
+#include <unistd.h>
 
 // Qt Librairies
 #include <QDir>

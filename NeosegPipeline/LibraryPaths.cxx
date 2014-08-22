@@ -13,12 +13,13 @@ QString LibraryPaths::getLibraryPath(QString name)
 {
    return m_libraries[name];
 }
-bool LibraryPaths::checkLibraryPath(QString library_name, QString library_path)
+bool LibraryPaths::checkLibraryPath(QString , QString library_path)
 {
    if(library_path.isEmpty() || !QFileInfo(library_path).isExecutable())
    {
       return false; 
    }
+   return true ;
 }
 
 QString LibraryPaths::checkLibraries()
