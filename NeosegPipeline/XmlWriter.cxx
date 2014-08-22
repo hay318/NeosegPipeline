@@ -108,24 +108,8 @@ void XmlWriter::writeGeneralParameters(QXmlStreamWriter* stream)
 
       writeElement(stream, "Smoothing","type", m_parameters->getSmoothing(), "size", QString::number(m_parameters->getSmoothingSize()));    
 
-      if(m_parameters->getComputingWeights())
-      {
-         writeElement(stream, "Computing-weights", "bool", QString::number(m_parameters->getComputingWeights()),"modality", m_parameters->getWeightsModality(), "radius", QString::number(m_parameters->getWeightsRadius()), "unit", m_parameters->getWeightsRadiusUnit());
-      }
-      else
-      {
-         writeElement(stream, "Computing-weights", "bool", QString::number(m_parameters->getComputingWeights()));  
-      }
-
-      if(m_parameters->getIncludingFA())
-      {
-         writeElement(stream, "Including-FA", "bool", QString::number(m_parameters->getIncludingFA()), "shift", QString::number(m_parameters->getFAShift()), "sigma", QString::number(m_parameters->getFASigmaScale()), "weight", QString::number(m_parameters->getFAWeight()), "smoothing-size", QString::number(m_parameters->getFASmoothingSize()));  
-      }
-      else
-      {
-         writeElement(stream, "Including-FA", "bool", QString::number(m_parameters->getIncludingFA()));
-      }
- 
+      writeElement(stream, "Computing-weights", "bool", QString::number(m_parameters->getComputingWeights()),"modality", m_parameters->getWeightsModality(), "radius", QString::number(m_parameters->getWeightsRadius()), "unit", m_parameters->getWeightsRadiusUnit());
+      writeElement(stream, "Including-FA", "bool", QString::number(m_parameters->getIncludingFA()), "shift", QString::number(m_parameters->getFAShift()), "sigma", QString::number(m_parameters->getFASigmaScale()), "weight", QString::number(m_parameters->getFAWeight()), "smoothing-size", QString::number(m_parameters->getFASmoothingSize()));  
       stream->writeEndElement(); // NEW-ATLAS
    }
 
@@ -146,13 +130,16 @@ void XmlWriter::writeGeneralParameters(QXmlStreamWriter* stream)
    writeElement(stream, "Cleaning-up","bool", QString::number(m_parameters->getCleaningUp()));
    writeElement(stream, "Computing-system","name", m_parameters->getComputingSystem());
    stream->writeEndElement(); // COMPUTATION
-
+   stream->writeStartElement("Preprocessing");  
+   writeElement(stream, "Skull-strip", "bool", QString::number(m_parameters->getSkullStripping()));
+   writeElement(stream, "Correct-inhomogeneity", "bool", QString::number(m_parameters->getCorrecting()));
+   stream->writeEndElement(); // Preprocessing
    stream->writeEndElement(); // GENERAL-PARAMETERS
 }
 
 void XmlWriter::writeAntsParameters(QXmlStreamWriter* stream, AntsParameters* antsParameters)
 {
-   stream->writeStartElement("ANTS-parameters" + antsParameters->getName());
+   stream->writeStartElement("ANTS-parameters-" + antsParameters->getName());
 
    writeElement(stream, "First-modality", "metric", antsParameters->getImageMetric1(), "weight", QString::number(antsParameters->getWeight1()), "radius", QString::number(antsParameters->getRadius1()));
    writeElement(stream, "Second-modality", "metric", antsParameters->getImageMetric2(), "weight", QString::number(antsParameters->getWeight2()), "radius", QString::number(antsParameters->getRadius2()));
@@ -164,7 +151,7 @@ void XmlWriter::writeAntsParameters(QXmlStreamWriter* stream, AntsParameters* an
    writeElement(stream, "Regularization", "type", antsParameters->getRegularizationType(), "gradient-field-sigma", QString::number(antsParameters->getGradientFieldSigma()), "deformation-field-sigma", QString::number(antsParameters->getDeformationFieldSigma()));
 
    writeElement(stream, "Mask", "brain-mask", QString::number(antsParameters->getUsingMask()), "smoothed-brain-mask", QString::number(antsParameters->getUsingSmoothedMask()));
-   writeElement(stream, "Resources", "Number-of-Registrations", QString::number(antsParameters->getNumberOfRegistrations()), "Number-of-Cores", QString::number(antsParameters->getWeight1()), "Number-of-GB", QString::number(antsParameters->getNumberOfGB()));
+   writeElement(stream, "Resources", "Number-of-Registrations", QString::number(antsParameters->getNumberOfRegistrations()), "Number-of-Cores", QString::number(antsParameters->getNumberOfCores()), "Number-of-GB", QString::number(antsParameters->getNumberOfGB()));
 
    stream->writeEndElement();
 }

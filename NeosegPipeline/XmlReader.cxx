@@ -349,6 +349,19 @@ void XmlReader::readGeneralParameters(QXmlStreamReader* stream, QString errors)
             }
          }
 
+         else if (stream->name() == "Stopping-if-error")
+         {
+            bool StoppingIfError = ((attributes.value("bool")).toString()).toInt(&ok);
+            if(ok && isBoolean(StoppingIfError))
+            {
+               m_parameters->setStoppingIfError(StoppingIfError);
+            } 
+            else 
+            {
+               errors += " - 'Stopping-if-error' is not valid, it must be a boolean\n";
+            }
+         }
+
          else if (stream->name() == "Cleaning-up")
          {
             bool cleaningUp = ((attributes.value("bool")).toString()).toInt(&ok);
@@ -374,6 +387,33 @@ void XmlReader::readGeneralParameters(QXmlStreamReader* stream, QString errors)
                errors += " - 'Computing-system' is not valid, it must be one of the following : " + (m_parameters->getComputingSystemValues()).join(", ") + "\n";
             }
          }
+
+         else if (stream->name() == "Skull-strip")
+         {
+            bool skullstripping = ((attributes.value("bool")).toString()).toInt(&ok);
+            if(ok && isBoolean(skullstripping))
+            {
+               m_parameters->setSkullStripping(skullstripping);
+            } 
+            else 
+            {
+               errors += " - 'Skull-strip' is not valid, it must be a boolean\n";
+            }
+         }
+
+         else if (stream->name() == "Correct-inhomogeneity")
+         {
+            bool inhomogeneity = ((attributes.value("bool")).toString()).toInt(&ok);
+            if(ok && isBoolean(inhomogeneity))
+            {
+               m_parameters->setCorrecting(inhomogeneity);
+            } 
+            else 
+            {
+               errors += " - 'Correct-inhomogeneity' is not valid, it must be a boolean\n";
+            }
+         }
+
       }
       m_parameters->setSelectedAtlases(m_selectedAtlases);
    }
@@ -383,7 +423,6 @@ void XmlReader::readGeneralParameters(QXmlStreamReader* stream, QString errors)
 void XmlReader::readAntsParameters(QXmlStreamReader* stream, QString errors, AntsParameters* antsParameters)
 {  
    bool ok; 
-
    while(!(stream->isEndElement() && stream->name() == "ANTS-parameters-" + antsParameters->getName()))
    {
       stream->readNext();
@@ -391,7 +430,6 @@ void XmlReader::readAntsParameters(QXmlStreamReader* stream, QString errors, Ant
       if(stream->isStartElement())
       {
          QXmlStreamAttributes attributes = stream->attributes();
-
          if (stream->name() == "First-modality")
          {
             QString imageMetric = (attributes.value("metric")).toString(); 
@@ -579,9 +617,30 @@ void XmlReader::readAntsParameters(QXmlStreamReader* stream, QString errors, Ant
             }     
          }
 
+         else if (stream->name() == "Mask")
+         { 
+            bool brainMask = ((attributes.value("brain-mask")).toString()).toInt(&ok);
+            if(ok && isBoolean(brainMask))
+            {
+               antsParameters->setUsingMask(brainMask);
+            }
+            else 
+            {
+               errors += " - 'brain-mask' is not valid, it must be a boolean\n";
+            }
+            bool smoothedBrainMask = ((attributes.value("smoothed-brain-mask")).toString()).toInt(&ok);
+            if(ok && isBoolean(smoothedBrainMask))
+            {
+               antsParameters->setUsingSmoothedMask(smoothedBrainMask);
+            }
+            else 
+            {
+               errors += " - 'smoothed-brain-mask' is not valid, it must be a boolean\n";
+            }
+         }
          else if (stream->name() == "Resources")
          { 
-            QString numberOfRegistrations_QString = (attributes.value("Number-of-registrations")).toString();  
+            QString numberOfRegistrations_QString = (attributes.value("Number-of-Registrations")).toString();  
             int numberOfRegistrations = numberOfRegistrations_QString.toInt(&ok);
             if(ok) 
             {              
@@ -592,7 +651,7 @@ void XmlReader::readAntsParameters(QXmlStreamReader* stream, QString errors, Ant
                errors += " - 'Number-of-Registrations' is not valid, it must be a positive integer\n";
             }  
   
-            QString numberOfCores_QString = (attributes.value("Number-of-cores")).toString();  
+            QString numberOfCores_QString = (attributes.value("Number-of-Cores")).toString();  
             int numberOfCores = numberOfCores_QString.toInt(&ok);
             if(ok) 
             {              

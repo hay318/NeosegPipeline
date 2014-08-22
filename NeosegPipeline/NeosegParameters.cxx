@@ -11,27 +11,22 @@ NeosegParameters::NeosegParameters()
    m_filterMethod = m_filterMethod_default;
 
    m_filterIterations_min = 0;
-   //m_filterIterations_max;
    m_filterIterations_default = 5;
    m_filterIterations = m_filterIterations_default;
 
-   m_filterTimeStep_min = 0;
-   //m_filterTimeStep_max;
+   m_filterTimeStep_lowerBound = 0;
    m_filterTimeStep_default = 0.01;   
    m_filterTimeStep = m_filterTimeStep_default;
 
-   m_priorThreshold_min = 0;
-   m_priorThreshold_max = 1;
+   m_priorThreshold_lowerBound = 0;
    m_priorThreshold_default = 0.9;
    m_priorThreshold = m_priorThreshold_default;
 
    m_maxBiasDegree_min = 2;
-   //m_maxBiasDegree_max;
    m_maxBiasDegree_default = 4;
    m_maxBiasDegree = m_maxBiasDegree_default;
 
-   m_prior_min = 0; 
-   //m_prior_max; 
+   m_prior_lowerBound = 0 ;
 
    m_prior1_default = 0.4;
    m_prior1 = m_prior1_default;
@@ -51,47 +46,11 @@ NeosegParameters::NeosegParameters()
    m_refinement_default = false; 
    m_refinement = m_refinement_default;
 
-   m_initialParzenKernelWidth_min = 0;
-   //m_initialParzenKernelWidth_max;
+   m_initialParzenKernelWidth_lowerBound = 0;
    m_initialParzenKernelWidth_default = 0.05;
    m_initialParzenKernelWidth = m_initialParzenKernelWidth_default;
 }
 
-bool NeosegParameters::isSuperior(int value, int min)
-{
-   if(value>min)
-   {
-      return true; 
-   }
-   return false; 
-}
-
-bool NeosegParameters::isBetween(int value, int min, int max)
-{
-   if(value>min && value<max)
-   {
-      return true; 
-   }
-   return false; 
-}
-
-bool NeosegParameters::isSuperior(double value, double min)
-{
-   if(value>min)
-   {
-      return true; 
-   }
-   return false; 
-}
-
-bool NeosegParameters::isBetween(double value, double min, double max)
-{
-   if(value>min && value<max)
-   {
-      return true; 
-   }
-   return false; 
-}
 
 
 bool NeosegParameters::isIn(QString item, QStringList list)
@@ -155,7 +114,7 @@ QStringList NeosegParameters::getFilterMethodValues()
 // Number of iterations
 bool NeosegParameters::checkNumberOfIterations(int filterIterations)
 {
-   return isSuperior(filterIterations, m_filterIterations_min);
+   return filterIterations >= m_filterIterations_min ;
 }
 void NeosegParameters::setNumberOfIterations(int filterIterations)
 {
@@ -170,7 +129,7 @@ int NeosegParameters::getNumberOfIterations()
 // Time step
 bool NeosegParameters::checkTimeStep(double filterTimeStep)
 {
-   return isSuperior(filterTimeStep, m_filterTimeStep_min);
+   return filterTimeStep > m_filterTimeStep_lowerBound ;
 }
 void NeosegParameters::setTimeStep(double filterTimeStep)
 {
@@ -185,7 +144,7 @@ double NeosegParameters::getTimeStep()
 // Prior threshold 
 bool NeosegParameters::checkPriorThreshold(double priorThreshold)
 {
-   return isBetween(priorThreshold, m_priorThreshold_min, m_priorThreshold_max);
+   return priorThreshold > m_priorThreshold_lowerBound ;
 }
 void NeosegParameters::setPriorThreshold(double priorThreshold)
 {
@@ -199,7 +158,7 @@ double NeosegParameters::getPriorThreshold()
 // Max bias degree
 bool NeosegParameters::checkMaxBiasDegree(int maxBiasDegree)
 {
-   return isSuperior(maxBiasDegree, m_maxBiasDegree_min);
+   return maxBiasDegree >= m_maxBiasDegree_min ;
 }
 void NeosegParameters::setMaxBiasDegree(int maxBiasDegree)
 {
@@ -213,7 +172,7 @@ int NeosegParameters::getMaxBiasDegree()
 // Prior 1
 bool NeosegParameters::checkPrior1(double prior1)
 {
-   return isSuperior(prior1, m_prior_min);
+   return prior1 > m_prior_lowerBound ;
 }
 void NeosegParameters::setPrior1(double prior1)
 {
@@ -227,7 +186,7 @@ double NeosegParameters::getPrior1()
 // Prior 2 
 bool NeosegParameters::checkPrior2(double prior2)
 {
-   return isSuperior(prior2, m_prior_min);
+   return prior2 > m_prior_lowerBound ;
 }
 void NeosegParameters::setPrior2(double prior2)
 {
@@ -241,7 +200,7 @@ double NeosegParameters::getPrior2()
 // Prior 3 
 bool NeosegParameters::checkPrior3(double prior3)
 {
-   return isSuperior(prior3, m_prior_min);
+   return prior3 > m_prior_lowerBound ;
 }
 void NeosegParameters::setPrior3(double prior3)
 {
@@ -255,7 +214,7 @@ double NeosegParameters::getPrior3()
 // Prior 4
 bool NeosegParameters::checkPrior4(double prior4)
 {
-   return isSuperior(prior4, m_prior_min);
+   return prior4 > m_prior_lowerBound ;
 }
 void NeosegParameters::setPrior4(double prior4)
 {
@@ -269,7 +228,7 @@ double NeosegParameters::getPrior4()
 // Prior 5 
 bool NeosegParameters::checkPrior5(double prior5)
 {
-   return isSuperior(prior5, m_prior_min);
+   return prior5 > m_prior_lowerBound ;
 }
 void NeosegParameters::setPrior5(double prior5)
 {
@@ -293,7 +252,7 @@ bool NeosegParameters::getRefinement()
 // Initial parzen kernal width
 bool NeosegParameters::checkInitialParzenKernelWidth(double initialParzenKernelWidth)
 {
-   return isSuperior(initialParzenKernelWidth, m_initialParzenKernelWidth_min);
+   return initialParzenKernelWidth > m_initialParzenKernelWidth_lowerBound ;
 }
 void NeosegParameters::setInitialParzenKernelWidth(double initialParzenKernelWidth)
 {

@@ -18,12 +18,6 @@ class NeosegParameters
    NeosegParameters();
 
    // Test
-   bool isSuperior(int value, int min);
-   bool isSuperior(double value, double min);
-
-   bool isBetween(int value, int min, int max);
-   bool isBetween(double value, double min, double max);
-   
    bool isIn(QString item, QStringList list);
 
    // Reference image 
@@ -108,31 +102,26 @@ class NeosegParameters
 
    // Filter Iterations
    int m_filterIterations_min;
-   int m_filterIterations_max;
    int m_filterIterations_default;
    int m_filterIterations;
 
    // filter Time Step 
-   double m_filterTimeStep_min;
-   double m_filterTimeStep_max;
+   double m_filterTimeStep_lowerBound;
    double m_filterTimeStep_default;   
    double m_filterTimeStep;
 
    // Prior Threshold
-   double m_priorThreshold_min;
-   double m_priorThreshold_max;
+   double m_priorThreshold_lowerBound;
    double m_priorThreshold_default;
    double m_priorThreshold;
 
    // Max Bias Degree
    int m_maxBiasDegree_default;
    int m_maxBiasDegree_min;
-   int m_maxBiasDegree_max;
    int m_maxBiasDegree;
 
    // Priors 
-   double m_prior_min; 
-   double m_prior_max; 
+   double m_prior_lowerBound;
 
    // Prior1
    double m_prior1_default;
@@ -159,8 +148,7 @@ class NeosegParameters
    bool m_refinement;
 
    // Initial Parzen Kernel Width
-   double m_initialParzenKernelWidth_min;
-   double m_initialParzenKernelWidth_max;
+   double m_initialParzenKernelWidth_lowerBound;
    double m_initialParzenKernelWidth_default;
    double m_initialParzenKernelWidth;
 

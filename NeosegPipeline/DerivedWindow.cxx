@@ -423,12 +423,14 @@ void DerivedWindow::selectNewOrExistingAtlas()
       displayAtlases();
       m_selectedAtlases = m_goodAtlases;
       checkSelectedAtlases();
+      AtlasGenerationTab->setDisabled( false ) ;
    } 
 
    if(existingAtlas_radioButton->isChecked())
    {
       newAtlas_widget->hide();
       existingAtlas_widget->show();
+      AtlasGenerationTab->setDisabled( true ) ;
    } 
 
    tabs->adjustSize();
@@ -585,7 +587,6 @@ void DerivedWindow::enterExistingAtlas()
 //***** Preprocessing Data *****//
 void DerivedWindow::changeUsingMaskDTI(bool checked)
 {
-  usingSmoothedMask_DTI_checkBox->setCheckable( checked ) ;
   if( !checked )
   {
     usingSmoothedMask_DTI_checkBox->setChecked( Qt::Unchecked ) ;
@@ -600,7 +601,6 @@ void DerivedWindow::changeUsingMaskDTI(bool checked)
 //***** Atlas Registration *****//
 void DerivedWindow::changeUsingMaskAtlas(bool checked)
 {
-  usingSmoothedMask_atlas_checkBox->setCheckable( checked ) ;
   if( !checked )
   {
     usingSmoothedMask_atlas_checkBox->setChecked( Qt::Unchecked ) ;
@@ -853,6 +853,7 @@ void DerivedWindow::initializeParameters()
    usingFA_checkBox->setChecked(m_parameters->getUsingFA()); 
    usingAD_checkBox->setChecked(m_parameters->getUsingAD()); 
 
+   computing3LabelsSeg_checkBox->setChecked(m_parameters->getComputing3LabelsSeg() ) ;
    reassigningWhite_checkBox->setChecked(m_parameters->getReassigningWhiteMatter());
    whiteThreshold_spinBox->setValue(m_parameters->getSizeThreshold()); 
 
@@ -895,7 +896,16 @@ void DerivedWindow::initializeParameters()
    deformationFieldSigma_DTI_spinBox->setValue(m_antsParameters_DTI->getDeformationFieldSigma());
 
    usingMask_DTI_checkBox->setChecked(m_antsParameters_DTI->getUsingMask());
-   usingSmoothedMask_DTI_checkBox->setChecked(m_antsParameters_DTI->getUsingSmoothedMask());
+   if( m_antsParameters_DTI->getUsingMask() )
+   {
+     usingSmoothedMask_DTI_checkBox->setDisabled( false ) ;
+     usingSmoothedMask_DTI_checkBox->setChecked( m_antsParameters_DTI->getUsingSmoothedMask() ) ;
+   }
+   else
+   {
+     usingSmoothedMask_DTI_checkBox->setChecked( false ) ;
+     usingSmoothedMask_DTI_checkBox->setDisabled( true ) ;
+   }
 
    // ANTS
    numberOfRegistrations_spinBox->setValue(m_antsParameters_atlas->getNumberOfRegistrations());
@@ -932,7 +942,16 @@ void DerivedWindow::initializeParameters()
    deformationFieldSigma_atlas_spinBox->setValue(m_antsParameters_atlas->getDeformationFieldSigma());
 
    usingMask_atlas_checkBox->setChecked(m_antsParameters_atlas->getUsingMask());
-   usingSmoothedMask_atlas_checkBox->setChecked(m_antsParameters_atlas->getUsingSmoothedMask());
+   if( m_antsParameters_atlas->getUsingMask() )
+   {
+     usingSmoothedMask_atlas_checkBox->setDisabled( false ) ;
+     usingSmoothedMask_atlas_checkBox->setChecked( m_antsParameters_atlas->getUsingSmoothedMask() ) ;
+   }
+   else
+   {
+     usingSmoothedMask_atlas_checkBox->setChecked( false ) ;
+     usingSmoothedMask_atlas_checkBox->setDisabled( true ) ;
+   }
 
    //Neoseg
    referenceModality_comboBox->clear() ;
@@ -955,7 +974,15 @@ void DerivedWindow::initializeParameters()
    prior5_spinBox->setValue(m_neosegParameters->getPrior5());
 
    refinement_checkBox->setChecked(m_neosegParameters->getRefinement());
-   initialParzenKernelWidth_spinBox->setValue(m_neosegParameters->getInitialParzenKernelWidth());  
+   initialParzenKernelWidth_spinBox->setValue(m_neosegParameters->getInitialParzenKernelWidth());
+   if( newAtlas_radioButton->isChecked() )
+   {
+      AtlasGenerationTab->setDisabled( false ) ;
+   }
+   else
+   {
+      AtlasGenerationTab->setDisabled( true ) ;
+   }
 }
 
 void DerivedWindow::initializeExecutables()
@@ -1024,7 +1051,7 @@ void DerivedWindow::setParameters()
       m_parameters->setComputingWeights(computingWeights_checkBox->isChecked());
       m_parameters->setWeightsRadius(weightsRadius_spinBox->value());
       m_parameters->setWeightsRadiusUnit(weightsRadiusUnit_comboBox->currentText()); 
-      
+      m_parameters->setWeightsModality(weightsModality_comboBox->currentText());
       // Including FA
       m_parameters->setIncludingFA(includingFA_checkBox->isChecked()); 
       m_parameters->setFAShift(FAShift_spinBox->value());
@@ -1076,7 +1103,7 @@ void DerivedWindow::setParameters()
    m_antsParameters_DTI->setDeformationFieldSigma(deformationFieldSigma_DTI_spinBox->value());
 
    m_antsParameters_DTI->setUsingMask(usingMask_DTI_checkBox->isChecked());
-   m_antsParameters_DTI->setUsingSmoothedMask(usingSmoothedMask_DTI_checkBox->isChecked());  
+   m_antsParameters_DTI->setUsingSmoothedMask( usingSmoothedMask_DTI_checkBox->isChecked() ) ;
 
    //ANTS parameters for Atlas Population Registration 
    m_antsParameters_atlas->setNumberOfRegistrations(numberOfRegistrations_spinBox->value());
@@ -1105,7 +1132,7 @@ void DerivedWindow::setParameters()
    m_antsParameters_atlas->setDeformationFieldSigma(deformationFieldSigma_atlas_spinBox->value());
 
    m_antsParameters_atlas->setUsingMask(usingMask_atlas_checkBox->isChecked());
-   m_antsParameters_atlas->setUsingSmoothedMask(usingSmoothedMask_atlas_checkBox->isChecked());
+   m_antsParameters_atlas->setUsingSmoothedMask( usingSmoothedMask_atlas_checkBox->isChecked() ) ;
 
    // Neoseg parameters 
    m_neosegParameters->setReferenceImage(referenceModality_comboBox->currentText()); 

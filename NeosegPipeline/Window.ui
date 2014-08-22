@@ -675,7 +675,7 @@ p, li { white-space: pre-wrap; }
            <item>
             <widget class="QCheckBox" name="correcting_checkBox">
              <property name="text">
-              <string>Correct inomogeneity of T1 and T2 images</string>
+              <string>Correct inhomogeneity of T1 and T2 images</string>
              </property>
             </widget>
            </item>
@@ -1596,7 +1596,7 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_5">
+      <widget class="QWidget" name="AtlasGenerationTab">
        <attribute name="title">
         <string>Atlas Generation</string>
        </attribute>
@@ -2169,8 +2169,14 @@ p, li { white-space: pre-wrap; }
                  </item>
                  <item>
                   <widget class="QDoubleSpinBox" name="timeStep_spinBox">
+                   <property name="decimals">
+                    <number>3</number>
+                   </property>
+                   <property name="minimum">
+                    <double>0.001000000000000</double>
+                   </property>
                    <property name="value">
-                    <double>0.000000000000000</double>
+                    <double>0.001000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -2314,11 +2320,14 @@ p, li { white-space: pre-wrap; }
                  </item>
                  <item row="2" column="2">
                   <widget class="QDoubleSpinBox" name="prior3_spinBox">
+                   <property name="minimum">
+                    <double>0.010000000000000</double>
+                   </property>
                    <property name="singleStep">
                     <double>0.100000000000000</double>
                    </property>
                    <property name="value">
-                    <double>0.000000000000000</double>
+                    <double>0.010000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -2331,31 +2340,40 @@ p, li { white-space: pre-wrap; }
                  </item>
                  <item row="1" column="2">
                   <widget class="QDoubleSpinBox" name="prior2_spinBox">
+                   <property name="minimum">
+                    <double>0.010000000000000</double>
+                   </property>
                    <property name="singleStep">
                     <double>0.100000000000000</double>
                    </property>
                    <property name="value">
-                    <double>0.000000000000000</double>
+                    <double>0.010000000000000</double>
                    </property>
                   </widget>
                  </item>
                  <item row="4" column="2">
                   <widget class="QDoubleSpinBox" name="prior5_spinBox">
+                   <property name="minimum">
+                    <double>0.010000000000000</double>
+                   </property>
                    <property name="singleStep">
                     <double>0.100000000000000</double>
                    </property>
                    <property name="value">
-                    <double>0.000000000000000</double>
+                    <double>0.010000000000000</double>
                    </property>
                   </widget>
                  </item>
                  <item row="0" column="2">
                   <widget class="QDoubleSpinBox" name="prior1_spinBox">
+                   <property name="minimum">
+                    <double>0.010000000000000</double>
+                   </property>
                    <property name="singleStep">
                     <double>0.100000000000000</double>
                    </property>
                    <property name="value">
-                    <double>0.000000000000000</double>
+                    <double>0.010000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -2382,11 +2400,14 @@ p, li { white-space: pre-wrap; }
                  </item>
                  <item row="3" column="2">
                   <widget class="QDoubleSpinBox" name="prior4_spinBox">
+                   <property name="minimum">
+                    <double>0.010000000000000</double>
+                   </property>
                    <property name="singleStep">
                     <double>0.100000000000000</double>
                    </property>
                    <property name="value">
-                    <double>0.000000000000000</double>
+                    <double>0.010000000000000</double>
                    </property>
                   </widget>
                  </item>
@@ -2465,8 +2486,11 @@ p, li { white-space: pre-wrap; }
                  </item>
                  <item>
                   <widget class="QDoubleSpinBox" name="initialParzenKernelWidth_spinBox">
+                   <property name="minimum">
+                    <double>0.010000000000000</double>
+                   </property>
                    <property name="value">
-                    <double>0.000000000000000</double>
+                    <double>0.010000000000000</double>
                    </property>
                   </widget>
                  </item>
