@@ -59,12 +59,14 @@
          <description>Prefix added to output files</description>
          <longflag>prefix</longflag>
          <label>prefix</label>
+         <default>neo</default>
       </string>
       <string>
          <name>suffix</name>
          <description>Suffix added to output files</description>
          <longflag>suffix</longflag>
          <label>suffix</label>
+         <default>NP</default>
       </string>
       <boolean>
          <name>force</name>
