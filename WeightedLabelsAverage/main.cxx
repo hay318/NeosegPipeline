@@ -68,8 +68,8 @@ int main(int argc, char* argv[])
    }
 
    // Input 
-	ReaderType::Pointer input_reader = ReaderType::New();
-	input_reader->SetFileName(parameters->GetInput());
+   ReaderType::Pointer input_reader = ReaderType::New();
+   input_reader->SetFileName(parameters->GetInput());
    input_reader->Update();
    WeightedLabelsAverageFilter->SetInput(input_reader->GetOutput());
 
@@ -82,34 +82,34 @@ int main(int argc, char* argv[])
       Atlas atlas = *(it);
 
       // Image
-	   ReaderType::Pointer image_reader = ReaderType::New(); 
-	   image_reader->SetFileName(atlas.image);
+      ReaderType::Pointer image_reader = ReaderType::New(); 
+      image_reader->SetFileName(atlas.image);
       image_reader->Update();
 
       if(atlas.probabilistic)
       {
-	      ReaderType::Pointer white_reader = ReaderType::New(); 
-	      white_reader->SetFileName(atlas.white);
-         white_reader->Update();
-
-	      ReaderType::Pointer gray_reader = ReaderType::New(); 
-	      gray_reader->SetFileName(atlas.gray);
-         gray_reader->Update();
-
-	      ReaderType::Pointer csf_reader = ReaderType::New(); 
-	      csf_reader->SetFileName(atlas.csf);
-         csf_reader->Update();
-
-         WeightedLabelsAverageFilter->AddAtlas(image_reader->GetOutput(), white_reader->GetOutput(), gray_reader->GetOutput(), csf_reader->GetOutput());
+	ReaderType::Pointer white_reader = ReaderType::New(); 
+	white_reader->SetFileName(atlas.white);
+	white_reader->Update();
+	
+	ReaderType::Pointer gray_reader = ReaderType::New(); 
+	gray_reader->SetFileName(atlas.gray);
+	gray_reader->Update();
+	
+	ReaderType::Pointer csf_reader = ReaderType::New(); 
+	csf_reader->SetFileName(atlas.csf);
+	csf_reader->Update();
+	
+	WeightedLabelsAverageFilter->AddAtlas(image_reader->GetOutput(), white_reader->GetOutput(), gray_reader->GetOutput(), csf_reader->GetOutput());
       }
       
       else
       {
-	      ReaderType::Pointer seg_reader = ReaderType::New(); 
-	      seg_reader->SetFileName(atlas.seg);
-         seg_reader->Update();
+	ReaderType::Pointer seg_reader = ReaderType::New(); 
+	seg_reader->SetFileName(atlas.seg);
+	seg_reader->Update();
 
-         WeightedLabelsAverageFilter->AddAtlas(image_reader->GetOutput(), seg_reader->GetOutput());
+	WeightedLabelsAverageFilter->AddAtlas(image_reader->GetOutput(), seg_reader->GetOutput());
       }
 
 
@@ -119,25 +119,25 @@ int main(int argc, char* argv[])
    WeightedLabelsAverageFilter->Update();
 
    // Weighted Averaged White // 
-	WriterType::Pointer writer_white = WriterType::New(); 
-	writer_white->SetInput(WeightedLabelsAverageFilter->GetOutput(0)); 
-	writer_white->SetFileName(parameters->GetWhite());
-        writer_white->SetUseCompression(true);
-	writer_white->Update();
-
+   WriterType::Pointer writer_white = WriterType::New(); 
+   writer_white->SetInput(WeightedLabelsAverageFilter->GetOutput(0)); 
+   writer_white->SetFileName(parameters->GetWhite());
+   writer_white->SetUseCompression(true);
+   writer_white->Update();
+   
    // Weighted Averaged Gray // 
-	WriterType::Pointer writer_gray = WriterType::New(); 
-	writer_gray->SetInput(WeightedLabelsAverageFilter->GetOutput(1)); 
-	writer_gray->SetFileName(parameters->GetGray());
-        writer_gray->SetUseCompression(true);
-	writer_gray->Update();
-
+   WriterType::Pointer writer_gray = WriterType::New(); 
+   writer_gray->SetInput(WeightedLabelsAverageFilter->GetOutput(1)); 
+   writer_gray->SetFileName(parameters->GetGray());
+   writer_gray->SetUseCompression(true);
+   writer_gray->Update();
+   
    // Weighted Averaged Csf // 
-	WriterType::Pointer writer_csf = WriterType::New(); 
-	writer_csf->SetInput(WeightedLabelsAverageFilter->GetOutput(2)); 
-	writer_csf->SetFileName(parameters->GetCsf());
-        writer_csf->SetUseCompression(true);
-	writer_csf->Update();
+   WriterType::Pointer writer_csf = WriterType::New(); 
+   writer_csf->SetInput(WeightedLabelsAverageFilter->GetOutput(2)); 
+   writer_csf->SetFileName(parameters->GetCsf());
+   writer_csf->SetUseCompression(true);
+   writer_csf->Update();
 }
 
 

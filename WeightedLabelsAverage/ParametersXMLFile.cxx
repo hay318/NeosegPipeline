@@ -21,6 +21,7 @@ void
 ParametersXMLFileReader
 ::StartElement(const char* name, const char** atts)
 {
+  //std::cout << "StartElement" << name << std::endl;
   if(itksys::SystemTools::Strucmp(name,"WEIGHTED-AVERAGED-LABELS-PARAMETERS") == 0)
   {  
     m_PObject = Parameters::New();
@@ -31,6 +32,8 @@ void
 ParametersXMLFileReader
 ::EndElement(const char* name)
 {
+
+   //std::cout << "ENDElement " << name << std::endl;
 
    if(itksys::SystemTools::Strucmp(name,"WEIGHTED-AVERAGED-LABELS-PARAMETERS") == 0)
    {
@@ -131,10 +134,19 @@ void
 ParametersXMLFileReader
 ::CharacterDataHandler(const char* inData, int inLength)
 {
-   m_CurrentString = "";
-   for (int i = 0; i < inLength; i++)
-   {
-      m_CurrentString += inData[i];
-   }
+  // std::cout << "Data: " << inLength << ": " << inData << std::endl;
+
+  //if (inLength <= 1) return;
+  
+  char *data = new char[inLength+1];
+  char *item = new char[inLength+1];
+  strncpy(data, inData, inLength);
+  data[inLength] = '\n';
+  sscanf(data, " %s ", item);
+  if (itksys::SystemTools::Strucmp(item,"") != 0) 
+    {
+      m_CurrentString = std::string(item);
+      //std::cout << inLength << ": " << m_CurrentString << std::endl;
+    }
 }
 

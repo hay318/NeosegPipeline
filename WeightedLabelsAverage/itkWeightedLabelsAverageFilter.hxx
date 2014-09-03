@@ -281,9 +281,9 @@ namespace itk
             m_csf->SetPixel( index, 0 );
          }
 
-         if ( progress % 100000 == 0 )
+         if ( progress % 500000 == 0 )
          {
-            std::cout<<"At index:"<<index<<" labels = "<<labels[1]<<" "<<labels[2]<<" "<<labels[3]<<std::endl;
+	   std::cout<<"Avg At index:"<<index<<" - " << progress << " labels = "<<labels[1]<<" "<<labels[2]<<" "<<labels[3]<<std::endl;
          } 
 
          ++it;

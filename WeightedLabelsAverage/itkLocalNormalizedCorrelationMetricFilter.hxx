@@ -175,9 +175,9 @@ namespace itk
 
          metricValue = GetMetric(m_region);
 
-         if (progress % 100000 == 0)
+         if (progress % 500000 == 0)
          {
-           std::cout<<"At index "<<index<<": fixed region="<<m_fixedImage->GetPixel(index)<<", moving region="<<m_movingImage->GetPixel(index)<<", metric="<<metricValue<<std::endl;
+           std::cout<<"Correl At index "<<index<<": fixed region="<<m_fixedImage->GetPixel(index)<<", moving region="<<m_movingImage->GetPixel(index)<<", metric="<<metricValue<<std::endl;
          }
          
          it.Set(metricValue);
