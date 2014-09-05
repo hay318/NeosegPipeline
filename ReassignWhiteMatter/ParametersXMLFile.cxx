@@ -63,10 +63,15 @@ void ParametersXMLFileReader::EndElement(const char* name)
 
 void ParametersXMLFileReader::CharacterDataHandler(const char* inData, int inLength)
 {
-   m_CurrentString = "";
-   for (int i = 0; i < inLength; i++)
-   {
-      m_CurrentString += inData[i];
-   }
+  char *data = new char[inLength+1];
+  char *item = new char[inLength+1];
+  strncpy(data, inData, inLength);
+  data[inLength] = '\n';
+  sscanf(data, " %s ", item);
+  if (itksys::SystemTools::Strucmp(item,"") != 0) 
+    {
+      m_CurrentString = std::string(item);
+      //std::cout << inLength << ": " << m_CurrentString << std::endl;
+    }
 }
 
