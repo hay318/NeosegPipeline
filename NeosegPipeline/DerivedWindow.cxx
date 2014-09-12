@@ -436,15 +436,23 @@ void DerivedWindow::selectNewOrExistingAtlas()
    tabs->adjustSize();
 }
 
+
 //***** Atlas Population Directory *****//
+
+void DerivedWindow::UpdateAtlasPopulationDirectoryDisplay()
+{
+    checkAtlases() ;
+    displayAtlases() ;
+    m_selectedAtlases = m_goodAtlases ;
+    checkSelectedAtlases() ;
+}
+
 void DerivedWindow::selectAtlasPopulationDirectory()
 {
    QString atlasPopulationDirectory = QFileDialog::getExistingDirectory (this, tr("Open Directory"), atlasPopulationDirectory_lineEdit->text(), QFileDialog::ShowDirsOnly);
    atlasPopulationDirectory_lineEdit->setText(atlasPopulationDirectory);
-   checkAtlases();
-   displayAtlases();
-   m_selectedAtlases = m_goodAtlases;
-   checkSelectedAtlases();
+   m_parameters->setAtlasPopulationDirectory( atlasPopulationDirectory_lineEdit->text() ) ;
+   UpdateAtlasPopulationDirectoryDisplay() ;
 }
 
 void DerivedWindow::enterAtlasPopulationDirectory()
@@ -456,20 +464,20 @@ void DerivedWindow::enterAtlasPopulationDirectory()
       if(!m_parameters->checkAtlasPopulationDirectory(atlasPopulationDirectory))
       {
          atlasPopulationDirectory_lineEdit->clear();
-         QMessageBox::critical(this, tr("Output Directory"), atlasPopulationDirectory + tr("\ndoes not exist, enter a new directory path"));
+         QMessageBox::critical(this, tr("Population atlas directory"), atlasPopulationDirectory + tr("\ndoes not exist, enter a new directory path"));
+      }
+      else
+      {
+          m_parameters->setAtlasPopulationDirectory( atlasPopulationDirectory_lineEdit->text() ) ;
       }
    }
-   checkAtlases();
-   displayAtlases();
-   m_selectedAtlases = m_goodAtlases;
+   UpdateAtlasPopulationDirectoryDisplay() ;
 }
+
 void DerivedWindow::resetAtlasPopulationDirectory()
 {
    atlasPopulationDirectory_lineEdit->setText(m_parameters->getAtlasPopulationDirectory()); 
-   checkAtlases();
-   displayAtlases();
-   m_selectedAtlases = m_goodAtlases;
-   checkSelectedAtlases();
+   UpdateAtlasPopulationDirectoryDisplay() ;
 }
 
 
@@ -486,7 +494,6 @@ void DerivedWindow::checkAtlases()
    for (it = atlasPopulation_list.constBegin(); it != atlasPopulation_list.constEnd(); ++it) 
    {
       QString atlas_dir = m_atlasPopulation_dir->filePath(*it);
-      
       if(m_parameters->checkAtlas(atlas_dir))
       {
          m_goodAtlases << *it;
@@ -495,7 +502,7 @@ void DerivedWindow::checkAtlases()
       {
          m_wrongAtlases << *it;
       }
-   } 
+   }
 } 
 
 //***** Display Atlases *****//
@@ -510,7 +517,6 @@ void DerivedWindow::displayAtlases()
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable);
         item->setCheckState(Qt::Unchecked);
    } 
-
    for (it = m_wrongAtlases.constBegin(); it != m_wrongAtlases.constEnd(); ++it) 
    {
         QListWidgetItem* item = new QListWidgetItem(*it, atlasPopulation_listWidget);
@@ -686,13 +692,13 @@ void DerivedWindow::selectExecutable(QString executable_name)
 	 executable_path = QFileDialog::getOpenFileName(this, tr("Select executable"), dir_path);
    if(!executable_path.isEmpty())
    {
-      if(QFileInfo(executable_path).isExecutable())
+      if( m_executables->checkExecutablePath( executable_name , executable_path) )
       {
-         (executable.enter_lineEdit)->setText(executable_path);
+         (executable.enter_lineEdit)->setText(executable_path) ;
       }
       else
       {
-         QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable"));      
+         QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable or is the incorrect version"));
       }
    }
 }
@@ -701,20 +707,8 @@ void DerivedWindow::enterExecutable(QString executable_name)
    Executable executable = m_executables_map[executable_name];   
 
    QString executable_path = (executable.enter_lineEdit)->text();
-
-   if(!executable_path.isEmpty()) 
-   {  
-      if( !QFileInfo(executable_path).exists() || !QFileInfo(executable_path).isExecutable() )
-      {
-         (executable.enter_lineEdit)->clear();
-         QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable, enter a new executable path") ) ;
-      }
-      //else everything is ok, let's do nothing
-   }
-   else
-   {
-      QMessageBox::critical(this, executable_name, tr("Please enter a file path"));
-   }
+   //We do not check the validity of the path as it was frustrating and prompting too many windows.
+   //The validity of all the paths is checked when the pipeline is run.
 }
 void DerivedWindow::resetExecutable(QString executable_name)
 {
@@ -1222,6 +1216,10 @@ void DerivedWindow::setParametersWidgetEnabled(bool enabled)
    existingAtlas_groupBox->setEnabled(enabled);
    atlasPopulation_groupBox->setEnabled(enabled); 
 
+   //Preprocessing Data
+   DiffusionImagesRegistration_groupBox->setEnabled(enabled);
+   StructuralImages_groupBox->setEnabled(enabled);
+
    // Atlas Registration
    numberOfRegistrations_groupBox->setEnabled(enabled);
    ANTSParameters_groupBox->setEnabled(enabled);
@@ -1236,19 +1234,11 @@ void DerivedWindow::setParametersWidgetEnabled(bool enabled)
    neosegParameters_groupBox->setEnabled(enabled);
    mergedSegmentation_groupBox->setEnabled(enabled);
 
-   // Softwares
-   QMap<QString, Executable>::iterator it_exec; 
-   for(it_exec = m_executables_map.begin(); it_exec != m_executables_map.end(); ++it_exec)
-   {
-      QString name = it_exec.key(); 
-      Executable executable = it_exec.value();  
+   // Software
+   Executables_groupBox->setEnabled(enabled);
+   Libraries_groupBox->setEnabled(enabled);
 
-      executable.select_button->setEnabled(enabled); 
-      executable.enter_lineEdit->setEnabled(enabled);
-      executable.reset_button->setEnabled(enabled);   
-   }
-
-   resetAllExecutables_button->setEnabled(enabled);   
+   resetAllExecutables_button->setEnabled(enabled);
 
    // Computing 
    overwriting_checkBox->setEnabled(enabled);
@@ -1267,8 +1257,18 @@ void DerivedWindow::runPipeline()
    QString imagesErrors = m_parameters->checkImages(); 
    QString executablesErrors = m_executables->checkExecutables(); 
    QString librariesErrors = m_libraries->checkLibraries(); 
-
-   if(imagesErrors.isEmpty() && executablesErrors.isEmpty() && librariesErrors.isEmpty())
+   /*  Check output directory specified  */
+   QString outputDirError ;
+   if( m_parameters->getOutput().isEmpty() )
+   {
+       outputDirError = "Please specify an output directory" ;
+   }
+   /*/////////////////////////*/
+   if( imagesErrors.isEmpty()
+    && executablesErrors.isEmpty()
+    && librariesErrors.isEmpty()
+    && outputDirError.isEmpty()
+     )
    {
       m_pipeline->writeXMLFiles(); 
       m_pipeline->writePipeline();
@@ -1289,16 +1289,19 @@ void DerivedWindow::runPipeline()
       stopPipeline_button->setEnabled(true);
       displayResults_button->setEnabled(false);
       displayResults_action->setEnabled(false);
-      tabs->setCurrentWidget(execution_tab);   
+      tabs->setCurrentWidget(execution_tab);
 
       runPipeline_progressBar->setTextVisible(false);
       runPipeline_progressBar->show();
       runPipeline_progressBar->setMinimum(0);
-      runPipeline_progressBar->setMaximum(0); 
+      runPipeline_progressBar->setMaximum(0);
    }
    else
    {
-      QMessageBox::critical(this, tr("Errors"), imagesErrors + "\n" + executablesErrors + "\n" + librariesErrors);
+      QMessageBox::critical( this , tr("Errors") ,
+                             imagesErrors + "\n" + executablesErrors + "\n"
+                             + librariesErrors + "\n" + outputDirError
+                           ) ;
    }
 }
 
@@ -1501,6 +1504,7 @@ void DerivedWindow::enableDisplayButton()
    stopPipeline_action->setEnabled(false); 
 
    runPipeline_progressBar->hide();
+   QMessageBox::information( this , tr("Information"), tr("Done") ) ;
 }
 
 void DerivedWindow::displayResults()

@@ -277,8 +277,8 @@ void AtlasPopulationRegistration::implementRegisterAtlasPopulation()
       m_script += "\tnbRegMax = " + QString::number(m_parameters->getNumberOfRegistrations()) +  "\n";
    }
 
-   m_script += "\trunningRegistrations = []\n\n";
    m_script += "\tglobal runningRegistrations\n";
+   m_script += "\trunningRegistrations = []\n\n";
 
    if(m_computingSystem == "killdevil" || m_computingSystem == "killdevil interactive")
    {

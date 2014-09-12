@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <vector>
+#include <sstream>
+#include <ctype.h>
 
 #include <QString>
 #include <QDir>
@@ -12,7 +14,6 @@
 #include <QProcessEnvironment>
 #include <QMap>
 #include <QtGlobal>
-
 
 class ExecutablePaths
 {
@@ -35,7 +36,9 @@ class ExecutablePaths
    QString checkExecutables();
 
    private: 
-
+   std::vector<int> ConvertStringVersionToVector( std::string version ) ;
+   bool testVersion( std::string givenVersion , std::string comparedVersion ) ;
+   void ltrim(std::string& s) ;
    QString m_currentDirectory; 
 
    QMap<QString, QString> m_executables; 
@@ -46,7 +49,7 @@ class ExecutablePaths
    QStringList m_executables_withVersionShortFlag; 
    QStringList m_executables_withVersionArgument; 
    QStringList m_executables_withoutVersionFlag; 
-
+   QMap<QString, std::string> m_executables_versions ;
 };
 
 #endif

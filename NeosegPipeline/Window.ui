@@ -660,7 +660,7 @@ p, li { white-space: pre-wrap; }
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_9">
         <item>
-         <widget class="QGroupBox" name="groupBox_11">
+         <widget class="QGroupBox" name="StructuralImages_groupBox">
           <property name="title">
            <string>Structural Images</string>
           </property>
@@ -683,7 +683,7 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="groupBox_15">
+         <widget class="QGroupBox" name="DiffusionImagesRegistration_groupBox">
           <property name="title">
            <string>Diffusion Images - Registration</string>
           </property>
@@ -2635,7 +2635,7 @@ p, li { white-space: pre-wrap; }
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QGroupBox" name="groupBox_16">
+         <widget class="QGroupBox" name="Executables_groupBox">
           <property name="title">
            <string>Executables</string>
           </property>
@@ -2949,7 +2949,7 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="groupBox_17">
+         <widget class="QGroupBox" name="Libraries_groupBox">
           <property name="title">
            <string>Library Directories</string>
           </property>

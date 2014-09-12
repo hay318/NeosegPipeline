@@ -106,17 +106,14 @@ void NeosegPipelineTool::setExecutablesFile(QString xml_CLI)
 
    if(!xml_CLI.isEmpty())
    {
-      m_xmlReader.readExecutablesConfigurationFile(xml_CLI); 
+      m_executablesErrors = m_xmlReader.readExecutablesConfigurationFile(xml_CLI);
    }
    else
    {
       QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
       QString xml_ENV = env.value("NEOSEG_PIPELINE_EXECUTABLES", QString::null);
-
       if(!xml_ENV.isEmpty())
       {
-         std::cout<<"environnement variable"<<std::endl; 
-
          m_executablesErrors = m_xmlReader.readExecutablesConfigurationFile(xml_ENV);
       }
    }
@@ -201,8 +198,16 @@ int NeosegPipelineTool::launch(int argc, char *argv[], bool gui)
             return 1 ;
          }
       }
-      m_pipeline->writePipeline() ;
-      m_pipeline->runPipeline() ;
+      QString imagesErrors = m_parameters->checkImages();
+      if( imagesErrors.isEmpty() )
+      {
+          m_pipeline->writePipeline() ;
+          m_pipeline->runPipeline() ;
+      }
+      else
+      {
+          std::cerr << imagesErrors.toStdString() << std::endl ;
+      }
    }
    return 0 ;
 }

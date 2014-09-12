@@ -20,7 +20,7 @@ PipelineParameters::PipelineParameters()
 
    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
    m_atlasPopulationDirectory_default = env.value("NEOSEG_PIPELINE_ATLAS_POPULATION_DIRECTORY", QString::null);   
-   m_atlasPopulationDirectory = m_atlasPopulationDirectory_default; 
+   m_atlasPopulationDirectory = m_atlasPopulationDirectory_default;
 
    m_precision = 10000;
    QStringList atlases = QDir(m_atlasPopulationDirectory).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -1024,6 +1024,18 @@ QString PipelineParameters::checkImages()
       errors += "You cannot reassign the small islands of white matter without creating a new atlas\n";      
    }
 
+   if( !m_newAtlas && m_existingAtlas.isEmpty() )
+   {
+       errors += "Please choose a directory containing an existing atlas\n";
+   }
+   if( m_newAtlas && m_atlasPopulationDirectory.isEmpty() )
+   {
+       errors += "Please select a population atlas directory\n";
+   }
+   else if( m_newAtlas && m_selectedAtlases.size() < 2 )
+   {
+       errors += "Please select at least 2 directories in the population atlas\n";
+   }
    return errors;
 }
 

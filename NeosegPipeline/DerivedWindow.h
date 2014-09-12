@@ -111,6 +111,7 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void selectAtlasPopulationDirectory();
    void enterAtlasPopulationDirectory();
    void resetAtlasPopulationDirectory();
+   void UpdateAtlasPopulationDirectoryDisplay();
    void selectAtlas(QListWidgetItem* item);
 
    // Existing Atlas

@@ -70,6 +70,7 @@ QString XmlReader::readParametersConfigurationFile(QString file_path)
 void XmlReader::readGeneralParameters(QXmlStreamReader* stream, QString errors)
 {  
    bool ok; 
+   m_selectedAtlases.clear() ;
 
    while(!(stream->isEndElement() && stream->name() == "General-parameters"))
    {
@@ -104,7 +105,7 @@ void XmlReader::readGeneralParameters(QXmlStreamReader* stream, QString errors)
                errors += " - 'Atlas-population-directory' is not valid, it does not exist\n";
             }
          }
-                  
+
          else if (stream->name() == "Atlas")
          {
             QString atlas = (attributes.value("name")).toString();   
@@ -415,8 +416,8 @@ void XmlReader::readGeneralParameters(QXmlStreamReader* stream, QString errors)
          }
 
       }
-      m_parameters->setSelectedAtlases(m_selectedAtlases);
    }
+   m_parameters->setSelectedAtlases(m_selectedAtlases);
 }
 
 

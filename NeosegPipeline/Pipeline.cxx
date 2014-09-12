@@ -435,7 +435,8 @@ void Pipeline::runPipeline()
    QString python_path = (m_parameters->getExecutablePaths())->getExecutablePath("python"); 
    QString pythonDirectory_path = ((QFileInfo(python_path)).absoluteDir()).path();
 
-   QString FSL_path = (m_parameters->getExecutablePaths())->getExecutablePath("FSL"); 
+   QString FSL_path = (m_parameters->getLibraryPaths()->getLibraryPath("FSL") );
+                       //ExecutablePaths())->getExecutablePath("FSL");
 
    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
    env.insert("PATH", pythonDirectory_path + ":" + env.value("PATH"));
@@ -496,14 +497,13 @@ void Pipeline::stopPipeline()
 {
    if(!(m_parameters->getComputingSystem()).compare("killdevil", Qt::CaseInsensitive))
    {
-      QProcess* bkill_process = new::QProcess(); 
-      bkill_process->start("bkill " + m_jobID); 
+      QProcess* bkill_process = new::QProcess();
+      bkill_process->start("bkill " + m_jobID);
       while (!bkill_process->waitForFinished())
       {
          sleep(1);
-      }      
+      }
    }
-
-   m_mainScriptProcess->terminate(); 
+   m_mainScriptProcess->terminate();
 }
 

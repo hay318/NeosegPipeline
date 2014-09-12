@@ -120,7 +120,11 @@ QString AtlasGeneration::getImage(Atlas atlas, QString name)
 
 void AtlasGeneration::generateTemplate(TemplateImage& templateImage)
 {
-   QString ref = getImage(m_atlasPopulation[1], templateImage.name);
+   if( m_atlasPopulation.size() < 2 )
+   {
+       throw "GenerateTemplate: Needs at least 2 atlases in the population atlas" ;
+   }
+   QString ref = getImage(m_atlasPopulation[0], templateImage.name);
    m_inputs.insert("ref", ref);
 
    m_log = "- Averaging all the " + templateImage.name;
