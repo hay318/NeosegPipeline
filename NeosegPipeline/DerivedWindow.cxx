@@ -1474,15 +1474,15 @@ void DerivedWindow::changeExecutionPlainTextEdit()
 
 void DerivedWindow::stopPipeline()
 {
-   m_thread->terminate(); 
+   m_thread->terminate();
 
-   setParametersWidgetEnabled(true); 
+   setParametersWidgetEnabled(true);
 
    runPipeline_button->setEnabled(true);
    runPipeline_action->setEnabled(true);
 
-   stopPipeline_button->setEnabled(false); 
-   stopPipeline_action->setEnabled(false); 
+   stopPipeline_button->setEnabled(false);
+   stopPipeline_action->setEnabled(false);
 
    runPipeline_progressBar->hide();
 }

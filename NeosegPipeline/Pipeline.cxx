@@ -450,12 +450,8 @@ void Pipeline::runPipeline()
    m_mainScriptProcess->start(command);
 
    m_mainScriptProcess->waitForStarted();   
-   m_timer.start();
 
-   while (!m_mainScriptProcess->waitForFinished())
-   {
-      sleep(1);
-   }
+   m_mainScriptProcess->waitForFinished( -1 ) ;
 
    if(!(m_parameters->getComputingSystem()).compare("killdevil", Qt::CaseInsensitive))
    {
@@ -472,11 +468,7 @@ void Pipeline::runPipeline()
       while(jobRunning)
       {
          bjobs_process->start("bjobs " + m_jobID); 
-         while (!bjobs_process->waitForFinished())
-         {
-            sleep(1);
-         }
-
+         bjobs_process->waitForFinished( -1 ) ;
          QString bjobs_output(bjobs_process->readAllStandardOutput());
          if(bjobs_output.contains("DONE") || bjobs_output.contains("EXIT"))
          {
@@ -486,10 +478,9 @@ void Pipeline::runPipeline()
          sleep(1); 
       }
    }
-
-   if(m_mainScriptProcess->exitCode()==0)
+   if( m_mainScriptProcess->exitCode() == 0 )
    {
-      cleanUp();
+      cleanUp() ;
    }
 }
 
@@ -504,6 +495,20 @@ void Pipeline::stopPipeline()
          sleep(1);
       }
    }
+
    m_mainScriptProcess->terminate();
+/*    qDebug() << "wait for finished: "<<m_mainScriptProcess->waitForFinished(500);
+    usleep(10000);
+    qDebug() << "Still running: "<<(m_mainScriptProcess->state() == QProcess::Running);*/
+//   m_mainScriptProcess->terminate();
+   m_mainScriptProcess->waitForFinished(-1);
+   //usleep(10000);
+   /*while( !m_mainScriptProcess->waitForFinished(500) )
+   {
+       qDebug() << m_mainScriptProcess->readAllStandardOutput() ;
+       qDebug() << m_mainScriptProcess->readAllStandardError() ;
+   }*/
+   usleep(10000);
+   qDebug() << "Process is still running: " << (m_mainScriptProcess->state() == QProcess::Running ) ;
 }
 

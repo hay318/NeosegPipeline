@@ -305,7 +305,7 @@ void NeosegExecution::runNeoseg()
 
    m_log = "Running Neoseg";
    m_outputs.insert("seg_4Labels", segmentation_path); 
-   m_argumentsList << "Neoseg" << "parameters_path";
+   m_argumentsList << "neoseg" << "parameters_path";
    execute(); 
 
    m_neo.seg4Labels = segmentation_path;
