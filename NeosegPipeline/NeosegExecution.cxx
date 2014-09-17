@@ -169,24 +169,24 @@ void NeosegExecution::writeXMLFile()
 
    addSubElement("segmentationParameters", "suffix", "SUFFIX", m_neo.prefix);
    addSubElement("segmentationParameters", "atlasDirectory", "ATLAS-DIRECTORY", m_atlas);
-   addSubElement("segmentationParameters", "atlasOrientation", "ATLAS-ORIENTATION", "RAI");
+   addSubElement("segmentationParameters", "atlasOrientation", "ATLAS-ORIENTATION", "file");
    addSubElement("segmentationParameters", "atlasFormat", "ATLAS-FORMAT", m_atlasFormat);
    addSubElement("segmentationParameters", "outputDirectory", "OUTPUT-DIRECTORY", m_module_path);
    addSubElement("segmentationParameters", "outputFormat", "OUTPUT-FORMAT", "NRRD");
 
    m_script += "\t\tT2 = SubElement(segmentationParameters, 'IMAGE')\n";
    addSubElement("T2", "T2File", "FILE", m_neo.T2);   
-   addSubElement("T2", "T2Orientation", "ORIENTATION", "RAI"); 
+   addSubElement("T2", "T2Orientation", "ORIENTATION", "file");
 
    m_script += "\t\tT1 = SubElement(segmentationParameters, 'IMAGE')\n";
    addSubElement("T1", "T1File", "FILE", m_neo.T1);   
-   addSubElement("T1", "T1Orientation", "ORIENTATION", "RAI");
+   addSubElement("T1", "T1Orientation", "ORIENTATION", "file");
  
    if(m_usingFA)
    {
       m_script += "\t\tFA = SubElement(segmentationParameters, 'IMAGE')\n";
       addSubElement("FA", "FAFile", "FILE", m_neo.FA);   
-      addSubElement("FA", "FAOrientation", "ORIENTATION", "RAI"); 
+      addSubElement("FA", "FAOrientation", "ORIENTATION", "file");
    }
 
 
@@ -194,7 +194,7 @@ void NeosegExecution::writeXMLFile()
    {
       m_script += "\t\tAD = SubElement(segmentationParameters, 'IMAGE')\n";
       addSubElement("AD", "ADFile", "FILE", m_neo.AD);   
-      addSubElement("AD", "ADOrientation", "ORIENTATION", "RAI"); 
+      addSubElement("AD", "ADOrientation", "ORIENTATION", "file");
    }
 
    addSubElement("segmentationParameters", "filterIterations", "FILTER-ITERATIONS", QString::number(m_parameters->getNumberOfIterations()));
