@@ -942,57 +942,97 @@ QString XmlReader::readExecutablesConfigurationFile(QString file_path)
    return errors; 
 }
 
-/*
-QString XmlReader::readExecutablesConfigurationFile(QString file_path)
+QString XmlReader::readDataConfigurationFile( QString file_path )
 {
-   QFile* file = new::QFile(file_path);
-   if(!file->exists())
+   QFile* file = new::QFile( file_path ) ;
+   if( !file->exists() )
    {
-      return " - " + file_path + " does not exist\n"; 
+      return " - " + file_path + " does not exist\n" ;
    }
    else
    {
-      file->open(QIODevice::ReadOnly);
-
-      QXmlStreamReader* stream = new::QXmlStreamReader(file);
-
-      QString errors;
+      file->open( QIODevice::ReadOnly ) ;
+      QXmlStreamReader* stream = new::QXmlStreamReader( file ) ;
+      QString errors ;
       while(!stream->atEnd())
       {
          stream->readNext();
-         if(stream->isStartElement())
+         if (stream->isStartElement())
          {
             QXmlStreamAttributes attributes = stream->attributes();
-            if((stream->name()).toString()!="Executables")
+            QString name = (stream->name()).toString();
+            if( stream->name() == "Data"
+                || stream->name() == "Outputs"
+                || stream->name() == "Inputs" )
             {
-               QString name = (stream->name()).toString(); 
-               QString path = (attributes.value("path")).toString(); 
-               if(m_executablePaths->checkExecutablePath(name, path))
-               {
-                  m_executablePaths->setExecutablePath(name, path);    
-               }
-               else
-               {
-                  errors += " - " + name + " path is not valid\n"; 
-               } 
+                continue ;
             }
-            else if((stream->name()).toString()!="Library-directories")
+            else if( stream->name() == "Output-files" )
             {
-               QString name = (stream->name()).toString(); 
-               QString path = (attributes.value("path")).toString(); 
-
-               if(m_libraryPaths->checkLibraryPath(name, path))
-               {
-                  m_libraryPaths->setLibraryPath(name, path);    
-               }
-               else
-               {
-                  errors += " - " + name + " path is not valid\n"; 
-               } 
+                QString prefix = ( attributes.value( "prefix" ) ).toString() ;
+                QString suffix = ( attributes.value( "suffix" ) ).toString() ;
+                m_parameters->setPrefix( prefix ) ;
+                m_parameters->setSuffix( suffix ) ;
+            }
+            else
+            {
+                QString path = ( attributes.value("path") ).toString() ;
+                if(stream->name() == "T1")
+                {
+                    if( path.isEmpty() )
+                    {
+                        errors += QString( "T1 path is empty" ) ;
+                    }
+                    else
+                    {
+                        m_parameters->setT1( path ) ;
+                    }
+                }
+                else if(stream->name() == "T2")
+                {
+                    if( path.isEmpty() )
+                    {
+                        errors += QString( "T2 path is empty" ) ;
+                    }
+                    else
+                    {
+                        m_parameters->setT2( path ) ;
+                    }
+                }
+                else if(stream->name() == "Mask")
+                {
+                    if( path.isEmpty() )
+                    {
+                        errors += QString( "Mask path is empty" ) ;
+                    }
+                    else
+                    {
+                        m_parameters->setMask( path ) ;
+                    }
+                }
+                else if(stream->name() == "DWI")
+                {
+                    m_parameters->setDWI( path ) ;
+                }
+                else if(stream->name() == "Output-directory")
+                {
+                    if( path.isEmpty() )
+                    {
+                        errors += QString( "Output-directory path is empty" ) ;
+                    }
+                    else
+                    {
+                        m_parameters->setOutput( path ) ;
+                    }
+                }
+                else
+                {
+                  errors += QString( "Unknown attribute: " ) + stream->name().toString() ;
+                  stream->raiseError( errors ) ;
+                }
             }
          }
       }
-      return errors; 
+      return errors;
    }
 }
-*/

@@ -24,6 +24,7 @@ class XmlReader
    void readNeosegParameters(QXmlStreamReader* stream, QString errors);
 
    QString readExecutablesConfigurationFile(QString file_path);
+   QString readDataConfigurationFile( QString file_path ) ;
 
    private:
 

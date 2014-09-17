@@ -72,18 +72,18 @@ void XmlWriter::writeDataConfiguration(QString file_path)
 
 void XmlWriter::writeData(QXmlStreamWriter* stream)
 {
-   stream->writeStartElement("Inputs"); 
-   writeElement(stream, "T1", "path", m_parameters->getT1()); 
+   stream->writeStartElement("Data");
+   stream->writeStartElement("Inputs");
+   writeElement(stream, "T1", "path", m_parameters->getT1());
    writeElement(stream, "T2", "path", m_parameters->getT2());
    writeElement(stream, "Mask", "path", m_parameters->getMask());
    writeElement(stream, "DWI", "path", m_parameters->getDWI());
-   stream->writeEndElement();  
-
-   stream->writeStartElement("Outputs"); 
+   stream->writeEndElement();
+   stream->writeStartElement("Outputs");
    writeElement(stream, "Output-files","prefix", m_parameters->getPrefix(), "suffix", m_parameters->getSuffix());
    writeElement(stream, "Output-directory", "path", m_parameters->getOutput());
-   stream->writeEndElement();  
-
+   stream->writeEndElement();
+   stream->writeEndElement();
 }
 
 void XmlWriter::writeGeneralParameters(QXmlStreamWriter* stream)

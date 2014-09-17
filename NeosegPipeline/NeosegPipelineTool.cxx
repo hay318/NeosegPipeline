@@ -75,6 +75,7 @@ void NeosegPipelineTool::setMask(QString mask)
       }
    }
 }
+
 void NeosegPipelineTool::setDWI(QString DWI)
 {
    if(!DWI.isEmpty())
@@ -89,6 +90,7 @@ void NeosegPipelineTool::setDWI(QString DWI)
       }
    }
 }
+
 void NeosegPipelineTool::setParametersFile(QString xmlFile) 
 {
    if(!xmlFile.isEmpty())
@@ -96,6 +98,16 @@ void NeosegPipelineTool::setParametersFile(QString xmlFile)
       XmlReader m_xmlReader;
       m_xmlReader.setPipelineParameters(m_parameters);
       m_parametersErrors = m_xmlReader.readParametersConfigurationFile(xmlFile); 
+   }
+}
+
+void NeosegPipelineTool::setDataFile(QString xmlFile)
+{
+   if(!xmlFile.isEmpty())
+   {
+      XmlReader m_xmlReader;
+      m_xmlReader.setPipelineParameters(m_parameters);
+      m_dataErrors = m_xmlReader.readDataConfigurationFile(xmlFile);
    }
 }
 
@@ -121,27 +133,29 @@ void NeosegPipelineTool::setExecutablesFile(QString xml_CLI)
 
 void NeosegPipelineTool::printErrors()
 {
-   if(!m_parametersErrors.isEmpty() || !m_executablesErrors.isEmpty())
+   if(!m_parametersErrors.isEmpty()
+   || !m_executablesErrors.isEmpty()
+   || !m_dataErrors.isEmpty()
+     )
    {
-      if(!m_parametersErrors.isEmpty() && !m_executablesErrors.isEmpty())
+       if( !m_dataErrors.isEmpty() )
+       {
+          m_errors += "Errors in the data configuration :\n" + m_dataErrors;
+          m_errors += "\n";
+       }
+      if(!m_parametersErrors.isEmpty() )
       {
          m_errors = "Errors in the parameters configuration :\n" + m_parametersErrors;
          m_errors += "\n";
-         m_errors += "Errors in the software configuration :\n" + m_executablesErrors;           
       }
-
-      if(!m_parametersErrors.isEmpty() && m_executablesErrors.isEmpty())      
+      if( !m_executablesErrors.isEmpty() )
       {
-         m_errors = "Errors in the parameters configuration :\n" + m_parametersErrors; 
-      }
-
-      if(m_parametersErrors.isEmpty() && !m_executablesErrors.isEmpty())      
-      {
-         m_errors = "Errors in the software configuration :\n" + m_executablesErrors; 
+         m_errors += "Errors in the software configuration :\n" + m_executablesErrors;
+         m_errors += "\n";
       }
 
       m_errors += "\n";
-      m_errors += "All the parameters or softwares that are nor valid, are left to their default value\n";
+      m_errors += "All the data or parameters or softwares that are nor valid, are left to their default value\n";
    }
 }
 
@@ -162,7 +176,7 @@ int NeosegPipelineTool::launch(int argc, char *argv[], bool gui)
 
       if(!m_errors.isEmpty())
       {
-         window.printErrors(m_errors);  
+         window.printErrors(m_errors);
       }
 
       app.exec();

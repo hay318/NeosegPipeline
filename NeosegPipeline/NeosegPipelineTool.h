@@ -30,6 +30,7 @@ class NeosegPipelineTool
       void setForce(bool force);
 
       void setParametersFile(QString xmlFile);
+      void setDataFile(QString xmlFile);
       void setExecutablesFile(QString xmlFile);
 
       void printErrors();
@@ -43,6 +44,7 @@ class NeosegPipelineTool
 
       QString m_parametersErrors; 
       QString m_executablesErrors; 
+      QString m_dataErrors;
       QString m_errors;
       bool m_Force ;
 }; 
