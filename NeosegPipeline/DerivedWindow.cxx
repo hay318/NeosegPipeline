@@ -623,14 +623,14 @@ void DerivedWindow::changeComputingSystem(int index)
 {
    if(index == 0)
    {
-      numberOfRegistrations_spinBox->setEnabled(true); 
-      numberOfGB_spinBox->setEnabled(false);       
+      numberOfRegistrations_spinBox->setEnabled(true);
+      numberOfGB_spinBox->setEnabled(false);
    }
    else
    {
-      numberOfRegistrations_spinBox->setEnabled(false); 
-      numberOfRegistrations_spinBox->setValue(0); 
-      numberOfGB_spinBox->setEnabled(true); 
+      numberOfRegistrations_spinBox->setEnabled(false);
+      numberOfRegistrations_spinBox->setValue(0);
+      numberOfGB_spinBox->setEnabled(true);
    }
 }
 
@@ -638,13 +638,13 @@ void DerivedWindow::changeComputingSystem(int index)
 //***** Parameters Configuration File *****//
 void DerivedWindow::selectParameters()
 {
-	QString parameters = QFileDialog::getOpenFileName( this , tr( "Open file" ) , m_data_path , "XML (*.xml)" ) ;
+  QString parameters = QFileDialog::getOpenFileName( this , tr( "Open file" ) , m_data_path , "XML (*.xml)" ) ;
   if(!parameters.isEmpty())
   {
     XmlReader xmlReader ;
     xmlReader.setPipelineParameters( m_parameters ) ;
     QString parametersErrors = xmlReader.readParametersConfigurationFile( parameters ) ;
-    initializeParameters() ;
+    initializeXMLParameters() ;
     if( !parametersErrors.isEmpty() )
     {
       parametersErrors = tr( "Errors in the parameters configuration :\n" ) + parametersErrors ;
@@ -791,7 +791,11 @@ void DerivedWindow::initializeParameters()
    T2_lineEdit->setText(m_parameters->getT2());
    mask_lineEdit->setText(m_parameters->getMask());
    DWI_lineEdit->setText(m_parameters->getDWI());
-   
+   initializeXMLParameters() ;
+}
+
+void DerivedWindow::initializeXMLParameters()
+{
    skullStripping_checkBox->setChecked(m_parameters->getSkullStripping());   
    correcting_checkBox->setChecked(m_parameters->getCorrecting());
 

@@ -69,6 +69,7 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void initializeExecutablesMap();
    void initializeLibrariesMap();   
    void initializeParameters();
+   void initializeXMLParameters();
    void initializeExecutables(); 
 
    // Connection 
