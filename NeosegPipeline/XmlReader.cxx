@@ -54,16 +54,20 @@ QString XmlReader::readParametersConfigurationFile(QString file_path)
             }
             else if (stream->name() == "ANTS-parameters-atlas")
             {
-               readAntsParameters(stream, errors, m_antsParameters_atlas);
+                readAntsParameters(stream, errors, m_antsParameters_atlas);
             }
             else if (stream->name() == "Neoseg-parameters")
             {
-               readNeosegParameters(stream, errors);
+                readNeosegParameters(stream, errors);
+            }
+            else if( stream->name() != "Parameters")
+            {
+                errors += QString( "Unknown attribute: " ) + stream->name().toString() ;
+                stream->raiseError( errors ) ;
             }
          }
       }
-
-      return errors; 
+      return errors;
    }
 }
 

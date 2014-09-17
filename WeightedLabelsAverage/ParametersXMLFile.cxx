@@ -19,7 +19,7 @@ ParametersXMLFileReader
 
 void
 ParametersXMLFileReader
-::StartElement(const char* name, const char** atts)
+::StartElement(const char* name, const char**)
 {
   //std::cout << "StartElement" << name << std::endl;
   if(itksys::SystemTools::Strucmp(name,"WEIGHTED-AVERAGED-LABELS-PARAMETERS") == 0)

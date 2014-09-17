@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>743</width>
-    <height>963</height>
+    <height>998</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -3071,6 +3071,9 @@ p, li { white-space: pre-wrap; }
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="loadDataConfiguration_action"/>
+    <addaction name="saveDataConfiguration_action"/>
+    <addaction name="separator"/>
     <addaction name="loadParametersConfiguration_action"/>
     <addaction name="saveParametersConfiguration_action"/>
     <addaction name="separator"/>
@@ -3213,6 +3216,16 @@ p, li { white-space: pre-wrap; }
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="loadDataConfiguration_action">
+   <property name="text">
+    <string>Load Data Configuration</string>
+   </property>
+  </action>
+  <action name="saveDataConfiguration_action">
+   <property name="text">
+    <string>Save Data Configuration</string>
    </property>
   </action>
  </widget>

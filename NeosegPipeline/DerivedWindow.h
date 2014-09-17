@@ -67,10 +67,10 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    // Initialization
    void initializeImagesMap();
    void initializeExecutablesMap();
-   void initializeLibrariesMap();   
-   void initializeParameters();
+   void initializeLibrariesMap();
    void initializeXMLParameters();
-   void initializeExecutables(); 
+   void initializeExecutables();
+   void initializeDataParameters();
 
    // Connection 
 
@@ -128,13 +128,12 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    // Computing System
    void changeComputingSystem(int index);
 
+   // Executables/Data/Parameters
+   void selectXMLFile( int XMLFile ) ;
    // Parameters
-   void selectParameters(); 
    void saveParameters();  
-
-   // Executables
-   void selectExecutables(); 
-   void saveExecutables(); 
+   void saveExecutables();
+   void saveData();
 
    // Executables 
    void selectExecutable(QString executable_name);

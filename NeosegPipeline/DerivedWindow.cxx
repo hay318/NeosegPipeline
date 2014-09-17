@@ -8,12 +8,22 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    m_executablesSet = false; 
    m_pipelineWriten = false; 
 
+   // Select Image Signal Mapper
+   QSignalMapper* selectXMLFile_signalMapper = new QSignalMapper(this);
+   connect(selectXMLFile_signalMapper, SIGNAL(mapped(int)), this, SLOT(selectXMLFile(int)));
+   selectXMLFile_signalMapper->setMapping(loadDataConfiguration_action, 0);
+   connect(loadDataConfiguration_action, SIGNAL(triggered()), selectXMLFile_signalMapper, SLOT(map()));
+   selectXMLFile_signalMapper->setMapping(loadParametersConfiguration_action, 1);
+   connect(loadParametersConfiguration_action, SIGNAL(triggered()), selectXMLFile_signalMapper, SLOT(map()));
+   selectXMLFile_signalMapper->setMapping(loadSoftwaresConfiguration_action, 2);
+   connect(loadSoftwaresConfiguration_action, SIGNAL(triggered()), selectXMLFile_signalMapper, SLOT(map()));
+   // Data Configuration
+   connect(saveDataConfiguration_action, SIGNAL(triggered()), this, SLOT(saveData()));
+
    // Parameters Configuration 
-   connect(loadParametersConfiguration_action, SIGNAL(triggered()), this, SLOT(selectParameters()));
    connect(saveParametersConfiguration_action, SIGNAL(triggered()), this, SLOT(saveParameters()));
 
    // Executables Configuration
-   connect(loadSoftwaresConfiguration_action, SIGNAL(triggered()), this, SLOT(selectExecutables()));
    connect(saveSoftwaresConfiguration_action, SIGNAL(triggered()), this, SLOT(saveExecutables()));
 
    // Quit
@@ -183,7 +193,8 @@ void DerivedWindow::setPipelineParameters(PipelineParameters* parameters)
    m_neosegParameters = m_parameters->getNeosegParameters(); 
    m_executables = m_parameters->getExecutablePaths();
    m_libraries = m_parameters->getLibraryPaths();
-   initializeParameters();
+   initializeXMLParameters();
+   initializeDataParameters();
    initializeExecutables();
 }
 
@@ -634,62 +645,55 @@ void DerivedWindow::changeComputingSystem(int index)
    }
 }
 
-
-//***** Parameters Configuration File *****//
-void DerivedWindow::selectParameters()
+void DerivedWindow::selectXMLFile( int XMLFile )
 {
-  QString parameters = QFileDialog::getOpenFileName( this , tr( "Open file" ) , m_data_path , "XML (*.xml)" ) ;
-  if(!parameters.isEmpty())
+  QString xmlFile = QFileDialog::getOpenFileName( this , tr( "Open file" ) , m_data_path , "XML (*.xml)" ) ;
+  if(!xmlFile.isEmpty())
   {
     XmlReader xmlReader ;
     xmlReader.setPipelineParameters( m_parameters ) ;
-    QString parametersErrors = xmlReader.readParametersConfigurationFile( parameters ) ;
-    initializeXMLParameters() ;
-    if( !parametersErrors.isEmpty() )
+    QString errors ;
+    switch( XMLFile )
     {
-      parametersErrors = tr( "Errors in the parameters configuration :\n" ) + parametersErrors ;
-      parametersErrors += tr( "\n" ) ;
-      parametersErrors += tr( "All the parameters that are nor valid, are left to their default value\n") ;
-      QMessageBox::critical( this , tr("Errors in XML file") , parametersErrors ) ;
+    case 0:
+        errors = xmlReader.readDataConfigurationFile( xmlFile ) ;
+        initializeDataParameters() ;
+        break ;
+    case 1:
+        errors = xmlReader.readParametersConfigurationFile( xmlFile ) ;
+        initializeXMLParameters() ;
+        break ;
+    case 2:
+    default:
+        errors = xmlReader.readExecutablesConfigurationFile( xmlFile ) ;
+        initializeExecutables() ;
+        break ;
+    }
+    if( !errors.isEmpty() )
+    {
+      errors = tr( "Errors in the XML file:\n" ) + errors ;
+      errors += tr( "\n" ) ;
+      errors += tr( "All the parameters that are nor valid, are left to their default value\n") ;
+      QMessageBox::critical( this , tr("Errors in XML file") , errors ) ;
     }
   }
 }
 
 
-//***** Executables Configuration File *****//
-void DerivedWindow::selectExecutables()
-{
-	QString executables = QFileDialog::getOpenFileName( this , tr( "Open file" ) , m_data_path , "XML (*.xml)" ) ;
-  if( !executables.isEmpty() )
-  {
-    XmlReader xmlReader ;
-    xmlReader.setPipelineParameters( m_parameters ) ;
-    QString executablesErrors = xmlReader.readExecutablesConfigurationFile( executables ) ;
-    initializeExecutables() ;
-    if( !executablesErrors.isEmpty() )
-    {
-      executablesErrors = tr( "Errors in the parameters configuration :\n" ) + executablesErrors ;
-      executablesErrors += tr( "\n" ) ;
-      executablesErrors += tr( "All the parameters that are nor valid, are left to their default value\n" ) ;
-      QMessageBox::critical( this , tr( "Errors in XML file" ) , executablesErrors ) ;
-    }
-  }
-}
-
-// Executables 
+// Executables
 void DerivedWindow::selectExecutable(QString executable_name)
-{   
+{
    Executable executable = m_executables_map[executable_name];
 
-   QString executable_path = (executable.enter_lineEdit)->text(); 
-   QString dir_path = ""; 
+   QString executable_path = (executable.enter_lineEdit)->text();
+   QString dir_path = "";
 
    if(!(executable_path.isEmpty()))
    {
-      dir_path = (QFileInfo(executable_path).dir()).absolutePath(); 
+      dir_path = (QFileInfo(executable_path).dir()).absolutePath();
    }
 
-	 executable_path = QFileDialog::getOpenFileName(this, tr("Select executable"), dir_path);
+     executable_path = QFileDialog::getOpenFileName(this, tr("Select executable"), dir_path);
    if(!executable_path.isEmpty())
    {
       if( m_executables->checkExecutablePath( executable_name , executable_path) )
@@ -702,6 +706,7 @@ void DerivedWindow::selectExecutable(QString executable_name)
       }
    }
 }
+
 void DerivedWindow::enterExecutable(QString executable_name)
 {
    Executable executable = m_executables_map[executable_name];   
@@ -782,16 +787,15 @@ void DerivedWindow::enterLibrary(QString library_name)
 }
 
 
-void DerivedWindow::initializeParameters()
+void DerivedWindow::initializeDataParameters()
 {
-   prefix_lineEdit->setText(m_parameters->getPrefix());
-   suffix_lineEdit->setText(m_parameters->getSuffix());
-   output_lineEdit->setText(m_parameters->getOutput());
-   T1_lineEdit->setText(m_parameters->getT1());  
-   T2_lineEdit->setText(m_parameters->getT2());
-   mask_lineEdit->setText(m_parameters->getMask());
-   DWI_lineEdit->setText(m_parameters->getDWI());
-   initializeXMLParameters() ;
+  prefix_lineEdit->setText(m_parameters->getPrefix());
+  suffix_lineEdit->setText(m_parameters->getSuffix());
+  output_lineEdit->setText(m_parameters->getOutput());
+  T1_lineEdit->setText(m_parameters->getT1());
+  T2_lineEdit->setText(m_parameters->getT2());
+  mask_lineEdit->setText(m_parameters->getMask());
+  DWI_lineEdit->setText(m_parameters->getDWI());
 }
 
 void DerivedWindow::initializeXMLParameters()
@@ -1181,24 +1185,29 @@ void DerivedWindow::setExecutables()
 
 void DerivedWindow::saveParameters()
 {
-   setParameters();
-
-   QString parameters_path = QFileDialog::getSaveFileName(this, tr("Save file"), tr("parameters.xml"), "XML files (*.xml)");
-
-   XmlWriter* parameters = new::XmlWriter();
-   parameters->setPipelineParameters(m_parameters);  
-   parameters->writeParametersConfiguration(parameters_path);
+   setParameters() ;
+   QString parameters_path = QFileDialog::getSaveFileName(this, tr("Save file"), tr("parameters.xml"), "XML files (*.xml)") ;
+   XmlWriter parameters ;
+   parameters.setPipelineParameters( m_parameters ) ;
+   parameters.writeParametersConfiguration( parameters_path ) ;
 }
 
 void DerivedWindow::saveExecutables()
 {
-   setExecutables();
+   setExecutables() ;
+   QString executables_path = QFileDialog::getSaveFileName(this, tr("Save file"), tr("executables.xml"), "XML files (*.xml)") ;
+   XmlWriter executables ;
+   executables.setPipelineParameters( m_parameters ) ;
+   executables.writeExecutablesConfiguration( executables_path ) ;
+}
 
-   QString executables_path = QFileDialog::getSaveFileName(this, tr("Save file"), tr("executables.xml"), "XML files (*.xml)");
-
-   XmlWriter* executables = new::XmlWriter();
-   executables->setPipelineParameters(m_parameters);  
-   executables->writeExecutablesConfiguration(executables_path);
+void DerivedWindow::saveData()
+{
+   setData() ;
+   QString data_path = QFileDialog::getSaveFileName(this, tr("Save file"), tr("data.xml"), "XML files (*.xml)") ;
+   XmlWriter data ;
+   data.setPipelineParameters( m_parameters ) ;
+   data.writeDataConfiguration( data_path ) ;
 }
 
 void DerivedWindow::setParametersWidgetEnabled(bool enabled)

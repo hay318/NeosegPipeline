@@ -32,7 +32,7 @@ public:
 
    // Reading XML File // 
    virtual int CanReadFile(const char* name);
-   virtual void StartElement(const char * name, const char **atts);
+   virtual void StartElement(const char * name, const char **);
    virtual void EndElement(const char *name);
    virtual void CharacterDataHandler(const char *inData, int inLength);
 
