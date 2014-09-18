@@ -34,6 +34,7 @@ class ExecutablePaths
    QString findExecutablePath(QString executableName);
   
    QString checkExecutables();
+   bool skipCheck( QString executableName ) ;
 
    private: 
    std::vector<int> ConvertStringVersionToVector( std::string version ) ;
@@ -44,7 +45,7 @@ class ExecutablePaths
    QMap<QString, QString> m_executables; 
 
    QStringList m_splitPath;
-
+   QStringList m_skipExecutables ;
    QStringList m_executables_withVersionLongFlag; 
    QStringList m_executables_withVersionShortFlag; 
    QStringList m_executables_withVersionArgument; 

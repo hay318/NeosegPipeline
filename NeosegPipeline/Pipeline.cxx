@@ -170,7 +170,7 @@ void Pipeline::writeAtlasGeneration()
    m_importingModules += "import " + module_name + "\n"; 
    m_runningModules += module_name + ".run()\n"; 
 
-   m_parameters->setExistingAtlas(m_atlasGeneration->getOutput());
+   m_parameters->setExistingAtlas(m_atlasGeneration->getOutput() , false );
 }
 
 void Pipeline::writeExistingAtlasRegistration()
@@ -195,7 +195,7 @@ void Pipeline::writeExistingAtlasRegistration()
    m_importingModules += "import " + module_name +"\n"; 
    m_runningModules += module_name + ".run()\n"; 
 
-   m_parameters->setExistingAtlas(m_existingAtlasRegistration->getOutput());
+   m_parameters->setExistingAtlas(m_existingAtlasRegistration->getOutput() , false );
 }
 
 

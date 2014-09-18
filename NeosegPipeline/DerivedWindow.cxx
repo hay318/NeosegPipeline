@@ -1065,7 +1065,7 @@ void DerivedWindow::setParameters()
    else 
    {
       m_parameters->setNewAtlas(false);  
-      m_parameters->setExistingAtlas(existingAtlas_lineEdit->text()); 
+      m_parameters->setExistingAtlas(existingAtlas_lineEdit->text() , true );
    }
 
    m_parameters->setUsingFA(usingFA_checkBox->isChecked());
@@ -1502,12 +1502,14 @@ void DerivedWindow::stopPipeline()
 
 void DerivedWindow::enableDisplayButton()
 {
-   if(QFile(m_parameters->getSegmentation()).exists())
-   {   
-      displayResults_button->setEnabled(true); 
-      displayResults_action->setEnabled(true); 
+   if( m_executables->checkExecutablePath( "InsightSNAP" ,  m_executables->getExecutablePath( "InsightSNAP" ) ) )
+   {
+       if(QFile(m_parameters->getSegmentation()).exists())
+       {
+          displayResults_button->setEnabled(true);
+          displayResults_action->setEnabled(true);
+       }
    }
-
    setParametersWidgetEnabled(true); 
 
    runPipeline_button->setEnabled(true);

@@ -95,7 +95,7 @@ class PipelineParameters
 
    // Existing Atlas
    bool checkExistingAtlas(QString existingAtlas);
-   int setExistingAtlas( QString existingAtlas ) ;
+   int setExistingAtlas( QString existingAtlas , bool alreadyExists ) ;
    QString getExistingAtlas(); 
 
    // Existing Atlas

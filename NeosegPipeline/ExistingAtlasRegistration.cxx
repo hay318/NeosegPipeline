@@ -28,9 +28,9 @@ void ExistingAtlasRegistration::initializeScript()
    defineExecutable("ANTS");
    defineExecutable("ResampleScalarVectorDWIVolume");
    defineExecutable("ImageMath");
-   defineExecutable("ImageStat");
+   /*defineExecutable("ImageStat"); ->Not used anymore???*/
    defineExecutable("unu");
-   defineExecutable("CleanRingMask");
+   /*defineExecutable("CleanRingMask"); ->Not used anymore???*/
  
    m_script += "logger = logging.getLogger('NeosegPipeline')\n\n"; 
 

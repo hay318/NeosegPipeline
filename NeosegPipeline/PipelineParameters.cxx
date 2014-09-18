@@ -439,23 +439,30 @@ bool PipelineParameters::checkExistingAtlas(QString atlas)
    return false;
 }
 
-int PipelineParameters::setExistingAtlas(QString existingAtlas)
+int PipelineParameters::setExistingAtlas( QString existingAtlas , bool alreadyExists )
 {
-   m_existingAtlas = existingAtlas;
-
-   QDir atlas_dir( m_existingAtlas ) ;
-   QFileInfoList templateT1 = find( atlas_dir , "templateT1" , "" , ".*"  ) ;
-   m_atlasFormat = "" ;
-   if( templateT1.size() == 1 )
-   {
-      m_atlasFormat = templateT1[0].completeSuffix() ;
-      return 0 ;
-   }
-   else
-   {
-      return 1 ;
-   }
+    m_existingAtlas = existingAtlas;
+    if( alreadyExists )
+    {
+        QDir atlas_dir( m_existingAtlas ) ;
+        QFileInfoList templateT1 = find( atlas_dir , "templateT1" , "" , ".*"  ) ;
+        m_atlasFormat = "" ;
+        if( templateT1.size() == 1 )
+        {
+            m_atlasFormat = templateT1[0].completeSuffix() ;
+            return 0 ;
+        }
+        else
+        {
+            return 1 ;
+        }
+    }
+    else
+    {
+        return 0 ;
+    }
 }
+
 QString PipelineParameters::getExistingAtlas()
 {
    return m_existingAtlas;
@@ -1021,7 +1028,7 @@ QString PipelineParameters::checkImages()
 
    if(!m_newAtlas && m_reassigningWhiteMatter)
    {
-      errors += "You cannot reassign the small islands of white matter without creating a new atlas\n";      
+      errors += "You cannot reassign the small islands of white matter without creating a new atlas (see \'Neoseg->Post-Processing\')\n";
    }
 
    if( !m_newAtlas && m_existingAtlas.isEmpty() )

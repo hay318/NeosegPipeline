@@ -28,6 +28,8 @@ ExecutablePaths::ExecutablePaths()
    m_executables_versions.insert("ImageMath","1.1");
    m_executables_versions.insert("ITKTransformTools","1.1.0");
    m_executables_versions.insert("python","2.7.3");
+
+   m_skipExecutables.append("InsightSNAP");
 }
 
 void ExecutablePaths::setProgramPath(QString programPath)
@@ -233,11 +235,14 @@ QString ExecutablePaths::checkExecutables()
    {
       QString name = it.key();
       QString path = it.value(); 
-
-      if(path.isEmpty())
+      if( skipCheck( name ) )//We do not check for Insight SNAP as it is not necessary to process the images
+      {
+          continue ;
+      }
+      if( path.isEmpty() )
       {
          errors += name + " path is empty\n";
-      }      
+      }
       else if(!checkExecutablePath(name, path))
       {
          errors += name + " path does not seem to be the good one\n";
@@ -245,4 +250,9 @@ QString ExecutablePaths::checkExecutables()
    }
 
    return errors;
+}
+
+bool ExecutablePaths::skipCheck( QString executableName )
+{
+    return m_skipExecutables.contains( executableName , Qt::CaseInsensitive ) ;
 }

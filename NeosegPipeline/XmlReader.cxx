@@ -138,7 +138,7 @@ void XmlReader::readGeneralParameters(QXmlStreamReader* stream, QString errors)
             {
                if(m_parameters->checkExistingAtlas(existingAtlas))
                {
-                  m_parameters->setExistingAtlas(existingAtlas);
+                  m_parameters->setExistingAtlas(existingAtlas , true );
                } 
                else
                {
@@ -903,7 +903,7 @@ QString XmlReader::readExecutablesConfigurationFile(QString file_path)
                QString path = (attributes.value("path")).toString(); 
                if( currentSection == "Executables" )
                {
-                  if(m_executablePaths->checkExecutablePath(name, path))
+                  if( m_executablePaths->skipCheck( name ) || m_executablePaths->checkExecutablePath(name, path) )
                   {
                      m_executablePaths->setExecutablePath(name, path);    
                   }
