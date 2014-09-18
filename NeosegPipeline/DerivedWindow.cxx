@@ -751,10 +751,11 @@ void DerivedWindow::selectExecutable(QString executable_name)
      executable_path = QFileDialog::getOpenFileName(this, tr("Select executable"), dir_path);
    if(!executable_path.isEmpty())
    {
-      if( m_executables->checkExecutablePath( executable_name , executable_path) )
-      {
-         (executable.enter_lineEdit)->setText(executable_path) ;
-      }
+       if( m_executables->checkExecutablePath( executable_name , executable_path) )
+       {
+           (executable.enter_lineEdit)->setText(executable_path) ;
+           m_executables->setExecutablePath( executable_name , executable_path ) ;
+       }
       else
       {
          QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable or is the incorrect version"));
@@ -764,17 +765,26 @@ void DerivedWindow::selectExecutable(QString executable_name)
 
 void DerivedWindow::enterExecutable(QString executable_name)
 {
-   Executable executable = m_executables_map[executable_name];   
+    Executable executable = m_executables_map[executable_name];
 
-   QString executable_path = (executable.enter_lineEdit)->text();
-   //We do not check the validity of the path as it was frustrating and prompting too many windows.
-   //The validity of all the paths is checked when the pipeline is run.
+    QString executable_path = (executable.enter_lineEdit)->text();
+    if( m_executables->checkExecutablePath( executable_name , executable_path) )
+    {
+        (executable.enter_lineEdit)->setText(executable_path) ;
+        m_executables->setExecutablePath( executable_name , executable_path ) ;
+    }
+    else
+    {
+        QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable or is the incorrect version"));
+    }
 }
+
 void DerivedWindow::resetExecutable(QString executable_name)
 {
    Executable executable = m_executables_map[executable_name]; 
    (executable.enter_lineEdit)->setText(m_executables->getExecutablePath(executable_name));
 }
+
 void DerivedWindow::resetAllExecutables()
 {
    resetExecutable("python"); 
@@ -1388,7 +1398,7 @@ void DerivedWindow::initializePipelineLogging()
    QDir* output_dir = new QDir(m_parameters->getOutput());
    QString log_path = output_dir->filePath(m_parameters->getPrefix() + ".log");
 
-   // Log File 
+   // Log File
    QFile* log_file = new::QFile(log_path); 
    log_file->open(QIODevice::ReadWrite);    
    m_log_textStream = new::QTextStream(log_file); 
@@ -1582,11 +1592,18 @@ void DerivedWindow::displayResults()
    QProcess insightSNAP_process;
 
    QString command = m_executables->getExecutablePath("InsightSNAP") + " -g " + m_parameters->getT1() + " -s " + m_parameters->getSegmentation(); 
-   insightSNAP_process.start(command);
-
-   while (!insightSNAP_process.waitForFinished())
+   insightSNAP_process.start( command ) ;
+   insightSNAP_process.waitForFinished() ;
+   insightSNAP_process.waitForReadyRead() ;
+   QByteArray BA =  insightSNAP_process.readAllStandardOutput() ;
+   QString outputMessage = QString( BA.data() ) ;
+   BA =  insightSNAP_process.readAllStandardError() ;
+   outputMessage += QString( BA.data() ) ;
+   if( !outputMessage.isEmpty() )
    {
-   } 
+       outputMessage = "Check that the selected version is 2.2 or 2.4\n\n" + outputMessage ;
+       QMessageBox::information( this , tr("Error running InsightSNAP"), outputMessage ) ;
+   }
 }
 
 void DerivedWindow::closeEvent(QCloseEvent *event)
