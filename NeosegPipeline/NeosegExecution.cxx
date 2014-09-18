@@ -59,38 +59,38 @@ void NeosegExecution::implementWriteAffineTranformationFile()
 {
    m_script += "def writeAffineTransformationFile(fileName):\n";
 
-   m_script += "\tfile = open(fileName, 'w')\n"; 
+   m_script += m_indent + "file = open(fileName, 'w')\n";
 
-   m_script += "\tfile.write('# Chained affine transform\\n')\n";
-   m_script += "\tfile.write('#\\n')\n";
-   m_script += "\tfile.write('# Translations:\\n')\n";
-   m_script += "\tfile.write('0.00\\n')\n";
-   m_script += "\tfile.write('0.00\\n')\n";
-   m_script += "\tfile.write('0.00\\n')\n";
-   m_script += "\tfile.write('# Rotations:\\n')\n";
-   m_script += "\tfile.write('0.00\\n')\n";
-   m_script += "\tfile.write('0.00\\n')\n";
-   m_script += "\tfile.write('0.00\\n')\n";
-   m_script += "\tfile.write('# Scaling:\\n')\n";
-   m_script += "\tfile.write('1.00\\n')\n";
-   m_script += "\tfile.write('1.00\\n')\n";
-   m_script += "\tfile.write('1.00\\n')\n";
-   m_script += "\tfile.write('# Skews:\\n')\n";
-   m_script += "\tfile.write('0.00\\n')\n";
-   m_script += "\tfile.write('0.00\\n')\n";
-   m_script += "\tfile.write('0.00\\n')\n";
-   m_script += "\tfile.write('# Center of rotation (source):\\n')\n";
-   m_script += "\tfile.write('61.50\\n')\n";
-   m_script += "\tfile.write('77.50\\n')\n";
-   m_script += "\tfile.write('94.50\\n')\n";
-   m_script += "\tfile.write('# Center of rotation (target):\\n')\n";
-   m_script += "\tfile.write('61.50\\n')\n";
-   m_script += "\tfile.write('77.50\\n')\n";
-   m_script += "\tfile.write('94.50\\n')\n";
-   m_script += "\tfile.write('# Forward composition order?\\n')\n";
-   m_script += "\tfile.write('1\\n')\n";
+   m_script += m_indent + "file.write('# Chained affine transform\\n')\n";
+   m_script += m_indent + "file.write('#\\n')\n";
+   m_script += m_indent + "file.write('# Translations:\\n')\n";
+   m_script += m_indent + "file.write('0.00\\n')\n";
+   m_script += m_indent + "file.write('0.00\\n')\n";
+   m_script += m_indent + "file.write('0.00\\n')\n";
+   m_script += m_indent + "file.write('# Rotations:\\n')\n";
+   m_script += m_indent + "file.write('0.00\\n')\n";
+   m_script += m_indent + "file.write('0.00\\n')\n";
+   m_script += m_indent + "file.write('0.00\\n')\n";
+   m_script += m_indent + "file.write('# Scaling:\\n')\n";
+   m_script += m_indent + "file.write('1.00\\n')\n";
+   m_script += m_indent + "file.write('1.00\\n')\n";
+   m_script += m_indent + "file.write('1.00\\n')\n";
+   m_script += m_indent + "file.write('# Skews:\\n')\n";
+   m_script += m_indent + "file.write('0.00\\n')\n";
+   m_script += m_indent + "file.write('0.00\\n')\n";
+   m_script += m_indent + "file.write('0.00\\n')\n";
+   m_script += m_indent + "file.write('# Center of rotation (source):\\n')\n";
+   m_script += m_indent + "file.write('61.50\\n')\n";
+   m_script += m_indent + "file.write('77.50\\n')\n";
+   m_script += m_indent + "file.write('94.50\\n')\n";
+   m_script += m_indent + "file.write('# Center of rotation (target):\\n')\n";
+   m_script += m_indent + "file.write('61.50\\n')\n";
+   m_script += m_indent + "file.write('77.50\\n')\n";
+   m_script += m_indent + "file.write('94.50\\n')\n";
+   m_script += m_indent + "file.write('# Forward composition order?\\n')\n";
+   m_script += m_indent + "file.write('1\\n')\n";
 
-   m_script += "\tfile.close()\n\n";
+   m_script += m_indent + "file.close()\n\n";
 }
 void NeosegExecution::addInputImages()
 {
@@ -160,12 +160,12 @@ void NeosegExecution::changeOrigin(float origin[3])
 void NeosegExecution::writeXMLFile()
 {   
    QString XML_path = m_module_dir->filePath("parameters.xml");
-   m_script += "\tparameters_path = \"" + XML_path + "\"\n"; 
+   m_script += m_indent + "parameters_path = \"" + XML_path + "\"\n";
 
-   m_script += "\tif checkFileExistence(parameters_path)==False:\n";   
+   m_script += m_indent + "if checkFileExistence(parameters_path)==False:\n";
    
-   m_script += "\t\tlogger.info('Writing the XML file...')\n";  
-   m_script += "\t\tsegmentationParameters = Element('SEGMENTATION-PARAMETERS')\n";
+   m_script += m_indent + m_indent + "logger.info('Writing the XML file...')\n";
+   m_script += m_indent + m_indent + "segmentationParameters = Element('SEGMENTATION-PARAMETERS')\n";
 
    addSubElement("segmentationParameters", "suffix", "SUFFIX", m_neo.prefix);
    addSubElement("segmentationParameters", "atlasDirectory", "ATLAS-DIRECTORY", m_atlas);
@@ -174,17 +174,17 @@ void NeosegExecution::writeXMLFile()
    addSubElement("segmentationParameters", "outputDirectory", "OUTPUT-DIRECTORY", m_module_path);
    addSubElement("segmentationParameters", "outputFormat", "OUTPUT-FORMAT", "NRRD");
 
-   m_script += "\t\tT2 = SubElement(segmentationParameters, 'IMAGE')\n";
+   m_script += m_indent + m_indent + "T2 = SubElement(segmentationParameters, 'IMAGE')\n";
    addSubElement("T2", "T2File", "FILE", m_neo.T2);   
    addSubElement("T2", "T2Orientation", "ORIENTATION", "file");
 
-   m_script += "\t\tT1 = SubElement(segmentationParameters, 'IMAGE')\n";
+   m_script += m_indent + m_indent + "T1 = SubElement(segmentationParameters, 'IMAGE')\n";
    addSubElement("T1", "T1File", "FILE", m_neo.T1);   
    addSubElement("T1", "T1Orientation", "ORIENTATION", "file");
  
    if(m_usingFA)
    {
-      m_script += "\t\tFA = SubElement(segmentationParameters, 'IMAGE')\n";
+      m_script += m_indent + m_indent + "FA = SubElement(segmentationParameters, 'IMAGE')\n";
       addSubElement("FA", "FAFile", "FILE", m_neo.FA);   
       addSubElement("FA", "FAOrientation", "ORIENTATION", "file");
    }
@@ -192,7 +192,7 @@ void NeosegExecution::writeXMLFile()
 
    if(m_usingAD)
    {
-      m_script += "\t\tAD = SubElement(segmentationParameters, 'IMAGE')\n";
+      m_script += m_indent + m_indent + "AD = SubElement(segmentationParameters, 'IMAGE')\n";
       addSubElement("AD", "ADFile", "FILE", m_neo.AD);   
       addSubElement("AD", "ADOrientation", "ORIENTATION", "file");
    }
@@ -230,12 +230,12 @@ void NeosegExecution::writeXMLFile()
    addSubElement("segmentationParameters", "referenceImageIndex", "REFERENCE-IMAGE-INDEX", referenceImageIndex);
    addSubElement("segmentationParameters", "referenceModality", "REFERENCE-MODALITY", m_parameters->getReferenceImage());
 
-   m_script += "\t\tXML = xml.dom.minidom.parseString(ElementTree.tostring(segmentationParameters))\n";
-   m_script += "\t\tpretty_xml_as_string = XML.toprettyxml()\n";
+   m_script += m_indent + m_indent + "XML = xml.dom.minidom.parseString(ElementTree.tostring(segmentationParameters))\n";
+   m_script += m_indent + m_indent + "pretty_xml_as_string = XML.toprettyxml()\n";
 
-   m_script += "\t\tparameters = open(parameters_path, 'w')\n";
-   m_script += "\t\tparameters.write(pretty_xml_as_string)\n";  
-   m_script += "\t\tparameters.close()\n\n";
+   m_script += m_indent + m_indent + "parameters = open(parameters_path, 'w')\n";
+   m_script += m_indent + m_indent + "parameters.write(pretty_xml_as_string)\n";
+   m_script += m_indent + m_indent + "parameters.close()\n\n";
 }
 
 
@@ -260,17 +260,17 @@ void NeosegExecution::writeAffineTranformationFiles()
    QString T2ToTemplate_name = T2_name + "_to_" + referenceTemplate_name + "_" + m_neo.prefix + ".affine"; 
    QString T2ToTemplate_path = m_module_dir->filePath(T2ToTemplate_name); 
 
-   m_script += "\tT2ToTemplate = '" + T2ToTemplate_path + "'\n";
+   m_script += m_indent + "T2ToTemplate = '" + T2ToTemplate_path + "'\n";
 
-   m_script += "\tif checkFileExistence(T2ToTemplate)==False:\n";   
-   m_script += "\t\twriteAffineTransformationFile(T2ToTemplate)\n\n";
+   m_script += m_indent + "if checkFileExistence(T2ToTemplate)==False:\n";
+   m_script += m_indent + m_indent + "writeAffineTransformationFile(T2ToTemplate)\n\n";
 
    QString T2ToT1_name = T2_name + "_to_" + T1_name + "_" + m_neo.prefix + ".affine"; 
    QString T2ToT1_path = m_module_dir->filePath(T2ToT1_name); 
 
-   m_script += "\tT2ToT1 = '" + T2ToT1_path + "'\n";
-   m_script += "\tif checkFileExistence(T2ToT1)==False:\n";  
-   m_script += "\t\twriteAffineTransformationFile(T2ToT1)\n\n";
+   m_script += m_indent + "T2ToT1 = '" + T2ToT1_path + "'\n";
+   m_script += m_indent + "if checkFileExistence(T2ToT1)==False:\n";
+   m_script += m_indent + m_indent + "writeAffineTransformationFile(T2ToT1)\n\n";
 
    if(m_usingFA)
    {
@@ -279,9 +279,9 @@ void NeosegExecution::writeAffineTranformationFiles()
       QString T2ToFA_name = T2_name + "_to_" + FA_name + "_" + m_neo.prefix + ".affine"; 
       QString T2ToFA_path = m_module_dir->filePath(T2ToFA_name); 
 
-      m_script += "\tT2ToFA = '" + T2ToFA_path + "'\n";
-      m_script += "\tif checkFileExistence(T2ToFA)==False:\n";  
-      m_script += "\t\twriteAffineTransformationFile(T2ToFA)\n\n";
+      m_script += m_indent + "T2ToFA = '" + T2ToFA_path + "'\n";
+      m_script += m_indent + "if checkFileExistence(T2ToFA)==False:\n";
+      m_script += m_indent + m_indent + "writeAffineTransformationFile(T2ToFA)\n\n";
    }
 
    if(m_usingAD)
@@ -291,9 +291,9 @@ void NeosegExecution::writeAffineTranformationFiles()
       QString T2ToAD_name = T2_name + "_to_" + AD_name + "_" + m_neo.prefix + ".affine"; 
       QString T2ToAD_path = m_module_dir->filePath(T2ToAD_name); 
 
-      m_script += "\tT2ToAD = '" + T2ToAD_path + "'\n";
-      m_script += "\tif checkFileExistence(T2ToAD)==False:\n";  
-      m_script += "\t\twriteAffineTransformationFile(T2ToAD)\n\n";
+      m_script += m_indent + "T2ToAD = '" + T2ToAD_path + "'\n";
+      m_script += m_indent + "if checkFileExistence(T2ToAD)==False:\n";
+      m_script += m_indent + m_indent + "writeAffineTransformationFile(T2ToAD)\n\n";
    }
 }
 
@@ -413,18 +413,18 @@ void NeosegExecution::mergeWhiteMatters()
 void NeosegExecution::reassignWhiteMatter()
 {
    QString m_XML_path = m_module_dir->filePath("parameters_reassignWhiteMatter.xml");
-   m_script += "\tparameters_path = \"" + m_XML_path + "\"\n"; 
+   m_script += m_indent + "parameters_path = \"" + m_XML_path + "\"\n";
 
-   m_script += "\tif checkFileExistence(parameters_path)==False:\n";   
-   m_script += "\t\tlogger.info('- Writing the XML file...')\n";
+   m_script += m_indent + "if checkFileExistence(parameters_path)==False:\n";
+   m_script += m_indent + m_indent + "logger.info('- Writing the XML file...')\n";
 
-   m_script += "\t\tparameters = Element('REASSIGN-WHITE-MATTER-PARAMETERS')\n";
+   m_script += m_indent + m_indent + "parameters = Element('REASSIGN-WHITE-MATTER-PARAMETERS')\n";
 
    addSubElement("parameters", "Input", "INPUT", m_neo.seg3Labels);
 
    addSubElement("parameters", "Threshold", "THRESHOLD", QString::number(m_sizeThreshold));
 
-   m_script += "\t\tprobabilityMaps = SubElement(parameters, 'PROBABILITY-MAPS')\n";
+   m_script += m_indent + m_indent + "probabilityMaps = SubElement(parameters, 'PROBABILITY-MAPS')\n";
    QString white = QDir(m_atlas).filePath("white.nrrd");
    addSubElement("probabilityMaps", "white", "WHITE", white);
    QString gray = QDir(m_atlas).filePath("gray.nrrd");
@@ -444,15 +444,15 @@ void NeosegExecution::reassignWhiteMatter()
    QString output = m_module_dir->filePath(output_name); 
    addSubElement("parameters", "Output", "OUTPUT", output);
 
-   m_script += "\t\tXML = xml.dom.minidom.parseString(ElementTree.tostring(parameters))\n";
-   m_script += "\t\tpretty_xml_as_string = XML.toprettyxml()\n";
+   m_script += m_indent + m_indent + "XML = xml.dom.minidom.parseString(ElementTree.tostring(parameters))\n";
+   m_script += m_indent + m_indent + "pretty_xml_as_string = XML.toprettyxml()\n";
 
-   m_script += "\t\tparameters = open(parameters_path, 'w')\n";
-   m_script += "\t\tparameters.write(pretty_xml_as_string)\n";  
-   m_script += "\t\tparameters.close()\n";
+   m_script += m_indent + m_indent + "parameters = open(parameters_path, 'w')\n";
+   m_script += m_indent + m_indent + "parameters.write(pretty_xml_as_string)\n";
+   m_script += m_indent + m_indent + "parameters.close()\n";
    
-   m_script += "\telse:\n";
-   m_script += "\t\tlogger.info('- Writing the XML file : Done ')\n";
+   m_script += m_indent + "else:\n";
+   m_script += m_indent + m_indent + "logger.info('- Writing the XML file : Done ')\n";
 
 
    m_log = "- Reassigning white matter";
@@ -469,10 +469,10 @@ void NeosegExecution::implementRun()
 {
    m_script += "def run():\n";
 
-   m_script += "\tsignal.signal(signal.SIGINT, stop)\n";
-   m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
+   m_script += m_indent + "signal.signal(signal.SIGINT, stop)\n";
+   m_script += m_indent + "signal.signal(signal.SIGTERM, stop)\n\n";
 
-   m_script += "\tlogger.info('=== Neoseg Execution ===')\n";
+   m_script += m_indent + "logger.info('=== Neoseg Execution ===')\n";
    
    QString seg_name;  
    if(m_computing3LabelsSeg && m_reassigningWhiteMatter)
@@ -492,43 +492,43 @@ void NeosegExecution::implementRun()
    m_outputs.insert("finalSeg", seg_path); 
    checkFinalOutputs();
 
-   m_script += "\tlogger.debug('')\n\n";
+   m_script += m_indent + "logger.debug('')\n\n";
 
    addInputImages(); 
  
    if(m_neo.origin[0] != 0 || m_neo.origin[1] != 0 || m_neo.origin[2] != 0)
    {
-      m_script += "\t# Change Origin #\n";
+      m_script += m_indent + "# Change Origin #\n";
       float origin[3] = {0,0,0};
       changeOrigin(origin);
    }
 
-   m_script += "\t# Write XML File #\n";
+   m_script += m_indent + "# Write XML File #\n";
    writeXMLFile();
 
-   m_script += "\t# Write Affine Transformation File #\n";
+   m_script += m_indent + "# Write Affine Transformation File #\n";
    writeAffineTranformationFiles();
 
-   m_script += "\t# Run Neoseg #\n";
+   m_script += m_indent + "# Run Neoseg #\n";
    runNeoseg();
 
    if(m_neo.origin[0] != 0 || m_neo.origin[1] != 0 || m_neo.origin[2] != 0)
    {
       addOutputImages(); 
 
-      m_script += "\t# Change Origin #\n";
+      m_script += m_indent + "# Change Origin #\n";
       changeOrigin(m_neo.origin);
    }
 
    if(m_computing3LabelsSeg)
    {
-      m_script += "\t# Merge White Matters #\n";
+      m_script += m_indent + "# Merge White Matters #\n";
       mergeWhiteMatters();
    }
 
    if(m_reassigningWhiteMatter)
    {
-      m_script += "\t# Reassign White Matter #\n";
+      m_script += m_indent + "# Reassign White Matter #\n";
       reassignWhiteMatter(); 
    }
 } 

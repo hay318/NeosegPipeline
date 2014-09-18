@@ -225,4 +225,3 @@ int NeosegPipelineTool::launch(int argc, char *argv[], bool gui)
    }
    return 0 ;
 }
-	 

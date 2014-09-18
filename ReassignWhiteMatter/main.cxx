@@ -43,26 +43,26 @@ int main(int argc, char* argv[])
    typedef itk::ImageFileWriter<ImageType> WriterType; 
    
    // Input Reader
-	ReaderType::Pointer reader_input = ReaderType::New();
-	reader_input->SetFileName(parameters->GetInput());
+   ReaderType::Pointer reader_input = ReaderType::New();
+   reader_input->SetFileName(parameters->GetInput());
    reader_input->Update();
    ImagePointerType input = reader_input->GetOutput();
 
    // White Reader 
-	ReaderType::Pointer reader_white = ReaderType::New();
-	reader_white->SetFileName(parameters->GetWhite());
+   ReaderType::Pointer reader_white = ReaderType::New();
+   reader_white->SetFileName(parameters->GetWhite());
    reader_white->Update();
    ImagePointerType white = reader_white->GetOutput();
 
    // Gray Reader 
-	ReaderType::Pointer reader_gray = ReaderType::New();
-	reader_gray->SetFileName(parameters->GetGray());
+   ReaderType::Pointer reader_gray = ReaderType::New();
+   reader_gray->SetFileName(parameters->GetGray());
    reader_gray->Update();
    ImagePointerType gray = reader_gray->GetOutput();
 
    // Caf Reader 
-	ReaderType::Pointer reader_csf = ReaderType::New();
-	reader_csf->SetFileName(parameters->GetCsf());
+   ReaderType::Pointer reader_csf = ReaderType::New();
+   reader_csf->SetFileName(parameters->GetCsf());
    reader_csf->Update();
    ImagePointerType csf = reader_csf->GetOutput();
 
@@ -141,9 +141,9 @@ int main(int argc, char* argv[])
    }
 
    // Output Writer
-	WriterType::Pointer writer_output = WriterType::New();
-	writer_output->SetFileName(parameters->GetOutput());
-	writer_output->SetInput(output);
+   WriterType::Pointer writer_output = WriterType::New();
+   writer_output->SetFileName(parameters->GetOutput());
+   writer_output->SetInput(output);
    writer_output->Update();
 
    return 0; 

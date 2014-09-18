@@ -31,8 +31,8 @@ int main(int argc, char* argv[])
    SpreadFAFilterType::Pointer spreadFAFilter = SpreadFAFilterType::New();
 
    // Input //
-	ReaderType::Pointer reader = ReaderType::New();
-	reader->SetFileName(input);
+   ReaderType::Pointer reader = ReaderType::New();
+   reader->SetFileName(input);
    reader->Update();
    spreadFAFilter->SetInput(reader->GetOutput()); 
 
@@ -42,10 +42,10 @@ int main(int argc, char* argv[])
    spreadFAFilter->Update(); 
 
    // Output //
-	WriterType::Pointer writer = WriterType::New(); 
-	writer->SetInput(spreadFAFilter->GetOutput()); 
-	writer->SetFileName(output);
+   WriterType::Pointer writer = WriterType::New();
+   writer->SetInput(spreadFAFilter->GetOutput());
+   writer->SetFileName(output);
    writer->SetUseCompression(true); 
-	writer->Update();
+   writer->Update();
 
 }

@@ -2,7 +2,8 @@
 
 DerivedWindow::DerivedWindow() : Ui_Window()
 {
-	setupUi(this);
+   setupUi(this);
+   setAcceptDrops(true);
 
    m_parametersSet = false; 
    m_executablesSet = false; 
@@ -185,6 +186,53 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    this->adjustSize();
 }
 
+void DerivedWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+void DerivedWindow::dropEvent(QDropEvent* event)
+{
+    const QMimeData* mimeData = event->mimeData();
+    // check for needed mime type, a file or a list of files
+    if( mimeData->hasUrls() )
+    {
+        QList<QUrl> urlList = mimeData->urls();
+        // extract the local paths of the files
+        for (int i = 0; i < urlList.size(); ++i)
+        {
+            QFileInfo currentFile ( urlList.at(i).toLocalFile() );
+            if ( !currentFile.completeSuffix().compare( "xml" , Qt::CaseInsensitive ) ) // load xml file
+            {
+                QString errors ;
+                QString filename = currentFile.absoluteFilePath() ;
+                XmlReader xmlReader ;
+                PipelineParameters parameters ;//local variable to find which kind of XML file was given (Data/Parameters/Executables)
+                xmlReader.setPipelineParameters( &parameters ) ;
+                errors = xmlReader.readDataConfigurationFile( filename ) ;
+                if( errors.isEmpty() )
+                {
+                    loadXMLFile( filename , 0 ) ;
+                    continue ;
+                }
+                errors = xmlReader.readParametersConfigurationFile( filename ) ;
+                if( errors.isEmpty() )
+                {
+                    loadXMLFile( filename , 1 ) ;
+                    continue ;
+                }
+                errors = xmlReader.readExecutablesConfigurationFile( filename ) ;
+                if( errors.isEmpty() )
+                {
+                    loadXMLFile( filename , 2 ) ;
+                    continue ;
+                }
+                printErrors( errors ) ;
+            }
+        }
+    } // if mimedata hasurls
+} // dropEvent
+
 void DerivedWindow::setPipelineParameters(PipelineParameters* parameters)
 {  
    m_parameters = parameters;
@@ -307,7 +355,7 @@ void DerivedWindow::selectImage(QString image_name)
       dir_path = (QFileInfo(image_path).dir()).absolutePath(); 
    }
 
-	image_path = QFileDialog::getOpenFileName(this, "Open file", dir_path,"Images (*.gipl *.gipl.gz *.nhdr *.nrrd *.mha *.mhd *.hdr *.nii *.nii.gz);; All files (*.*)");
+   image_path = QFileDialog::getOpenFileName(this, "Open file", dir_path,"Images (*.gipl *.gipl.gz *.nhdr *.nrrd *.mha *.mhd *.hdr *.nii *.nii.gz);; All files (*.*)");
 
    if(!image_path.isEmpty())
    {
@@ -434,14 +482,14 @@ void DerivedWindow::selectNewOrExistingAtlas()
       displayAtlases();
       m_selectedAtlases = m_goodAtlases;
       checkSelectedAtlases();
-      AtlasGenerationTab->setDisabled( false ) ;
+      atlasGeneration_tab->setDisabled( false ) ;
    } 
 
    if(existingAtlas_radioButton->isChecked())
    {
       newAtlas_widget->hide();
       existingAtlas_widget->show();
-      AtlasGenerationTab->setDisabled( true ) ;
+      atlasGeneration_tab->setDisabled( true ) ;
    } 
 
    tabs->adjustSize();
@@ -645,27 +693,34 @@ void DerivedWindow::changeComputingSystem(int index)
    }
 }
 
-void DerivedWindow::selectXMLFile( int XMLFile )
+void DerivedWindow::selectXMLFile( int XMLFileType )
 {
-  QString xmlFile = QFileDialog::getOpenFileName( this , tr( "Open file" ) , m_data_path , "XML (*.xml)" ) ;
-  if(!xmlFile.isEmpty())
+  QString xmlFileName = QFileDialog::getOpenFileName( this , tr( "Open file" ) , m_data_path , "XML (*.xml)" ) ;
+  loadXMLFile( xmlFileName , XMLFileType ) ;
+}
+
+void DerivedWindow::loadXMLFile( QString xmlFileName , int XMLFileType )
+{
+  if(!xmlFileName.isEmpty())
   {
     XmlReader xmlReader ;
     xmlReader.setPipelineParameters( m_parameters ) ;
     QString errors ;
-    switch( XMLFile )
+    switch( XMLFileType )
     {
     case 0:
-        errors = xmlReader.readDataConfigurationFile( xmlFile ) ;
+        errors = xmlReader.readDataConfigurationFile( xmlFileName ) ;
+        tabs->setCurrentWidget( data_tab ) ;
         initializeDataParameters() ;
         break ;
     case 1:
-        errors = xmlReader.readParametersConfigurationFile( xmlFile ) ;
+        errors = xmlReader.readParametersConfigurationFile( xmlFileName ) ;
         initializeXMLParameters() ;
         break ;
     case 2:
     default:
-        errors = xmlReader.readExecutablesConfigurationFile( xmlFile ) ;
+        errors = xmlReader.readExecutablesConfigurationFile( xmlFileName ) ;
+        tabs->setCurrentWidget( software_tab ) ;
         initializeExecutables() ;
         break ;
     }
@@ -754,7 +809,7 @@ void DerivedWindow::selectLibrary(QString library_name)
       dir_path = (QFileInfo(library_path).dir()).absolutePath(); 
    }
 
-	library_path =  QFileDialog::getExistingDirectory (this, tr("Select library"), dir_path);
+   library_path =  QFileDialog::getExistingDirectory (this, tr("Select library"), dir_path);
    if(!library_path.isEmpty())
    {
       if(QFileInfo(library_path).isDir())
@@ -979,11 +1034,11 @@ void DerivedWindow::initializeXMLParameters()
    initialParzenKernelWidth_spinBox->setValue(m_neosegParameters->getInitialParzenKernelWidth());
    if( newAtlas_radioButton->isChecked() )
    {
-      AtlasGenerationTab->setDisabled( false ) ;
+      atlasGeneration_tab->setDisabled( false ) ;
    }
    else
    {
-      AtlasGenerationTab->setDisabled( true ) ;
+      atlasGeneration_tab->setDisabled( true ) ;
    }
 }
 
@@ -1205,9 +1260,9 @@ void DerivedWindow::saveData()
 {
    setData() ;
    QString data_path = QFileDialog::getSaveFileName(this, tr("Save file"), tr("data.xml"), "XML files (*.xml)") ;
-   XmlWriter data ;
-   data.setPipelineParameters( m_parameters ) ;
-   data.writeDataConfiguration( data_path ) ;
+   XmlWriter dataWriter ;
+   dataWriter.setPipelineParameters( m_parameters ) ;
+   dataWriter.writeDataConfiguration( data_path ) ;
 }
 
 void DerivedWindow::setParametersWidgetEnabled(bool enabled)

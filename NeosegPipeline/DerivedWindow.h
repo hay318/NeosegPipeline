@@ -11,6 +11,9 @@
 #include <QWidget>
 #include <QtGui>  //MessageBox
 #include <QMap>
+#include <QDropEvent>
+#include <QDragEnterEvent>
+#include <QMimeData>
 
 // My Specific Librairies
 #include "ui_Window.h"
@@ -30,7 +33,7 @@
 
 class DerivedWindow : public QMainWindow , public Ui_Window
 {
-	Q_OBJECT // Enable slots and signals 
+   Q_OBJECT // Enable slots and signals
 
    struct Executable
    {
@@ -55,6 +58,10 @@ class DerivedWindow : public QMainWindow , public Ui_Window
 
    // Constructor
    DerivedWindow();
+
+   // Drag and drop
+   void dragEnterEvent(QDragEnterEvent *event);
+   void dropEvent(QDropEvent* event);
 
    // Set
    void setPipeline(Pipeline* pipeline);
@@ -129,7 +136,9 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void changeComputingSystem(int index);
 
    // Executables/Data/Parameters
-   void selectXMLFile( int XMLFile ) ;
+   void selectXMLFile(int XMLFileType ) ;
+   void loadXMLFile(QString xmlFileName , int XMLFileType );
+
    // Parameters
    void saveParameters();  
    void saveExecutables();

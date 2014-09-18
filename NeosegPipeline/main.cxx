@@ -5,7 +5,7 @@
 
 
 int main(int argc, char *argv[])
-{	
+{
    PARSE_ARGS;
 
    NeosegPipelineTool tool(QString::fromStdString(argv[0]));

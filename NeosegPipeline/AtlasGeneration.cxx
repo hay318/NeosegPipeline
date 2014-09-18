@@ -170,18 +170,18 @@ void AtlasGeneration::generateWeightedAveragedLabels()
    QString grayAverage = m_gray.dir->filePath(m_gray.name + "-average" + m_suffix + ".nrrd");
    QString csfAverage = m_csf.dir->filePath(m_csf.name + "-average" + m_suffix + ".nrrd");
 
-   m_script += "\t" + m_white.output + " = '" + whiteAverage + "'\n";
-   m_script += "\t" + m_gray.output + " = '" + grayAverage + "'\n";
-   m_script += "\t" + m_csf.output + " = '" + csfAverage + "'\n";
+   m_script += m_indent + "" + m_white.output + " = '" + whiteAverage + "'\n";
+   m_script += m_indent + "" + m_gray.output + " = '" + grayAverage + "'\n";
+   m_script += m_indent + "" + m_csf.output + " = '" + csfAverage + "'\n";
 
    QString m_XML_path = m_priorProbabilities_dir->filePath("parameters.xml");
-   m_script += "\tparameters_path = \"" + m_XML_path + "\"\n"; 
+   m_script += m_indent + "parameters_path = \"" + m_XML_path + "\"\n";
 
-   m_script += "\tif checkFileExistence(parameters_path)==False:\n";   
-   m_script += "\t\tlogger.info('- Writing the XML file...')\n";
-   m_script += "\t\tparameters = Element('WEIGHTED-AVERAGED-LABELS-PARAMETERS')\n";
+   m_script += m_indent + "if checkFileExistence(parameters_path)==False:\n";
+   m_script += m_indent + m_indent + "logger.info('- Writing the XML file...')\n";
+   m_script += m_indent + m_indent + "parameters = Element('WEIGHTED-AVERAGED-LABELS-PARAMETERS')\n";
    addSubElement("parameters", "Input", "INPUT", m_neo.T1);
-   m_script += "\t\tatlasPopulation = SubElement(parameters, 'ATLAS-POPULATION')\n";
+   m_script += m_indent + m_indent + "atlasPopulation = SubElement(parameters, 'ATLAS-POPULATION')\n";
 
    std::vector<Atlas>::iterator it;
    Atlas atlas;
@@ -192,7 +192,7 @@ void AtlasGeneration::generateWeightedAveragedLabels()
 
       if(atlas.probabilistic)
       {
-         m_script += "\t\tatlas = SubElement(atlasPopulation, 'PROBABILISTIC-ATLAS')\n";
+         m_script += m_indent + m_indent + "atlas = SubElement(atlasPopulation, 'PROBABILISTIC-ATLAS')\n";
          addSubElement("atlas", "image", "IMAGE", (*it).T2); 
          addSubElement("atlas", "seg", "WHITE", (*it).white);
          addSubElement("atlas", "seg", "GRAY", (*it).gray);
@@ -201,31 +201,31 @@ void AtlasGeneration::generateWeightedAveragedLabels()
 
       else
       {
-         m_script += "\t\tatlas = SubElement(atlasPopulation, 'ATLAS')\n";
+         m_script += m_indent + m_indent + "atlas = SubElement(atlasPopulation, 'ATLAS')\n";
          addSubElement("atlas", "image", "IMAGE", (*it).T2); 
          addSubElement("atlas", "seg", "SEG", (*it).seg);
       }
    }
    
-   m_script += "\t\tweights = SubElement(parameters, 'WEIGHTS')\n";
+   m_script += m_indent + m_indent + "weights = SubElement(parameters, 'WEIGHTS')\n";
    addSubElement("weights", "computingWeights", "COMPUTING-WEIGHTS", QString::number(m_computingWeights));
    addSubElement("weights", "neightborhoodRadius", "NEIGHTBORHOOD-RADIUS", QString::number(m_neightborhoodRadius));
    addSubElement("weights", "neightborhoodRadiusUnit", "NEIGHTBORHOOD-RADIUS-UNIT", m_neightborhoodRadiusUnit);
 
-   m_script += "\t\toutputs = SubElement(parameters, 'OUTPUTS')\n";
+   m_script += m_indent + m_indent + "outputs = SubElement(parameters, 'OUTPUTS')\n";
    addSubElement("outputs", "white", "WHITE-AVERAGE", whiteAverage);
    addSubElement("outputs", "gray", "GRAY-AVERAGE", grayAverage);
    addSubElement("outputs", "csf", "CSF-AVERAGE", csfAverage);
 
-   m_script += "\t\tXML = xml.dom.minidom.parseString(ElementTree.tostring(parameters))\n";
-   m_script += "\t\tpretty_xml_as_string = XML.toprettyxml()\n";
+   m_script += m_indent + m_indent + "XML = xml.dom.minidom.parseString(ElementTree.tostring(parameters))\n";
+   m_script += m_indent + m_indent + "pretty_xml_as_string = XML.toprettyxml()\n";
 
-   m_script += "\t\tparameters = open(parameters_path, 'w')\n";
-   m_script += "\t\tparameters.write(pretty_xml_as_string)\n";  
-   m_script += "\t\tparameters.close()\n";
+   m_script += m_indent + m_indent + "parameters = open(parameters_path, 'w')\n";
+   m_script += m_indent + m_indent + "parameters.write(pretty_xml_as_string)\n";
+   m_script += m_indent + m_indent + "parameters.close()\n";
    
-   m_script += "\telse:\n";
-   m_script += "\t\tlogger.info('- Writing the XML file : Done ')\n";
+   m_script += m_indent + "else:\n";
+   m_script += m_indent + m_indent + "logger.info('- Writing the XML file : Done ')\n";
 
 
    m_log = "- Computing weighted labels averages";
@@ -246,7 +246,7 @@ void AtlasGeneration::extractWMFromFA()
    QString FA_path = m_white.dir->filePath("FA");
    QDir* FA_dir = new QDir(FA_path);  
 
-   m_script += "\tFA = '" + m_neo.FA + "'\n\n";
+   m_script += m_indent + "FA = '" + m_neo.FA + "'\n\n";
 
    // Rescaling FA
    QString rescaledFA = FA_dir->filePath(m_prefix + "FA" + "-rescaled" + m_suffix + ".nrrd");
@@ -276,7 +276,7 @@ void AtlasGeneration::extractWMFromFA()
    m_unnecessaryFiles << smoothedFA; 
 
    // Eroding brain mask
-   m_script += "\tmask = '" + m_neo.mask + "'\n"; 
+   m_script += m_indent + "mask = '" + m_neo.mask + "'\n";
 
    QString erodedMask = FA_dir->filePath(m_prefix + "mask" + "-eroded" + m_suffix + ".nrrd");
    m_outputs.insert("erodedMask", erodedMask);
@@ -426,10 +426,10 @@ void AtlasGeneration::implementRun()
 {
    m_script += "def run():\n";
 
-   m_script += "\tsignal.signal(signal.SIGINT, stop)\n";
-   m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
+   m_script += m_indent + "signal.signal(signal.SIGINT, stop)\n";
+   m_script += m_indent + "signal.signal(signal.SIGTERM, stop)\n\n";
 
-   m_script += "\tlogger.info('=== Atlas Generation ===')\n";
+   m_script += m_indent + "logger.info('=== Atlas Generation ===')\n";
 
    QString finalTemplateT1_path = m_module_dir->filePath(m_templateT1.name + ".nrrd");  
    QString finalTemplateT2_path = m_module_dir->filePath(m_templateT2.name + ".nrrd");  
@@ -447,63 +447,63 @@ void AtlasGeneration::implementRun()
    
    checkFinalOutputs(); 
 
-   m_script += "\tlogger.debug('')\n";
+   m_script += m_indent + "logger.debug('')\n";
 
-   m_script += "\tmask = '" + m_neo.mask + "'\n";  
+   m_script += m_indent + "mask = '" + m_neo.mask + "'\n";
 
-   m_script += "\t### TEMPLATES ###\n";
+   m_script += m_indent + "### TEMPLATES ###\n";
 
-   m_script += "\t# Compute Template T1 #\n";
-   m_script += "\tlogger.info('Computing template T1')\n";
+   m_script += m_indent + "# Compute Template T1 #\n";
+   m_script += m_indent + "logger.info('Computing template T1')\n";
    generateTemplate(m_templateT1);
 
-   m_script += "\t# Compute Template T2 #\n";
-   m_script += "\tlogger.info('Computing template T2')\n";
+   m_script += m_indent + "# Compute Template T2 #\n";
+   m_script += m_indent + "logger.info('Computing template T2')\n";
    generateTemplate(m_templateT2);
 
-   m_script += "\t### PRIOR PROBABILITIES ###\n";
+   m_script += m_indent + "### PRIOR PROBABILITIES ###\n";
 
-   m_script += "\t# Compute Tissue Weighted Averages #\n";
-   m_script += "\tlogger.info('Computing weighted labels averages...')\n";
+   m_script += m_indent + "# Compute Tissue Weighted Averages #\n";
+   m_script += m_indent + "logger.info('Computing weighted labels averages...')\n";
    generateWeightedAveragedLabels();
 
    if(m_includingFA)
    {
-      m_script += "\t# Extract WM From FA #\n";
-      m_script += "\tlogger.info('Extracting and adding the FA to the white average :')\n";
+      m_script += m_indent + "# Extract WM From FA #\n";
+      m_script += m_indent + "logger.info('Extracting and adding the FA to the white average :')\n";
       extractWMFromFA();
    }
 
-   m_script += "\t# Compute White Probability #\n";
-   m_script += "\tlogger.info('Computing white probability :')\n";
+   m_script += m_indent + "# Compute White Probability #\n";
+   m_script += m_indent + "logger.info('Computing white probability :')\n";
    generatePriorProbability(m_white);
 
-   m_script += "\t# Compute Gray Probability #\n";
-   m_script += "\tlogger.info('Computing gray probability :')\n";
+   m_script += m_indent + "# Compute Gray Probability #\n";
+   m_script += m_indent + "logger.info('Computing gray probability :')\n";
    generatePriorProbability(m_gray);
 
-   m_script += "\t# Compute CSF Probability #\n";  
-   m_script += "\tlogger.info('Computing csf probability :')\n";
+   m_script += m_indent + "# Compute CSF Probability #\n";
+   m_script += m_indent + "logger.info('Computing csf probability :')\n";
    generatePriorProbability(m_csf);
 
-   m_script += "\t# Compute Rest Probability #\n"; 
-   m_script += "\tlogger.info('Computing rest probability :')\n"; 
+   m_script += m_indent + "# Compute Rest Probability #\n";
+   m_script += m_indent + "logger.info('Computing rest probability :')\n";
    computeRest(); 
 
-   m_script += "\t# Copy White Probability #\n";
-   m_script += "\tlogger.info('Copying final white probability...')\n";
+   m_script += m_indent + "# Copy White Probability #\n";
+   m_script += m_indent + "logger.info('Copying final white probability...')\n";
    copyFinalPriorProbability(m_white);
 
-   m_script += "\t# Copy Gray Probability #\n";
-   m_script += "\tlogger.info('Copying final gray probability...')\n"; 
+   m_script += m_indent + "# Copy Gray Probability #\n";
+   m_script += m_indent + "logger.info('Copying final gray probability...')\n";
    copyFinalPriorProbability(m_gray);
 
-   m_script += "\t# Copy CSF Probability #\n";
-   m_script += "\tlogger.info('Copying final csf probability...')\n"; 
+   m_script += m_indent + "# Copy CSF Probability #\n";
+   m_script += m_indent + "logger.info('Copying final csf probability...')\n";
    copyFinalPriorProbability(m_csf);
 
-   m_script += "\t# Copy Rest Probability #\n";
-   m_script += "\tlogger.info('Copying final rest probability...')\n"; 
+   m_script += m_indent + "# Copy Rest Probability #\n";
+   m_script += m_indent + "logger.info('Copying final rest probability...')\n";
    copyFinalPriorProbability(m_rest);
 
 }

@@ -50,8 +50,8 @@ void ExistingAtlasRegistration::implementRun()
 {   
    m_script += "def run():\n\n";
 
-   m_script += "\tsignal.signal(signal.SIGINT, stop)\n";
-   m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
+   m_script += m_indent + "signal.signal(signal.SIGINT, stop)\n";
+   m_script += m_indent + "signal.signal(signal.SIGTERM, stop)\n\n";
 
    QString finalTemplateT1_name = "atlas_to_" + m_neo.prefix + "-templateT1.nrrd";
    QString finalTemplateT1_path = m_module_dir->filePath(finalTemplateT1_name); 
@@ -82,10 +82,10 @@ void ExistingAtlasRegistration::implementRun()
    QString templateT1_path = getFilePath(m_atlas_dir, "templateT1");
    QString templateT2_path = getFilePath(m_atlas_dir, "templateT2");
 
-   m_script += "\tT1 = '" + m_neo.T1 + "'\n"; 
-   m_script += "\tT2 = '" + m_neo.T2 + "'\n"; 
-   m_script += "\ttemplateT1 = '" + templateT1_path + "'\n"; 
-   m_script += "\ttemplateT2 = '" + templateT2_path + "'\n"; 
+   m_script += m_indent + "T1 = '" + m_neo.T1 + "'\n";
+   m_script += m_indent + "T2 = '" + m_neo.T2 + "'\n";
+   m_script += m_indent + "templateT1 = '" + templateT1_path + "'\n";
+   m_script += m_indent + "templateT2 = '" + templateT2_path + "'\n";
 
 
 

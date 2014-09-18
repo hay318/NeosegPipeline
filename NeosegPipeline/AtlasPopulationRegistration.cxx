@@ -116,36 +116,36 @@ void AtlasPopulationRegistration::initializeScript()
 
 void AtlasPopulationRegistration::defineRegisterAtlasParameters(Atlas atlas)
 {
-   m_script += "\t# Registration " + atlas.name + " to " + m_neo.prefix + "\n"; 
+   m_script += m_indent + "# Registration " + atlas.name + " to " + m_neo.prefix + "\n";
 
-   m_script += "\tname = '" + atlas.name + "'\n"; 
+   m_script += m_indent + "name = '" + atlas.name + "'\n";
 
-   m_script += "\tT1Atlas = '" + atlas.T1 + "'\n";
-   m_script += "\tT2Atlas = '" + atlas.T2 + "'\n";
+   m_script += m_indent + "T1Atlas = '" + atlas.T1 + "'\n";
+   m_script += m_indent + "T2Atlas = '" + atlas.T2 + "'\n";
 
    if(atlas.probabilistic)
    {
-      m_script += "\twhiteAtlas = '" + atlas.white + "'\n";
-      m_script += "\tgrayAtlas = '" + atlas.gray + "'\n";
-      m_script += "\tcsfAtlas = '" + atlas.csf + "'\n";
+      m_script += m_indent + "whiteAtlas = '" + atlas.white + "'\n";
+      m_script += m_indent + "grayAtlas = '" + atlas.gray + "'\n";
+      m_script += m_indent + "csfAtlas = '" + atlas.csf + "'\n";
    }
    
    else
    {
-      m_script += "\tsegAtlas = '" + atlas.seg + "'\n";
+      m_script += m_indent + "segAtlas = '" + atlas.seg + "'\n";
    }
 
    QString atlas_path = m_module_dir->filePath(atlas.name);
    QDir* atlas_dir = new QDir(atlas_path);
 
    QString output_path = atlas_dir->absolutePath();
-   m_script += "\toutput = '" + output_path + "'\n";
+   m_script += m_indent + "output = '" + output_path + "'\n";
 
    QString basename = atlas.name + "_to_" + m_neo.prefix;
 
    QString log_name = basename + ".log";     
    QString log = atlas_dir->filePath(log_name);
-   m_script += "\tlog = '" + log + "'\n\n";
+   m_script += m_indent + "log = '" + log + "'\n\n";
    
    QString affine_path = atlas_dir->filePath(basename + "_Affine.txt");  
    QString affineTemp_path = atlas_dir->filePath(basename + "_Affine.txt~");  
@@ -181,14 +181,14 @@ void AtlasPopulationRegistration::submitRegisterAtlasJob(Atlas atlas, int i)
    {
       args += "'python', atlasRegistration_script, name, T1Atlas, T2Atlas, segAtlas, output, log";
    }
-   m_script += "\targs = [" + args + "]\n";
-   m_script += "\tbsub_process = subprocess.Popen(args, stdout=subprocess.PIPE)\n";
-   m_script += "\tbsub_output = bsub_process.stdout.read()\n";
-   m_script += "\tlogger.info(bsub_output)\n";
-   m_script += "\tjobID = re.search('(<{1})([0-9]{1,})(>{1})', bsub_output).group(2)\n"; 
-   m_script += "\tlogger.info(jobID)\n"; 
-   m_script += "\t" + registration_name + " = registration('" + atlas.name + "', jobID)\n";
-   m_script += "\trunningRegistrations.append(" + registration_name + ")\n\n";
+   m_script += m_indent + "args = [" + args + "]\n";
+   m_script += m_indent + "bsub_process = subprocess.Popen(args, stdout=subprocess.PIPE)\n";
+   m_script += m_indent + "bsub_output = bsub_process.stdout.read()\n";
+   m_script += m_indent + "logger.info(bsub_output)\n";
+   m_script += m_indent + "jobID = re.search('(<{1})([0-9]{1,})(>{1})', bsub_output).group(2)\n";
+   m_script += m_indent + "logger.info(jobID)\n";
+   m_script += m_indent + "" + registration_name + " = registration('" + atlas.name + "', jobID)\n";
+   m_script += m_indent + "runningRegistrations.append(" + registration_name + ")\n\n";
 
 }
 
@@ -199,10 +199,10 @@ void AtlasPopulationRegistration::executeRegisterAtlasProcess(Atlas atlas, int i
 
    if(m_parameters->getNumberOfRegistrations() != 0)
    {
-      m_script += "\ttime.sleep(1)\n";
-      m_script += "\twhile len(runningRegistrations) >= nbRegMax :\n";  
-      m_script += "\t\tcheckRunningRegistrations(runningRegistrations)\n";
-      m_script += "\t\ttime.sleep(1)\n";
+      m_script += m_indent + "time.sleep(1)\n";
+      m_script += m_indent + "while len(runningRegistrations) >= nbRegMax :\n";
+      m_script += m_indent + m_indent + "checkRunningRegistrations(runningRegistrations)\n";
+      m_script += m_indent + m_indent + "time.sleep(1)\n";
    }
 
    QString process_name = "process_" + QString_i;
@@ -220,10 +220,10 @@ void AtlasPopulationRegistration::executeRegisterAtlasProcess(Atlas atlas, int i
    }
    
    
-   m_script += "\t" + process_name + " = subprocess.Popen(" + command + ")\n";
+   m_script += m_indent + "" + process_name + " = subprocess.Popen(" + command + ")\n";
 
-   m_script += "\t" + registration_name + " = registration('" + atlas.name + "', " + process_name + ")\n";
-   m_script += "\trunningRegistrations.append(" + registration_name + ")\n\n";
+   m_script += m_indent + "" + registration_name + " = registration('" + atlas.name + "', " + process_name + ")\n";
+   m_script += m_indent + "runningRegistrations.append(" + registration_name + ")\n\n";
 }
 
 
@@ -234,66 +234,66 @@ void AtlasPopulationRegistration::implementRegisterAtlasPopulation()
    if(m_computingSystem == "local")
    {
       m_script += "def stop(signal, frame):\n";
-      m_script += "\tprint 'Signal received'\n";
-      m_script += "\tfor registration in runningRegistrations:\n";
-      m_script += "\t\t(registration.process).terminate()\n";
-      m_script += "\tsys.exit(0)\n\n";
+      m_script += m_indent + "print 'Signal received'\n";
+      m_script += m_indent + "for registration in runningRegistrations:\n";
+      m_script += m_indent + m_indent + "(registration.process).terminate()\n";
+      m_script += m_indent + "sys.exit(0)\n\n";
 
       m_script += "def checkRunningRegistrations(runningRegistrations):\n";   
-      m_script += "\tfor registration in runningRegistrations :\n";
-      m_script += "\t\tif (registration.process).poll()==0:\n";
-      m_script += "\t\t\trunningRegistrations.remove(registration)\n\n";
+      m_script += m_indent + "for registration in runningRegistrations :\n";
+      m_script += m_indent + m_indent + "if (registration.process).poll()==0:\n";
+      m_script += m_indent + m_indent + m_indent + "runningRegistrations.remove(registration)\n\n";
    }
 
    if(m_computingSystem == "killdevil" || m_computingSystem == "killdevil interactive")
    {
       m_script += "def stop(signal, frame):\n";
-      m_script += "\tprint 'Signal received'\n";
-      m_script += "\tfor registration in runningRegistrations:\n";
-      m_script += "\t\tbkill_process = subprocess.Popen(['bkill', registration.job])\n";
-      m_script += "\tsys.exit(0)\n\n";
+      m_script += m_indent + "print 'Signal received'\n";
+      m_script += m_indent + "for registration in runningRegistrations:\n";
+      m_script += m_indent + m_indent + "bkill_process = subprocess.Popen(['bkill', registration.job])\n";
+      m_script += m_indent + "sys.exit(0)\n\n";
 
       m_script += "def checkRunningRegistrations():\n";   
-      m_script += "\tfor registration in runningRegistrations :\n";
-      m_script += "\t\tbjobs_process = subprocess.Popen(['bjobs', registration.job], stdout=subprocess.PIPE)\n";
-      m_script += "\t\tbjobs_output = bjobs_process.stdout.read()\n";
-      m_script += "\t\tif 'DONE' in bjobs_output or 'EXIT' in bjobs_output :\n";
-      m_script += "\t\t\trunningRegistrations.remove(registration)\n\n";
+      m_script += m_indent + "for registration in runningRegistrations :\n";
+      m_script += m_indent + m_indent + "bjobs_process = subprocess.Popen(['bjobs', registration.job], stdout=subprocess.PIPE)\n";
+      m_script += m_indent + m_indent + "bjobs_output = bjobs_process.stdout.read()\n";
+      m_script += m_indent + m_indent + "if 'DONE' in bjobs_output or 'EXIT' in bjobs_output :\n";
+      m_script += m_indent + m_indent + m_indent + "runningRegistrations.remove(registration)\n\n";
    }
 
    m_script += "def run():\n";
 
-   m_script += "\tlogger.info('=== Atlas Registration ===')\n";
+   m_script += m_indent + "logger.info('=== Atlas Registration ===')\n";
 
-   m_script += "\tsignal.signal(signal.SIGINT, stop)\n";
-   m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
+   m_script += m_indent + "signal.signal(signal.SIGINT, stop)\n";
+   m_script += m_indent + "signal.signal(signal.SIGTERM, stop)\n\n";
 
    if(m_parameters->getNumberOfCores() != 0)
    {
-      m_script += "\tos.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = '" + QString::number(m_parameters->getNumberOfCores()) + "' \n";
+      m_script += m_indent + "os.environ['ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'] = '" + QString::number(m_parameters->getNumberOfCores()) + "' \n";
    }
    if(m_parameters->getNumberOfRegistrations() != 0)
    {
-      m_script += "\tnbRegMax = " + QString::number(m_parameters->getNumberOfRegistrations()) +  "\n";
+      m_script += m_indent + "nbRegMax = " + QString::number(m_parameters->getNumberOfRegistrations()) +  "\n";
    }
 
-   m_script += "\tglobal runningRegistrations\n";
-   m_script += "\trunningRegistrations = []\n\n";
+   m_script += m_indent + "global runningRegistrations\n";
+   m_script += m_indent + "runningRegistrations = []\n\n";
 
    if(m_computingSystem == "killdevil" || m_computingSystem == "killdevil interactive")
    {
-      m_script += "\tregistration = namedtuple('registration', 'name job')\n\n";
+      m_script += m_indent + "registration = namedtuple('registration', 'name job')\n\n";
    }
    else
    {
-      m_script += "\tregistration = namedtuple('registration', 'name process')\n\n";
+      m_script += m_indent + "registration = namedtuple('registration', 'name process')\n\n";
    }
 
    QString atlasRegistration_script = m_processing_dir->filePath("atlasRegistration.py");
-   m_script += "\tatlasRegistration_script = '" + atlasRegistration_script + "'\n";
+   m_script += m_indent + "atlasRegistration_script = '" + atlasRegistration_script + "'\n";
 
    QString probabilisticAtlasRegistration_script = m_processing_dir->filePath("probabilisticAtlasRegistration.py");
-   m_script += "\tprobabilisticAtlasRegistration_script = '" + probabilisticAtlasRegistration_script + "'\n\n";
+   m_script += m_indent + "probabilisticAtlasRegistration_script = '" + probabilisticAtlasRegistration_script + "'\n\n";
 
    std::vector<Atlas>::iterator it;
    for (it = m_atlasPopulation.begin(); it != m_atlasPopulation.end(); ++it)
@@ -317,17 +317,17 @@ void AtlasPopulationRegistration::implementRegisterAtlasPopulation()
 
    if(m_computingSystem == "local")
    {
-      m_script += "\texit_codes = [(registration.process).wait() for registration in runningRegistrations]\n";
+      m_script += m_indent + "exit_codes = [(registration.process).wait() for registration in runningRegistrations]\n";
    }
 
    if(m_computingSystem == "killdevil" || m_computingSystem == "killdevil interactive")
    {
-      m_script += "\twhile len(runningRegistrations) !=0 :\n";
-      m_script += "\t\tcheckRunningRegistrations()\n"; 
-      m_script += "\t\ttime.sleep(1)\n";
+      m_script += m_indent + "while len(runningRegistrations) !=0 :\n";
+      m_script += m_indent + m_indent + "checkRunningRegistrations()\n";
+      m_script += m_indent + m_indent + "time.sleep(1)\n";
    }
 
-   m_script += "\tlogger.info('')\n"; 
+   m_script += m_indent + "logger.info('')\n";
 }
 
 void AtlasPopulationRegistration::writeRegisterAtlasPopulation()

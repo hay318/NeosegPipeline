@@ -39,16 +39,16 @@ void AtlasRegistration::initializeLogging()
 {
    m_script += "def initializeLogging(log):\n";
 
-   m_script += "\tglobal logger\n";   
-   m_script += "\tlogger = logging.getLogger('NeosegPipelineRegistrations')\n"; 
-   m_script += "\tlogger.setLevel(logging.DEBUG)\n";
+   m_script += m_indent + "global logger\n";
+   m_script += m_indent + "logger = logging.getLogger('NeosegPipelineRegistrations')\n";
+   m_script += m_indent + "logger.setLevel(logging.DEBUG)\n";
 
-   m_script += "\tfileHandler = logging.FileHandler(log)\n";
-   m_script += "\tfileHandler.setLevel(logging.DEBUG)\n";
-   m_script += "\tfileFormatter = logging.Formatter('%(message)s')\n";
-   m_script += "\tfileHandler.setFormatter(fileFormatter)\n";
+   m_script += m_indent + "fileHandler = logging.FileHandler(log)\n";
+   m_script += m_indent + "fileHandler.setLevel(logging.DEBUG)\n";
+   m_script += m_indent + "fileFormatter = logging.Formatter('%(message)s')\n";
+   m_script += m_indent + "fileHandler.setFormatter(fileFormatter)\n";
 
-   m_script += "\tlogger.addHandler(fileHandler)\n\n";
+   m_script += m_indent + "logger.addHandler(fileHandler)\n\n";
 }
 
 void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
@@ -62,42 +62,42 @@ void AtlasRegistration::implementRegisterAtlas(bool probabilistic)
       m_script += "def main(name, T1Atlas, T2Atlas, segAtlas, output, log):\n\n";
    }
 
-   m_script += "\tsignal.signal(signal.SIGINT, stop)\n";
-   m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
+   m_script += m_indent + "signal.signal(signal.SIGINT, stop)\n";
+   m_script += m_indent + "signal.signal(signal.SIGTERM, stop)\n\n";
 
-   m_script += "\tlogFile = open(log, \"w\")\n";
-   m_script += "\tinitializeLogging(log)\n\n";
+   m_script += m_indent + "logFile = open(log, \"w\")\n";
+   m_script += m_indent + "initializeLogging(log)\n\n";
 
-   m_script += "\toutbase = output + '/' + name + '_to_" + m_neo.prefix + "'\n";   
-   m_script += "\tfinalT1 = outbase + '-T1.nrrd'\n";
-   m_script += "\tfinalT2 = outbase + '-T2.nrrd'\n";
+   m_script += m_indent + "outbase = output + '/' + name + '_to_" + m_neo.prefix + "'\n";
+   m_script += m_indent + "finalT1 = outbase + '-T1.nrrd'\n";
+   m_script += m_indent + "finalT2 = outbase + '-T2.nrrd'\n";
 
    if(probabilistic)
    {
-      m_script += "\tfinalWhite = outbase + '-white.nrrd'\n";
-      m_script += "\tfinalGray = outbase + '-gray.nrrd'\n";
-      m_script += "\tfinalCSF = outbase + '-csf.nrrd'\n";
-      m_script += "\tif checkFileExistence(finalT1)==True and checkFileExistence(finalT2) and checkFileExistence(finalWhite) and checkFileExistence(finalGray) and checkFileExistence(finalCSF) :\n";
+      m_script += m_indent + "finalWhite = outbase + '-white.nrrd'\n";
+      m_script += m_indent + "finalGray = outbase + '-gray.nrrd'\n";
+      m_script += m_indent + "finalCSF = outbase + '-csf.nrrd'\n";
+      m_script += m_indent + "if checkFileExistence(finalT1)==True and checkFileExistence(finalT2) and checkFileExistence(finalWhite) and checkFileExistence(finalGray) and checkFileExistence(finalCSF) :\n";
    }
    else
    {
-      m_script += "\tfinalSeg = outbase + '-seg.nrrd'\n";
-      m_script += "\tif checkFileExistence(finalT1)==True and checkFileExistence(finalT2) and checkFileExistence(finalSeg) :\n";
+      m_script += m_indent + "finalSeg = outbase + '-seg.nrrd'\n";
+      m_script += m_indent + "if checkFileExistence(finalT1)==True and checkFileExistence(finalT2) and checkFileExistence(finalSeg) :\n";
    }
 
-   //m_script += "\t\ttime.sleep(0.5)\n";
-   m_script += "\t\tmainLog = open('" + m_log_path + "','a')\n"; 
-   m_script += "\t\tmainLog.write(name + ' Registration -> Skipped\\n')\n"; 
-   m_script += "\t\tmainLog.close()\n";  
-   m_script += "\t\treturn\n"; 
+   //m_script += m_indent + m_indent + "time.sleep(0.5)\n";
+   m_script += m_indent + m_indent + "mainLog = open('" + m_log_path + "','a')\n";
+   m_script += m_indent + m_indent + "mainLog.write(name + ' Registration -> Skipped\\n')\n";
+   m_script += m_indent + m_indent + "mainLog.close()\n";
+   m_script += m_indent + m_indent + "return\n";
 
-   m_script += "\tmainLog = open('" + m_log_path + "','a')\n"; 
-   m_script += "\tmainLog.write(name + ' Registration...\\n')\n"; 
-   m_script += "\tmainLog.close()\n";  
+   m_script += m_indent + "mainLog = open('" + m_log_path + "','a')\n";
+   m_script += m_indent + "mainLog.write(name + ' Registration...\\n')\n";
+   m_script += m_indent + "mainLog.close()\n";
 
-   m_script += "\tT1 = '" + m_neo.T1 + "'\n";
-   m_script += "\tT2 = '" + m_neo.T2 + "'\n";  
-   m_script += "\tmask = '" + m_neo.mask + "'\n\n";  
+   m_script += m_indent + "T1 = '" + m_neo.T1 + "'\n";
+   m_script += m_indent + "T2 = '" + m_neo.T2 + "'\n";
+   m_script += m_indent + "mask = '" + m_neo.mask + "'\n\n";
 
    // Registration
    QString modality1 = "CC[' + T1 + ',' + T1Atlas + '," + QString::number(m_parameters->getWeight1()) + "," + QString::number(m_parameters->getRadius1()) + "]";
@@ -230,7 +230,7 @@ void AtlasRegistration::writeRegisterAtlas() // args = (T1Atlas, T2Atlas, output
    implementRegisterAtlas(0);
 
    m_script += "if __name__ == '__main__':\n";
-   m_script += "\tmain(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])\n";
+   m_script += m_indent + "main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])\n";
 
    QString script_path = m_processing_dir->filePath("atlasRegistration.py");
 
@@ -252,7 +252,7 @@ void AtlasRegistration::writeRegisterProbabilisticAtlas() // args = (T1Atlas, T2
    implementRegisterAtlas(1);
 
    m_script += "if __name__ == '__main__':\n";
-   m_script += "\tmain(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8])\n";
+   m_script += m_indent + "main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8])\n";
 
    QString script_path = m_processing_dir->filePath("probabilisticAtlasRegistration.py");
 

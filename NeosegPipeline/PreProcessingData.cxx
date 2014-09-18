@@ -122,14 +122,14 @@ void PreProcessingData::implementRun()
 {
    m_script += "def run():\n\n";  
 
-   m_script += "\tsignal.signal(signal.SIGINT, stop)\n";
-   m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
+   m_script += m_indent + "signal.signal(signal.SIGINT, stop)\n";
+   m_script += m_indent + "signal.signal(signal.SIGTERM, stop)\n\n";
 
-   m_script += "\tlogger.info('=== Preprocessing Data ===')\n";
+   m_script += m_indent + "logger.info('=== Preprocessing Data ===')\n";
 
-   m_script += "\tT1 = '" + m_neo.T1 + "'\n"; 
-   m_script += "\tT2 = '" + m_neo.T2 + "'\n"; 
-   m_script += "\tmask = '" + m_neo.mask + "'\n\n";
+   m_script += m_indent + "T1 = '" + m_neo.T1 + "'\n";
+   m_script += m_indent + "T2 = '" + m_neo.T2 + "'\n";
+   m_script += m_indent + "mask = '" + m_neo.mask + "'\n\n";
 
    QString correctedT1_name = m_prefix + "T1" + m_skullStripping_suffix + m_correcting_suffix + m_suffix + ".nrrd";
    QString correctedT1_path = m_module_dir->filePath(correctedT1_name);
@@ -141,7 +141,7 @@ void PreProcessingData::implementRun()
    m_outputs.insert("finalT2", correctedT2_path);
    checkFinalOutputs(); 
 
-   m_script += "\tlogger.info('')\n";
+   m_script += m_indent + "logger.info('')\n";
 
    if(m_skullStripping)
    {

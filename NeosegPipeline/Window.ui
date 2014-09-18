@@ -244,7 +244,7 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="Data">
+      <widget class="QWidget" name="data_tab">
        <attribute name="title">
         <string>Data</string>
        </attribute>
@@ -1596,7 +1596,7 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="AtlasGenerationTab">
+      <widget class="QWidget" name="atlasGeneration_tab">
        <attribute name="title">
         <string>Atlas Generation</string>
        </attribute>
@@ -2629,7 +2629,7 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="software_tab">
        <attribute name="title">
         <string>Software</string>
        </attribute>

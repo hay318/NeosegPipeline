@@ -13,7 +13,7 @@ class About : public QDialog , public Ui_Dialog
    
    About()
    {
-   	setupUi(this);
+      setupUi(this);
    }
 
    void setVersion(QString version)

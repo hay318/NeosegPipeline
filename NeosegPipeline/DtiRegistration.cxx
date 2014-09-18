@@ -223,10 +223,10 @@ void DtiRegistration::implementRun()
 {   
    m_script += "def run():\n\n";
 
-   m_script += "\tsignal.signal(signal.SIGINT, stop)\n";
-   m_script += "\tsignal.signal(signal.SIGTERM, stop)\n\n";
+   m_script += m_indent + "signal.signal(signal.SIGINT, stop)\n";
+   m_script += m_indent + "signal.signal(signal.SIGTERM, stop)\n\n";
 
-   m_script += "\tlogger.info('=== DTI Registration ===')\n";
+   m_script += m_indent + "logger.info('=== DTI Registration ===')\n";
 
    QString registeredAD_name = m_prefix + "AD" + m_registering_suffix + m_suffix + ".nrrd";
    QString registeredAD_path = m_module_dir->filePath(registeredAD_name); 
@@ -238,39 +238,39 @@ void DtiRegistration::implementRun()
    m_outputs.insert("finalFA", registeredFA_path); 
    checkFinalOutputs(); 
 
-   m_script += "\tlogger.info('')\n";
+   m_script += m_indent + "logger.info('')\n";
 
-   m_script += "\tT1 = '" + m_neo.T1 + "'\n";
-   m_script += "\tT2 = '" + m_neo.T2 + "'\n";
-   m_script += "\tDWI = '" + m_neo.DWI + "'\n";
+   m_script += m_indent + "T1 = '" + m_neo.T1 + "'\n";
+   m_script += m_indent + "T2 = '" + m_neo.T2 + "'\n";
+   m_script += m_indent + "DWI = '" + m_neo.DWI + "'\n";
 
-   m_script += "\n\t# Generate DTI amd b0 #\n";
+   m_script += "\n" + m_indent + "# Generate DTI amd b0 #\n";
    generateDTIAndb0(); 
 
-   m_script += "\n\t# Skull-Strip b0 #\n";
+   m_script += "\n" + m_indent + "# Skull-Strip b0 #\n";
    skullStripb0(); 
 
-   m_script += "\n\t# Skull-Strip DTI #\n";
+   m_script += "\n" + m_indent + "# Skull-Strip DTI #\n";
    skullStripDTI(); 
 
-   m_script += "\n\t# Generate FA #\n";  
+   m_script += "\n" + m_indent + "# Generate FA #\n";
    generateFA(); 
 
-   m_script += "\n\t# Upsample FA #\n";
+   m_script += "\n" + m_indent + "# Upsample FA #\n";
    upsample("FA"); 
 
-   m_script += "\n\t# Generate AD #\n"; 
+   m_script += "\n" + m_indent + "# Generate AD #\n";
    generateAD(); 
 
-   m_script += "\n\t# Upsample AD #\n";
+   m_script += "\n" + m_indent + "# Upsample AD #\n";
    upsample("AD"); 
 
-   m_script += "\n\t# Registering FA and AD #\n";
+   m_script += "\n" + m_indent + "# Registering FA and AD #\n";
    calculateTransformations(); 
    applyTransformations("FA"); 
    applyTransformations("AD"); 
 
-   m_script += "\tlogger.info('')\n";
+   m_script += m_indent + "logger.info('')\n";
 }
 
 void DtiRegistration::update()

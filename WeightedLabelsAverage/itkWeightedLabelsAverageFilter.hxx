@@ -283,7 +283,7 @@ namespace itk
 
          if ( progress % 500000 == 0 )
          {
-	   std::cout<<"Avg At index:"<<index<<" - " << progress << " labels = "<<labels[1]<<" "<<labels[2]<<" "<<labels[3]<<std::endl;
+             std::cout<<"Avg At index:"<<index<<" - " << progress << " labels = "<<labels[1]<<" "<<labels[2]<<" "<<labels[3]<<std::endl;
          } 
 
          ++it;

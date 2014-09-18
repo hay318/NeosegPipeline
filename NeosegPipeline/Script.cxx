@@ -4,6 +4,7 @@ Script::Script(QString module)
 {
    m_module_name = module; 
    m_script_name = module + ".py";   
+   m_indent = "  " ; //2 white spaces
 } 
 
 void Script::setProcessingDirectory(QString processing_path) 
@@ -91,91 +92,91 @@ void Script::defineExecutable(QString executable)
 void Script::implementStop()
 {
    m_script += "def stop(signal, frame):\n";
-   m_script += "\tprint '*************** Signal stop received! ******************'\n";
-   m_script += "\trunningProcess.terminate()\n";
-   m_script += "\tsys.exit(0)\n\n";
+   m_script += m_indent + "print '*************** Signal stop received! ******************'\n";
+   m_script += m_indent + "runningProcess.terminate()\n";
+   m_script += m_indent + "sys.exit(0)\n\n";
 }
 
 void Script::implementCheckFileExistence()
 {
    m_script += "def checkFileExistence(fileName):\n";
-   m_script += "\ttry:\n";
-   m_script += "\t\twith open(fileName):\n";
-   m_script += "\t\t\treturn True\n";
-   m_script += "\texcept IOError:\n";
-   m_script += "\t\treturn False\n\n";
+   m_script += m_indent + "try:\n";
+   m_script += m_indent + m_indent + "with open(fileName):\n";
+   m_script += m_indent + m_indent + m_indent + "return True\n";
+   m_script += m_indent + "except IOError:\n";
+   m_script += m_indent + m_indent + "return False\n\n";
 }
 
 void Script::implementExecute()
 {
    m_script += "def execute(args):\n";
 
-   m_script += "\tglobal runningProcess\n";
+   m_script += m_indent + "global runningProcess\n";
 
-   m_script += "\tlogger.debug(subprocess.list2cmdline(args))\n";
-   m_script += "\trunningProcess = subprocess.Popen(args,stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
+   m_script += m_indent + "logger.debug(subprocess.list2cmdline(args))\n";
+   m_script += m_indent + "runningProcess = subprocess.Popen(args,stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
 
-   m_script += "\tstdout = ''\n";
+   m_script += m_indent + "stdout = ''\n";
 
-   m_script += "\twhile True:\n";
-   m_script += "\t\tline = runningProcess.stdout.readline()\n";
-   m_script += "\t\tif line:\n";
-   m_script += "\t\t\tlogger.debug(line.rstrip())\n";
-   m_script += "\t\t\tstdout = stdout + line\n";
-   m_script += "\t\tif not line: break\n";
+   m_script += m_indent + "while True:\n";
+   m_script += m_indent + m_indent + "line = runningProcess.stdout.readline()\n";
+   m_script += m_indent + m_indent + "if line:\n";
+   m_script += m_indent + m_indent + m_indent + "logger.debug(line.rstrip())\n";
+   m_script += m_indent + m_indent + m_indent + "stdout = stdout + line\n";
+   m_script += m_indent + m_indent + "if not line: break\n";
 
-   m_script += "\twhile True:\n";
-   m_script += "\t\tline = runningProcess.stderr.readline()\n";
-   m_script += "\t\tif line:\n";
-   m_script += "\t\t\tlogger.error(line.rstrip())\n";
-   m_script += "\t\tif not line: break\n";
+   m_script += m_indent + "while True:\n";
+   m_script += m_indent + m_indent + "line = runningProcess.stderr.readline()\n";
+   m_script += m_indent + m_indent + "if line:\n";
+   m_script += m_indent + m_indent + m_indent + "logger.error(line.rstrip())\n";
+   m_script += m_indent + m_indent + "if not line: break\n";
 
-   m_script += "\trunningProcess.wait()\n";
+   m_script += m_indent + "runningProcess.wait()\n";
 
    if (m_stoppingIfError)
    {
-      m_script += "\tif runningProcess.returncode != 0 :\n";
-      m_script += "\t\tlogger.error('Error(s) occured, pipeline stopped!')\n";
-      m_script += "\t\tsys.exit(1)\n";
+      m_script += m_indent + "if runningProcess.returncode != 0 :\n";
+      m_script += m_indent + m_indent + "logger.error('Error(s) occured, pipeline stopped!')\n";
+      m_script += m_indent + m_indent + "sys.exit(1)\n";
    }   
-   m_script += "\tlogger.debug('')\n\n";
-   m_script += "\treturn stdout\n\n";
+   m_script += m_indent + "logger.debug('')\n\n";
+   m_script += m_indent + "return stdout\n\n";
 }
 
 void Script::implementExecutePipe()
 {
    m_script += "def executePipe(args1, args2):\n";
 
-   m_script += "\tglobal runningProcess\n";
+   m_script += m_indent + "global runningProcess\n";
 
-   m_script += "\tlogger.debug(subprocess.list2cmdline(args1) + ' | ' + subprocess.list2cmdline(args2))\n";
+   m_script += m_indent + "logger.debug(subprocess.list2cmdline(args1) + ' | ' + subprocess.list2cmdline(args2))\n";
 
-   m_script += "\tpreProcess = subprocess.Popen(args1,stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
-   m_script += "\trunningProcess = subprocess.Popen(args2,stdin=preProcess.stdout,stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
+   m_script += m_indent + "preProcess = subprocess.Popen(args1,stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
+   m_script += m_indent + "runningProcess = subprocess.Popen(args2,stdin=preProcess.stdout,stdout=subprocess.PIPE,stderr=subprocess.PIPE)\n";
 
-   m_script += "\twhile True:\n";
-   m_script += "\t\tline = runningProcess.stdout.readline()\n";
-   m_script += "\t\tif line:\n";
-   m_script += "\t\t\tlogger.debug(line.rstrip())\n";
-   m_script += "\t\tif not line: break\n";
+   m_script += m_indent + "while True:\n";
+   m_script += m_indent + m_indent + "line = runningProcess.stdout.readline()\n";
+   m_script += m_indent + m_indent + "if line:\n";
+   m_script += m_indent + m_indent + m_indent + "logger.debug(line.rstrip())\n";
+   m_script += m_indent + m_indent + "if not line: break\n";
 
-   m_script += "\twhile True:\n";
-   m_script += "\t\tline = runningProcess.stderr.readline()\n";
-   m_script += "\t\tif line:\n";
-   m_script += "\t\t\tlogger.error(line.rstrip())\n";
-   m_script += "\t\tif not line: break\n";
+   m_script += m_indent + "while True:\n";
+   m_script += m_indent + m_indent + "line = runningProcess.stderr.readline()\n";
+   m_script += m_indent + m_indent + "if line:\n";
+   m_script += m_indent + m_indent + m_indent + "logger.error(line.rstrip())\n";
+   m_script += m_indent + m_indent + "if not line: break\n";
 
-   m_script += "\trunningProcess.wait()\n";
+   m_script += m_indent + "runningProcess.wait()\n";
 
    if (m_stoppingIfError)
    {
-      m_script += "\tif runningProcess.returncode != 0 :\n";
-      m_script += "\t\tlogger.error('Error(s) occured, pipeline stopped!')\n";
-      m_script += "\t\tsys.exit(1)\n";
+      m_script += m_indent + "if runningProcess.returncode != 0 :\n";
+      m_script += m_indent + m_indent + "logger.error('Error(s) occured, pipeline stopped!')\n";
+      m_script += m_indent + m_indent + "sys.exit(1)\n";
    }
-   m_script += "\tlogger.debug('')\n\n";
-   m_script += "\tstdout, stderr = runningProcess.communicate()\n";
-   m_script += "\treturn stdout\n\n";
+   m_script += m_indent + "logger.debug('')\n\n";
+   m_script += m_indent + "stdout, stderr = runningProcess.communicate()\n";
+   m_script += m_indent + "return stdout\n\n";
 }
 
 void Script::checkFinalOutputs()
@@ -184,13 +185,13 @@ void Script::checkFinalOutputs()
 
    if(!m_overwriting)
    {
-      QString checking = "\tif ";
+      QString checking = m_indent + "if ";
 
       if(!m_outputs.isEmpty())
       {
          for(it = m_outputs.begin(); it != m_outputs.end(); ++it )
          {
-            m_script += "\t" + it.key() + " = '" + it.value() + "'\n"; 
+            m_script += m_indent + "" + it.key() + " = '" + it.value() + "'\n";
             
             checking += "checkFileExistence(" + it.key() + ")==True";
 
@@ -202,36 +203,63 @@ void Script::checkFinalOutputs()
 
          m_script += checking + ":\n"; 
 
-         m_script += "\t\tlogger.info('" + m_log + " -> Skipped')\n";
-         m_script += "\t\tlogger.info('')\n"; 
-         m_script += "\t\treturn\n\n";  
+         m_script += m_indent + m_indent + "logger.info('" + m_log + " -> Skipped')\n";
+         m_script += m_indent + m_indent + "logger.info('')\n";
+         m_script += m_indent + m_indent + "return\n\n";
       }
    }
    m_outputs.clear();
 }
 
+int Script::checkIndent(QString indent)
+{
+    size_t p = indent.toStdString().find_first_not_of(" \t");
+    if( p == std::string::npos )
+    {
+        return 1 ;
+    }
+    else
+    {
+        return 0 ;
+    }
+}
+
+void Script::setIndent(QString indent)
+{
+    if( !checkIndent(indent) )
+    {
+        m_indent = indent ;
+    }
+}
+
+QString Script::getIndent()
+{
+    return m_indent ;
+}
+
 void Script::execute()
 {
    QMap<QString, QString>::iterator it;
+   QString indentation;
 
    if(!m_test.isEmpty())
    {
-      m_script += "\tif " + m_test + " :\n";
-      m_indentation = "\t\t";
+      m_script += m_indent + "if " + m_test + " :\n";
+      indentation = m_indent + m_indent + "";
    }
    else
    {
-      m_indentation = "\t";
+      indentation = m_indent + "";
    }
 
-   QString checking = m_indentation + "if ";
+   QString checking = indentation + "if ";
 
    if(!m_outputs.isEmpty())
    {
       // Outputs 
       for(it = m_outputs.begin(); it != m_outputs.end(); ++it )
       {
-         m_script += m_indentation + it.key() + " = '" + it.value() + "'\n"; 
+         m_script += indentation + it.key() + " = '" + it.value() + "'\n";
          
          checking += "checkFileExistence(" + it.key() + ")==False";
 
@@ -249,19 +277,19 @@ void Script::execute()
 
    if(!m_outputs.isEmpty() && !m_overwriting)
    {
-      m_script += m_indentation + "\tlogger.info('" + m_log + "...')\n";
+      m_script += indentation + m_indent + "logger.info('" + m_log + "...')\n";
 
       // Inputs 
       for(it = m_inputs.begin(); it != m_inputs.end(); ++it )
       {
          if(m_inputsTests.contains(it.key()))
          {
-            m_script += m_indentation + "\tif " + m_inputsTests[it.key()] + " :\n";
-            m_script += m_indentation + "\t\t" + it.key() + " = '" + it.value() + "'\n"; 
+            m_script += indentation + m_indent + "if " + m_inputsTests[it.key()] + " :\n";
+            m_script += indentation + m_indent + m_indent + "" + it.key() + " = '" + it.value() + "'\n";
          }      
          else
          {
-            m_script += m_indentation + "\t" + it.key() + " = '" + it.value() + "'\n"; 
+            m_script += indentation + m_indent + "" + it.key() + " = '" + it.value() + "'\n";
          }
       }
 
@@ -272,66 +300,66 @@ void Script::execute()
          {
             if(it_args == m_argsTests.begin())
             {
-               m_script += m_indentation + "\tif not " + it_args.key() + " :\n";
+               m_script += indentation + m_indent + "if not " + it_args.key() + " :\n";
             } 
 
             else
             {
-               m_script += m_indentation + "\telif not " + it_args.key() + " :\n";
+               m_script += indentation + m_indent + "elif not " + it_args.key() + " :\n";
             }
 
-            m_script += m_indentation + "\t\targs = " + listToString(it_args.value()) + "\n";
-            m_script += m_indentation + "\t\texecute(args)\n";            
+            m_script += indentation + m_indent + m_indent + "args = " + listToString(it_args.value()) + "\n";
+            m_script += indentation + m_indent + m_indent + "execute(args)\n";
          }
 
-         m_script += m_indentation + "\telse :\n";
-         m_script += m_indentation + "\t\targs = " + listToString(m_argumentsList) + "\n";
+         m_script += indentation + m_indent + "else :\n";
+         m_script += indentation + m_indent + m_indent + "args = " + listToString(m_argumentsList) + "\n";
 
          if(!m_returnValue.isEmpty())
          {
-            m_script += m_indentation + "\t\t" + m_returnValue + " = execute(args)\n";
+            m_script += indentation + m_indent + m_indent + "" + m_returnValue + " = execute(args)\n";
          }
          else
          {
-            m_script += m_indentation + "\t\texecute(args)\n";
+            m_script += indentation + m_indent + m_indent + "execute(args)\n";
          }
       }
 
       else
       {
-         m_script += m_indentation + "\targs = " + listToString(m_argumentsList) + "\n";
+         m_script += indentation + m_indent + "args = " + listToString(m_argumentsList) + "\n";
          if(!m_returnValue.isEmpty())
          {
-            m_script += m_indentation + "\t" + m_returnValue + " = execute(args)\n";
+            m_script += indentation + m_indent + "" + m_returnValue + " = execute(args)\n";
          }
          else
          {
-            m_script += m_indentation + "\texecute(args)\n";
+            m_script += indentation + m_indent + "execute(args)\n";
          }
       }
 
-      m_script += m_indentation + "else:\n";
-      m_script += m_indentation + "\tlogger.info('" + m_log + " -> Skipped')\n\n";
+      m_script += indentation + "else:\n";
+      m_script += indentation + m_indent + "logger.info('" + m_log + " -> Skipped')\n\n";
    }
 
    else
    {
-      m_script += m_indentation + "logger.info('" + m_log + "...')\n";
+      m_script += indentation + "logger.info('" + m_log + "...')\n";
 
       // Inputs 
       for(it = m_inputs.begin(); it != m_inputs.end(); ++it )
       {
-         m_script += "\t" + it.key() + " = '" + it.value() + "'\n"; 
+         m_script += m_indent + "" + it.key() + " = '" + it.value() + "'\n";
       }
 
-      m_script += m_indentation + "args = " + listToString(m_argumentsList) + "\n";
+      m_script += indentation + "args = " + listToString(m_argumentsList) + "\n";
       if(!m_returnValue.isEmpty())
       {
-         m_script += m_indentation + "" + m_returnValue + " = execute(args)\n";
+         m_script += indentation + "" + m_returnValue + " = execute(args)\n";
       }
       else
       {
-         m_script += m_indentation + "execute(args)\n";
+         m_script += indentation + "execute(args)\n";
       }
    }
 
@@ -348,14 +376,14 @@ void Script::executePipe()
 {
    QMap<QString, QString>::iterator it = m_outputs.begin();
 
-   QString checking = "\tif ";
+   QString checking = m_indent + "if ";
 
    if(!m_outputs.isEmpty())
    {
       // Outputs 
       for(it = m_outputs.begin(); it != m_outputs.end(); ++it )
       {
-         m_script += "\t" + it.key() + " = '" + it.value() + "'\n"; 
+         m_script += m_indent + "" + it.key() + " = '" + it.value() + "'\n";
          checking += "checkFileExistence(" + it.key() + ")==False";
 
          if(it+1 != m_outputs.end())
@@ -372,36 +400,36 @@ void Script::executePipe()
 
    if(!m_outputs.isEmpty() && !m_overwriting)
    {
-      m_script += "\t\tlogger.info('" + m_log + "...')\n";
+      m_script += m_indent + m_indent + "logger.info('" + m_log + "...')\n";
 
       // Inputs 
       for(it = m_inputs.begin(); it != m_inputs.end(); ++it )
       {
-         m_script += "\t\t" + it.key() + " = '" + it.value() + "'\n"; 
+         m_script += m_indent + m_indent + "" + it.key() + " = '" + it.value() + "'\n";
       }
 
-      m_script += "\t\targs1 = " + listToString(m_argumentsList_1) + "\n";
-      m_script += "\t\targs2 = " + listToString(m_argumentsList_2) + "\n";
-      m_script += "\t\texecutePipe(args1, args2)\n";
+      m_script += m_indent + m_indent + "args1 = " + listToString(m_argumentsList_1) + "\n";
+      m_script += m_indent + m_indent + "args2 = " + listToString(m_argumentsList_2) + "\n";
+      m_script += m_indent + m_indent + "executePipe(args1, args2)\n";
 
-      m_script += "\telse:\n";
-      m_script += "\t\tlogger.info('" + m_log + " -> Skipped')\n\n";
+      m_script += m_indent + "else:\n";
+      m_script += m_indent + m_indent + "logger.info('" + m_log + " -> Skipped')\n\n";
 
    }
 
    else
    {
-      m_script += "\tlogger.info('" + m_log + "...')\n";
+      m_script += m_indent + "logger.info('" + m_log + "...')\n";
 
       // Inputs 
       for(it = m_inputs.begin(); it != m_inputs.end(); ++it )
       {
-         m_script += "\t" + it.key() + " = '" + it.value() + "'\n"; 
+         m_script += m_indent + "" + it.key() + " = '" + it.value() + "'\n";
       }
 
-      m_script += "\targs1 = " + listToString(m_argumentsList_1) + "\n";
-      m_script += "\targs2 = " + listToString(m_argumentsList_2) + "\n";
-      m_script += "\texecutePipe(args1, args2)\n";
+      m_script += m_indent + "args1 = " + listToString(m_argumentsList_1) + "\n";
+      m_script += m_indent + "args2 = " + listToString(m_argumentsList_2) + "\n";
+      m_script += m_indent + "executePipe(args1, args2)\n";
    }
 
    m_inputs.clear(); 
@@ -413,8 +441,8 @@ void Script::executePipe()
 
 void Script::addSubElement(QString element, QString pythonName, QString XMLname, QString value)
 {
-   m_script += "\t\t" + pythonName + " = SubElement(" + element + ", '" + XMLname + "')\n";
-   m_script += "\t\t" + pythonName + ".text = '" + value + "'\n";
+   m_script += m_indent + m_indent + "" + pythonName + " = SubElement(" + element + ", '" + XMLname + "')\n";
+   m_script += m_indent + m_indent + "" + pythonName + ".text = '" + value + "'\n";
 }
 
 void Script::writeScript()

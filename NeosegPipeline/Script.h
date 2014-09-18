@@ -29,6 +29,9 @@ class Script
    void setOverwriting(bool overwriting);
    void setStoppingIfError(bool stoppingIfError);
    void setNeo(Neo neo);
+   void setIndent(QString indent);
+   static int checkIndent(QString indent);
+   QString getIndent();
 
    // Initialize Script 
    void definePython();
@@ -46,6 +49,7 @@ class Script
    void checkFinalOutputs(); 
    void execute();
    void executePipe();
+
 
    // Write XML Files 
    void addSubElement(QString element, QString pythonName, QString XMLname, QString value);
@@ -87,8 +91,8 @@ class Script
 
    // Execute parameters 
    QString m_test;
-   QString m_indentation;
- 
+   QString m_indent ;
+
    QMap<QString, QString> m_inputs; 
    QMap<QString, QString> m_inputsTests; 
    QMap<QString, QStringList> m_argsTests; 

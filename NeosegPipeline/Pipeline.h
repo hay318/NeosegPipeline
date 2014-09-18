@@ -44,7 +44,7 @@ class Pipeline
    // Parameters
    void setPipelineParameters(PipelineParameters* parameters);
    void setPlainTextEdit(QPlainTextEdit* plainTextEdit); 
-
+   void setIndent( QString indent );
    // Process
    QProcess* getMainScriptProcess();
 
@@ -108,7 +108,7 @@ class Pipeline
    QString m_log_path; 
 
    QString m_jobID;
-
+   QString m_indent;
    // QProcess
    QProcess* m_mainScriptProcess;
 

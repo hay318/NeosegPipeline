@@ -3,11 +3,20 @@
 Pipeline::Pipeline()
 {
    m_processing_name = "Processing";
+   m_indent = "  " ; // 2 white-spaces
 }
 
 Pipeline::~Pipeline()
 {
 
+}
+
+void Pipeline::setIndent(QString indent)
+{
+    if( Script::checkIndent(indent) )
+    {
+        m_indent = indent ;
+    }
 }
 
 void Pipeline::setPipelineParameters(PipelineParameters* parameters)
@@ -51,7 +60,7 @@ void Pipeline::writePreProcessingData()
 
    QString module_name = "preProcessingData";
    m_preProcessingData = new::PreProcessingData(module_name);
-   
+   m_preProcessingData->setIndent(m_indent);
    m_preProcessingData->setNeo(m_parameters->getNeo()); 
    m_preProcessingData->setModuleDirectory(directory_path);
    m_preProcessingData->setProcessingDirectory(m_processing_path);
@@ -79,7 +88,7 @@ void Pipeline::writeDTIRegistration()
 
    QString module_name = "DTIRegistration";
    m_dtiRegistration = new::DtiRegistration(module_name);
-
+   m_dtiRegistration->setIndent(m_indent);
    m_dtiRegistration->setNeo(m_parameters->getNeo());
    m_dtiRegistration->setModuleDirectory(directory_path);
    m_dtiRegistration->setProcessingDirectory(m_processing_path);
@@ -100,7 +109,7 @@ void Pipeline::writeAtlasRegistration()
 {
    QString module_name = "atlasRegistration";
    m_atlasRegistration = new::AtlasRegistration(module_name); 
-
+   m_atlasRegistration->setIndent(m_indent);
    m_atlasRegistration->setNeo(m_parameters->getNeo());
    m_atlasRegistration->setSuffix(m_parameters->getSuffix()); 
    m_atlasRegistration->setProcessingDirectory(m_processing_path);
@@ -120,7 +129,7 @@ void Pipeline::writeAtlasPopulationRegistration()
 
    QString module_name = "atlasPopulationRegistration";
    m_atlasPopulationRegistration = new::AtlasPopulationRegistration(module_name); 
-
+   m_atlasPopulationRegistration->setIndent(m_indent);
    m_atlasPopulationRegistration->setNeo(m_parameters->getNeo());
    m_atlasPopulationRegistration->setAtlasPopulation(m_parameters->getAtlasPopulation());
    m_atlasPopulationRegistration->setModuleDirectory(directory_path);
@@ -146,7 +155,7 @@ void Pipeline::writeAtlasGeneration()
 
    QString module_name = "atlasGeneration";
    m_atlasGeneration = new::AtlasGeneration(module_name);
-
+   m_atlasGeneration->setIndent(m_indent);
    m_atlasGeneration->setNeo(m_parameters->getNeo());
    m_atlasGeneration->setAtlasPopulation(m_parameters->getAtlasPopulation());
    m_atlasGeneration->setModuleDirectory(directory_path);
@@ -180,7 +189,7 @@ void Pipeline::writeExistingAtlasRegistration()
 
    QString module_name = "existingAtlasRegistration";
    m_existingAtlasRegistration = new::ExistingAtlasRegistration(module_name);
-
+   m_existingAtlasRegistration->setIndent(m_indent);
    m_existingAtlasRegistration->setNeo(m_parameters->getNeo());
    m_existingAtlasRegistration->setModuleDirectory(directory_path);
    m_existingAtlasRegistration->setProcessingDirectory(m_processing_path);
@@ -206,7 +215,7 @@ void Pipeline::writeNeosegExecution()
 
    QString module_name = "neosegExecution";
    m_neosegExecution = new::NeosegExecution(module_name);
-
+   m_neosegExecution->setIndent(m_indent);
    m_neosegExecution->setNeo(m_parameters->getNeo());
    m_neosegExecution->setModuleDirectory(directory_path);
    m_neosegExecution->setProcessingDirectory(m_processing_path);
@@ -247,10 +256,10 @@ void Pipeline::initializeMainScript()
 void Pipeline::defineSignalHandler()
 {
    m_script += "def signal_handler(signal, frame):\n";
-   m_script += "\tprint '***************You pressed Ctrl+C!******************'\n";
-   m_script += "\tif runningProcess.poll!=1:\n";
-   m_script += "\t\trunningProcess.terminate()\n";
-   m_script += "\tsys.exit(0)\n\n";
+   m_script += m_indent + "print '***************You pressed Ctrl+C!******************'\n";
+   m_script += m_indent + "if runningProcess.poll!=1:\n";
+   m_script += m_indent + m_indent + "runningProcess.terminate()\n";
+   m_script += m_indent + "sys.exit(0)\n\n";
 
    m_script += "signal.signal(signal.SIGINT, signal_handler)\n";
    m_script += "signal.signal(signal.SIGTERM, signal_handler)\n\n";
@@ -372,7 +381,7 @@ void Pipeline::writeXMLFiles()
    QDir* output_dir = new QDir(m_parameters->getOutput());
 
    XmlWriter* writer = new::XmlWriter();
-   writer->setPipelineParameters(m_parameters);  
+   writer->setPipelineParameters(m_parameters);
 
    QString data_path = output_dir->filePath(m_parameters->getPrefix() + "-data.xml"); 
    writer->writeDataConfiguration(data_path);

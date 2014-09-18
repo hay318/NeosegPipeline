@@ -67,52 +67,48 @@ int main(int argc, char* argv[])
       WeightedLabelsAverageFilter->SetNumberOfThreads(2);
    }
 
-   // Input 
+   // Input
    ReaderType::Pointer input_reader = ReaderType::New();
    input_reader->SetFileName(parameters->GetInput());
    input_reader->Update();
    WeightedLabelsAverageFilter->SetInput(input_reader->GetOutput());
 
-   // Atlas Population 
+   // Atlas Population
    std::vector<Atlas> atlasPopulation = parameters->GetAtlasPopulation();
-   Atlas atlas; 
-   std::vector<Atlas>::iterator it; 
+   Atlas atlas;
+   std::vector<Atlas>::iterator it;
    for( it=atlasPopulation.begin(); it!=atlasPopulation.end(); ++it)
    {
-      Atlas atlas = *(it);
+       Atlas atlas = *(it);
 
-      // Image
-      ReaderType::Pointer image_reader = ReaderType::New(); 
-      image_reader->SetFileName(atlas.image);
-      image_reader->Update();
+       // Image
+       ReaderType::Pointer image_reader = ReaderType::New();
+       image_reader->SetFileName(atlas.image);
+       image_reader->Update();
 
-      if(atlas.probabilistic)
-      {
-	ReaderType::Pointer white_reader = ReaderType::New(); 
-	white_reader->SetFileName(atlas.white);
-	white_reader->Update();
-	
-	ReaderType::Pointer gray_reader = ReaderType::New(); 
-	gray_reader->SetFileName(atlas.gray);
-	gray_reader->Update();
-	
-	ReaderType::Pointer csf_reader = ReaderType::New(); 
-	csf_reader->SetFileName(atlas.csf);
-	csf_reader->Update();
-	
-	WeightedLabelsAverageFilter->AddAtlas(image_reader->GetOutput(), white_reader->GetOutput(), gray_reader->GetOutput(), csf_reader->GetOutput());
-      }
-      
-      else
-      {
-	ReaderType::Pointer seg_reader = ReaderType::New(); 
-	seg_reader->SetFileName(atlas.seg);
-	seg_reader->Update();
+       if(atlas.probabilistic)
+       {
+           ReaderType::Pointer white_reader = ReaderType::New();
+           white_reader->SetFileName(atlas.white);
+           white_reader->Update();
 
-	WeightedLabelsAverageFilter->AddAtlas(image_reader->GetOutput(), seg_reader->GetOutput());
-      }
+           ReaderType::Pointer gray_reader = ReaderType::New();
+           gray_reader->SetFileName(atlas.gray);
+           gray_reader->Update();
 
+           ReaderType::Pointer csf_reader = ReaderType::New();
+           csf_reader->SetFileName(atlas.csf);
+           csf_reader->Update();
 
+           WeightedLabelsAverageFilter->AddAtlas(image_reader->GetOutput(), white_reader->GetOutput(), gray_reader->GetOutput(), csf_reader->GetOutput());
+       }
+       else
+       {
+           ReaderType::Pointer seg_reader = ReaderType::New();
+           seg_reader->SetFileName(atlas.seg);
+           seg_reader->Update();
+           WeightedLabelsAverageFilter->AddAtlas(image_reader->GetOutput(), seg_reader->GetOutput());
+       }
    }
 
    // Update 
