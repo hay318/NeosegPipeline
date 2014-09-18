@@ -14,38 +14,43 @@
 #include "itkSpreadFA.h"
 
 
-int main(int argc, char* argv[])
+int main( int argc , char* argv[] )
 {
-   PARSE_ARGS;
+   PARSE_ARGS ;
+   if( input.empty() || output.empty() )
+   {
+      std::cerr << "input and output filename necessary" << std::endl ;
+      return EXIT_FAILURE ;
+   }
+   // Types //
+   typedef itk::Image< float , 3 > ImageType ;
+   typedef itk::ImageFileReader< ImageType > ReaderType ;
+   typedef itk::ImageFileWriter< ImageType > WriterType ;
 
-   // Types // 
-   typedef itk::Image<float, 3>                    ImageType;
-   typedef itk::ImageFileReader<ImageType>    ReaderType; 
-   typedef itk::ImageFileWriter<ImageType>    WriterType;    
 
- 
    // Spread FA Filter //
-   typedef itk::SpreadFA < ImageType::PixelType, ImageType::PixelType >                                                   SpreadFAFunctorType; 
-   typedef itk::UnaryFunctorImageFilter < ImageType, ImageType, SpreadFAFunctorType >                                     SpreadFAFilterType; 
+   typedef itk::SpreadFA < ImageType::PixelType, ImageType::PixelType >  SpreadFAFunctorType ;
+   typedef itk::UnaryFunctorImageFilter < ImageType, ImageType, SpreadFAFunctorType > SpreadFAFilterType ;
 
-   SpreadFAFilterType::Pointer spreadFAFilter = SpreadFAFilterType::New();
+   SpreadFAFilterType::Pointer spreadFAFilter = SpreadFAFilterType::New() ;
 
    // Input //
-   ReaderType::Pointer reader = ReaderType::New();
-   reader->SetFileName(input);
-   reader->Update();
-   spreadFAFilter->SetInput(reader->GetOutput()); 
+   ReaderType::Pointer reader = ReaderType::New() ;
+   reader->SetFileName( input ) ;
+   reader->Update() ;
+   spreadFAFilter->SetInput( reader->GetOutput() ) ;
 
-   // Update // 
-   (spreadFAFilter->GetFunctor()).SetShift(shift);
-   (spreadFAFilter->GetFunctor()).SetSigma(sigma);
-   spreadFAFilter->Update(); 
+   // Update //
+   ( spreadFAFilter->GetFunctor() ).SetShift( shift ) ;
+   ( spreadFAFilter->GetFunctor() ).SetSigma( sigma ) ;
+   spreadFAFilter->Update() ;
 
    // Output //
-   WriterType::Pointer writer = WriterType::New();
-   writer->SetInput(spreadFAFilter->GetOutput());
-   writer->SetFileName(output);
-   writer->SetUseCompression(true); 
-   writer->Update();
+   WriterType::Pointer writer = WriterType::New() ;
+   writer->SetInput( spreadFAFilter->GetOutput() ) ;
+   writer->SetFileName( output ) ;
+   writer->SetUseCompression( true ) ;
+   writer->Update() ;
 
+   return EXIT_SUCCESS ;
 }

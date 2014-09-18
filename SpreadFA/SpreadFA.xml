@@ -2,32 +2,38 @@
 <executable>
    <title>Spread FA</title>
    <description>A tool to spread the FA according to the shift (threshold) and the sigma scale. For any suggestion or question, please contact cherel[at]unc.edu</description>
-   <contributor>Marie Cherel</contributor>
-   <version>1.1</version>
+   <contributor>Marie Cherel, Francois Budin</contributor>
+   <version>1.2</version>
    <parameters>
       <file>
 	      <name>input</name>
 	      <description>Path of the input image</description>
 	      <longflag>input</longflag>
-	      <label>input path</label>
+        <flag>i</flag>
+	      <label>Input Volume</label>
+        <default></default>
       </file>
       <file>
 	      <name>output</name>
 	      <description>Path of the output image</description>
 	      <longflag>output</longflag>
-	      <label>output path</label>
+        <flag>o</flag>
+	      <label>Output Volume</label>
+        <default></default>
       </file>
       <double>
 	      <name>shift</name>
 	      <description>Shift of the spreading</description>
 	      <longflag>shift</longflag>
-	      <label>shift value</label>
+	      <label>Shift Value</label>
+        <default>0.3</default>
       </double>
       <double>
 	      <name>sigma</name>
 	      <description>Sigma scale of the spreading</description>
 	      <longflag>sigma</longflag>
-	      <label>sigma scale value</label>
+	      <label>Sigma Scale Value</label>
+        <default>10.0</default>
       </double>
    </parameters>
 </executable>

@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# Parameters 
-BUSS=${1}
