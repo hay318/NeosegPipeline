@@ -178,6 +178,10 @@ list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
   BUILDNAME:STRING
   )
 
+#Compilation options for ITK if USE_SYSTEM_ITK is set to OFF (Superbuild)
+set(${PRIMARY_PROJECT_NAME}_BUILD_DICOM_SUPPORT ON)
+set( USE_ITK_Module_MGHIO ON )
+set( ${PRIMARY_PROJECT_NAME}_BUILD_ZLIB_SUPPORT ON )
 #-----------------------------------------------------------------------------
 # Set CMake OSX variable to pass down the external project
 #-----------------------------------------------------------------------------
@@ -237,7 +241,6 @@ foreach( var ${LIBRARIES} )
 endforeach()
 
 set(ITK_EXTERNAL_NAME ITKv${VERSION_MAJOR_ITK})
-
 #
 # By default we want to build ${PROJECT_NAME} stuff using the CMAKE_BUILD_TYPE of
 # the top level build, but build the support libraries in Release.

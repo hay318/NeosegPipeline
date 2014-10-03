@@ -75,8 +75,13 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
     )
 
   ### --- End Project specific additions
+<<<<<<< HEAD
   set( ${proj}_REPOSITORY ${git_protocol}://github.com/NIRALUser/DTIProcessToolkit.git)
   set( ${proj}_GIT_TAG a7c39e485e492bc6b72f72348939d47835cd56cc )
+=======
+  set(${proj}_REPOSITORY "https://www.nitrc.org/svn/dtiprocess/trunk")
+  set(${proj}_SVN_REVISION -r "234")
+>>>>>>> 92aa4e7... ENH: Updated version of DTIProcess and updated ITKv4 configuration options to be able to build the new version of DTIProcess
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
