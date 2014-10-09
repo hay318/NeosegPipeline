@@ -36,16 +36,12 @@ if(DEFINED ${extProjName}_DIR AND NOT EXISTS ${${extProjName}_DIR})
   message(FATAL_ERROR "${extProjName}_DIR variable is defined but corresponds to non-existing directory (${${extProjName}_DIR})")
 endif()
 
-# Set dependency list
-set(${proj}_DEPENDENCIES ITKv4 VTK SlicerExecutionModel)
-#if(${PROJECT_NAME}_BUILD_DICOM_SUPPORT)
-#  list(APPEND ${proj}_DEPENDENCIES DCMTK)
-#endif()
-
-# Include dependent projects if any
-SlicerMacroCheckExternalProjectDependency(${proj})
-
 if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" ) )
+  # Set dependency list
+  set(${proj}_DEPENDENCIES ITKv4 VTK SlicerExecutionModel)
+
+  # Include dependent projects if any
+  SlicerMacroCheckExternalProjectDependency(${proj})
   #message(STATUS "${__indent}Adding project ${proj}")
 
   # Set CMake OSX variable to pass down the external project
@@ -60,35 +56,31 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
   ### --- Project specific additions here
   set(${proj}_CMAKE_OPTIONS
     -DCOMPILE_CONVERTITKFORMATS:BOOL=ON
+    -DCOMPILE_CORREVAL:BOOL=OFF
     -DCOMPILE_CROPTOOLS:BOOL=ON
     -DCOMPILE_CURVECOMPARE:BOOL=OFF
+    -DCOMPILE_DMDBIOMARKERTOOL:BOOL=OFF
     -DCOMPILE_DTIAtlasBuilder:BOOL=OFF
     -DCOMPILE_DWI_NIFTINRRDCONVERSION:BOOL=OFF
     -DCOMPILE_IMAGEMATH:BOOL=ON
     -DCOMPILE_IMAGESTAT:BOOL=ON
-    -DCOMPILE_POLYDATAMERGE:BOOL=OFF
     -DCOMPILE_MULTIATLASSEG:BOOL=OFF
-    -DCOMPILE_POLYDATATRANSFORM:BOOL=OFF
+    -DCOMPILE_POLYDATAMERGE:BOOL=ON
+    -DCOMPILE_POLYDATATRANSFORM:BOOL=ON
     -DCOMPILE_TRANSFORMDEFORMATIONFIELD:BOOL=OFF
     -DCOMPILE_TEXTUREBIOMARKERTOOL:BOOL=OFF
-    -DCOMPILE_DMDBIOMARKERTOOL:BOOL=OFF
     -DUSE_SYSTEM_SlicerExecutionModel:BOOL=ON
     -DUSE_SYSTEM_ITK:BOOL=ON
     -DUSE_SYSTEM_VTK:BOOL=ON
     -DITK_VERSION_MAJOR:STRING=${ITK_VERSION_MAJOR}
-    -DITK_DIR:PATH=${ITK_DIR}
-    -DGenerateCLP_DIR:PATH=${GenerateCLP_DIR}
-    -DVTK_DIR:PATH=${VTK_DIR}
     )
 
   ### --- End Project specific additions
-  set(${proj}_REPOSITORY "https://www.nitrc.org/svn/niral_utilities/trunk")
-  set(${proj}_SVN_REVISION -r "80")
+  set( ${proj}_REPOSITORY ${git_protocol}://github.com/NIRALUser/niral_utilities.git )
+  set( ${proj}_GIT_TAG dea3323b99be580b6fd2a7214ce60ddb9d7baec2 )
   ExternalProject_Add(${proj}
-    SVN_REPOSITORY ${${proj}_REPOSITORY}
-    SVN_REVISION ${${proj}_SVN_REVISION}
-    SVN_USERNAME slicerbot
-    SVN_PASSWORD slicer
+    GIT_REPOSITORY ${${proj}_REPOSITORY}
+    GIT_TAG ${${proj}_GIT_TAG}
     SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
     BINARY_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build
     LOG_CONFIGURE 0  # Wrap configure in script to ignore log output from dashboards

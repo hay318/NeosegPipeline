@@ -1,16 +1,16 @@
-#################################### USAGE ##################################
+####################################   USAGE   ##################################
 # By default, all CLI modules listed in SlicerCLIModules are built
 # If you do not want to compile all modules, define a variable 'BUILD_CLI_${Module}' and set it to OFF
 # before the resolution of external dependencies in your CMakeLists.txt
 # eg: set(BUILD_CLI_MedianImageFilter OFF )
-# SlicerMacroCheckExternalProjectDependency(${proj})
+#     SlicerMacroCheckExternalProjectDependency(${proj})
 #
 # If you are only interested in building a few SlicerCLIModules, you can set use
-# 'SLICER_CLI_DO_NOT_BUILD_ALL' to build only the specified modules, and then set
+# 'SLICER_CLI_DEFAULT_DO_NOT_BUILD' to build only the specified modules, and then set 
 # the appropriate 'BUILD_CLI_${Module}' to ON
-# eg: set(SLICER_CLI_DO_NOT_BUILD_ALL ON )
-# set(BUILD_CLI_MedianImageFilter OFF )
-# SlicerMacroCheckExternalProjectDependency(${proj})
+# eg: set(SLICER_CLI_DEFAULT_DO_NOT_BUILD ON )
+#     set(BUILD_CLI_MedianImageFilter OFF )
+#     SlicerMacroCheckExternalProjectDependency(${proj})
 # Beware: certain modules need other modules to be downloaded and compiled too.
 # eg: 'ResampleScalarVectorDWIVolume' needs 'ResampleDTIVolume'
 ##############################################################################
@@ -41,11 +41,11 @@ ProjectDependancyPush(CACHED_proj ${proj})
 # even if other External_${ExtProjName}.cmake files are sourced by
 # SlicerMacroCheckExternalProjectDependency
 set(extProjName SlicerCLI) #The find_package known name
-set(proj SlicerCLI) #This local name
-set(${extProjName}_REQUIRED_VERSION "") #If a required version is necessary, then set this, else leave blank
+set(proj        SlicerCLI) #This local name
+set(${extProjName}_REQUIRED_VERSION "")  #If a required version is necessary, then set this, else leave blank
 
 #if(${USE_SYSTEM_${extProjName}})
-# unset(${extProjName}_DIR CACHE)
+#  unset(${extProjName}_DIR CACHE)
 #endif()
 
 # Sanity checks
@@ -63,12 +63,9 @@ set( SlicerCLIModules
      MedianImageFilter
      N4ITKBiasFieldCorrection
      ResampleDTIVolume
-     ResampleScalarVectorDWIVolume
-     AffineRegistration
-     RigidRegistration
+     ResampleScalarVectorDWIVolume 
      ThresholdScalarVolume
      AddScalarVolumes
-     BSplineDeformableRegistration
      BSplineToDeformationField
      CastScalarVolume
      CheckerBoardFilter
@@ -81,11 +78,8 @@ set( SlicerCLIModules
      HistogramMatching
      ImageLabelCombine
      LabelMapSmoothing
-     LinearRegistration
      MaskScalarVolume
      OrientScalarVolume
-     OtsuThresholdImageFilter
-     OtsuThresholdSegmentation
      RobustStatisticsSegmenter
      SimpleRegionGrowingSegmentation
      SubtractScalarVolumes
@@ -98,13 +92,13 @@ set( SlicerCLIModules
      #DiffusionWeightedVolumeMasking->vtkITK+MRML
    )
 unset( SLICER_CLI_TO_BUILD )
-if( SLICER_CLI_DO_NOT_BUILD_ALL )
+if( SLICER_CLI_DEFAULT_DO_NOT_BUILD )
   set( DEFAULT_CLI_BUILD OFF )
 else()
   set( DEFAULT_CLI_BUILD ON )
 endif()
 foreach( var ${SlicerCLIModules})
-  if( DEFINED BUILD_CLI_${var} )
+  if( DEFINED BUILD_CLI_${var} ) 
     list(APPEND SLICER_CLI_TO_BUILD -DBUILD_CLI_${var}:BOOL=${BUILD_CLI_${var}} )
   else()
     list(APPEND SLICER_CLI_TO_BUILD -DBUILD_CLI_${var}:BOOL=${DEFAULT_CLI_BUILD} )
@@ -138,20 +132,20 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
     )
 
   ### --- End Project specific additions
-  set( ${proj}_REPOSITORY ${git_protocol}://github.com/fbudin69500/SlicerCLI.git )
-  set( ${proj}_GIT_TAG cecefcd1d67bb542dfeb2f0923e6d11cf49b9550 )
+  set( ${proj}_REPOSITORY ${git_protocol}://github.com/NIRALUser/SlicerCLI.git )
+  set( ${proj}_GIT_TAG b0333e8c66177f8b6bcd8f069120328e764f1f5f )
   if( NOT DEFINED Slicer_Revision )
-    set( Slicer_Revision 0 )
+    set( Slicer_Revision 0 ) 
   endif()
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
     SOURCE_DIR ${EXTERNAL_SOURCE_DIRECTORY}/${proj}
     BINARY_DIR ${EXTERNAL_BINARY_DIRECTORY}/${proj}-build
-    LOG_CONFIGURE 0 # Wrap configure in script to ignore log output from dashboards
-    LOG_BUILD 0 # Wrap build in script to to ignore log output from dashboards
-    LOG_TEST 0 # Wrap test in script to to ignore log output from dashboards
-    LOG_INSTALL 0 # Wrap install in script to to ignore log output from dashboards
+    LOG_CONFIGURE 0  # Wrap configure in script to ignore log output from dashboards
+    LOG_BUILD     0  # Wrap build in script to to ignore log output from dashboards
+    LOG_TEST      0  # Wrap test in script to to ignore log output from dashboards
+    LOG_INSTALL   0  # Wrap install in script to to ignore log output from dashboards
     ${cmakeversion_external_update} "${cmakeversion_external_update_value}"
     CMAKE_GENERATOR ${gen}
     CMAKE_ARGS
