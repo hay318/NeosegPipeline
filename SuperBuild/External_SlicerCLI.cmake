@@ -133,7 +133,7 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
 
   ### --- End Project specific additions
   set( ${proj}_REPOSITORY ${git_protocol}://github.com/NIRALUser/SlicerCLI.git )
-  set( ${proj}_GIT_TAG b0333e8c66177f8b6bcd8f069120328e764f1f5f )
+  set( ${proj}_GIT_TAG 266dd9c774beedc5f87973870a011be28b4b0484 )
   if( NOT DEFINED Slicer_Revision )
     set( Slicer_Revision 0 ) 
   endif()

@@ -246,7 +246,9 @@ else()
   SlicerMacroEmptyExternalProject(${proj} "${${proj}_DEPENDENCIES}")
 endif()
 
-list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS ${extProjName}_DIR:PATH)
+list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS ${extProjName}_DIR:PATH VTK_VERSION_MAJOR:STRING USE_VTKv6:BOOL)
+_expand_external_project_vars()
+set(COMMON_EXTERNAL_PROJECT_ARGS ${${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_ARGS})
 
 ProjectDependancyPop(CACHED_extProjName extProjName)
 ProjectDependancyPop(CACHED_proj proj)
