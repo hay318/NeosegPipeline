@@ -80,8 +80,6 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       ${COMMON_EXTERNAL_PROJECT_ARGS}
       ${${proj}_CMAKE_OPTIONS}
       -DCMAKE_INSTALL_PREFIX:PATH=${EXTERNAL_BINARY_DIRECTORY}/${proj}-install
-## We really do want to install in order to limit # of include paths INSTALL_COMMAND ""
-    INSTALL_COMMAND ""
     DEPENDS
       ${${proj}_DEPENDENCIES}
   )
