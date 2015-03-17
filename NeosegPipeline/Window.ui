@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>743</width>
-    <height>998</height>
+    <height>1031</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -1987,7 +1987,7 @@ p, li { white-space: pre-wrap; }
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
-        <string>Neoseg</string>
+        <string>Neoseg/ABC</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_11">
         <item row="5" column="0">
@@ -2068,7 +2068,7 @@ p, li { white-space: pre-wrap; }
         <item row="1" column="0">
          <widget class="QGroupBox" name="neosegParameters_groupBox">
           <property name="title">
-           <string>Neoseg Parameters</string>
+           <string>Parameters</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_15">
            <property name="topMargin">
@@ -2519,7 +2519,7 @@ p, li { white-space: pre-wrap; }
         <item row="0" column="0">
          <widget class="QGroupBox" name="neosegModalities_groupBox">
           <property name="title">
-           <string>Neoseg Modalities</string>
+           <string>Modalities</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_8">
            <property name="topMargin">
@@ -2643,6 +2643,13 @@ p, li { white-space: pre-wrap; }
            <item>
             <widget class="QWidget" name="widget_2" native="true">
              <layout class="QGridLayout" name="gridLayout_2">
+              <item row="11" column="0">
+               <widget class="QPushButton" name="WeightedLabelsAverage_button">
+                <property name="text">
+                 <string>WeightedLabelsAverage</string>
+                </property>
+               </widget>
+              </item>
               <item row="13" column="3">
                <widget class="QPushButton" name="resetNeoseg_button">
                 <property name="text">
@@ -2652,13 +2659,6 @@ p, li { white-space: pre-wrap; }
               </item>
               <item row="11" column="2">
                <widget class="QLineEdit" name="WeightedLabelsAverage_lineEdit"/>
-              </item>
-              <item row="11" column="0">
-               <widget class="QPushButton" name="WeightedLabelsAverage_button">
-                <property name="text">
-                 <string>WeightedLabelsAverage</string>
-                </property>
-               </widget>
               </item>
               <item row="2" column="0">
                <widget class="QPushButton" name="N4ITKBiasFieldCorrection_button">
@@ -2808,6 +2808,9 @@ p, li { white-space: pre-wrap; }
                 </property>
                </widget>
               </item>
+              <item row="13" column="2">
+               <widget class="QLineEdit" name="Neoseg_lineEdit"/>
+              </item>
               <item row="6" column="3">
                <widget class="QPushButton" name="resetDtiestim_button">
                 <property name="text">
@@ -2821,9 +2824,6 @@ p, li { white-space: pre-wrap; }
                  <string>bet2</string>
                 </property>
                </widget>
-              </item>
-              <item row="13" column="2">
-               <widget class="QLineEdit" name="Neoseg_lineEdit"/>
               </item>
               <item row="13" column="0">
                <widget class="QPushButton" name="Neoseg_button">
@@ -2930,6 +2930,23 @@ p, li { white-space: pre-wrap; }
               </item>
               <item row="0" column="3">
                <widget class="QPushButton" name="resetPython_button">
+                <property name="text">
+                 <string>Reset</string>
+                </property>
+               </widget>
+              </item>
+              <item row="17" column="0">
+               <widget class="QPushButton" name="ABC_button">
+                <property name="text">
+                 <string>ABC</string>
+                </property>
+               </widget>
+              </item>
+              <item row="17" column="2">
+               <widget class="QLineEdit" name="ABC_lineEdit"/>
+              </item>
+              <item row="17" column="3">
+               <widget class="QPushButton" name="resetABC_button">
                 <property name="text">
                  <string>Reset</string>
                 </property>

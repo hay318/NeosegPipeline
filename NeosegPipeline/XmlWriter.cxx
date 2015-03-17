@@ -227,6 +227,8 @@ void XmlWriter::writeExecutables(QXmlStreamWriter* stream)
    writeElement(stream, "neoseg", "path", executablePaths->getExecutablePath("neoseg"));
    writeElement(stream, "ReassignWhiteMatter", "path", executablePaths->getExecutablePath("ReassignWhiteMatter"));
    writeElement(stream, "InsightSNAP", "path", executablePaths->getExecutablePath("InsightSNAP"));
+   writeElement(stream, "ABC", "path", executablePaths->getExecutablePath("ABC"));
+
    stream->writeEndElement(); 
 
    LibraryPaths* libraryPaths = m_parameters->getLibraryPaths();

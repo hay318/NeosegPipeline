@@ -223,6 +223,7 @@ void PipelineParameters::setProgramPath(QString programPath)
    m_executablePaths->setDefaultExecutablePath("neoseg");
    m_executablePaths->setDefaultExecutablePath("WeightedLabelsAverage");
    m_executablePaths->setDefaultExecutablePath("ReassignWhiteMatter");
+   m_executablePaths->setDefaultExecutablePath("ABC");
 
    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
    m_libraryPaths->setLibraryPath("FSL", env.value("FSLDIR", QString::null));

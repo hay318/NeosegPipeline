@@ -326,6 +326,9 @@ void DerivedWindow::initializeExecutablesMap()
 
    Executable InsightSNAP = {InsightSNAP_button, InsightSNAP_lineEdit, resetInsightSNAP_button};
    m_executables_map.insert("InsightSNAP", InsightSNAP);
+
+   Executable ABC = {ABC_button, ABC_lineEdit, resetABC_button};
+   m_executables_map.insert("ABC", ABC);
 }
 
 void DerivedWindow::initializeLibrariesMap()
@@ -803,6 +806,7 @@ void DerivedWindow::resetAllExecutables()
    resetExecutable("neoseg"); 
    resetExecutable("ReassignWhiteMatter"); 
    resetExecutable("InsightSNAP");
+   resetExecutable("ABC");
 }
 
 
@@ -1071,7 +1075,7 @@ void DerivedWindow::initializeExecutables()
    ReassignWhiteMatter_lineEdit->setText(m_executables->getExecutablePath("ReassignWhiteMatter"));
    Neoseg_lineEdit->setText(m_executables->getExecutablePath("neoseg"));
    InsightSNAP_lineEdit->setText(m_executables->getExecutablePath("InsightSNAP"));
-
+   ABC_lineEdit->setText(m_executables->getExecutablePath("ABC"));
    // Libraries
    FSL_lineEdit->setText(m_libraries->getLibraryPath("FSL"));
 }
@@ -1241,7 +1245,8 @@ void DerivedWindow::setExecutables()
    m_executables->setExecutablePath("SpreadFA", SpreadFA_lineEdit->text()); 
    m_executables->setExecutablePath("ReassignWhiteMatter", ReassignWhiteMatter_lineEdit->text()); 
    m_executables->setExecutablePath("neoseg", Neoseg_lineEdit->text()); 
-   m_executables->setExecutablePath("InsightSNAP", InsightSNAP_lineEdit->text()); 
+   m_executables->setExecutablePath("InsightSNAP", InsightSNAP_lineEdit->text());
+   m_executables->setExecutablePath("ABC", ABC_lineEdit->text());
 
    m_libraries->setLibraryPath("FSL", FSL_lineEdit->text());    
 

@@ -49,7 +49,8 @@ class ExecutablePaths
    QStringList m_executables_withVersionLongFlag; 
    QStringList m_executables_withVersionShortFlag; 
    QStringList m_executables_withVersionArgument; 
-   QStringList m_executables_withoutVersionFlag; 
+   QStringList m_executables_withHelpVersionFlag;
+   QStringList m_executables_withoutFlag;
    QMap<QString, std::string> m_executables_versions ;
 };
 
