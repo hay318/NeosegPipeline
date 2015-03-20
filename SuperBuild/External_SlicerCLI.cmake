@@ -60,31 +60,31 @@ set(${proj}_DEPENDENCIES ITKv4 VTK SlicerExecutionModel )
 SlicerMacroCheckExternalProjectDependency(${proj})
 
 set( SlicerCLIModules
-     MedianImageFilter
+#     MedianImageFilter
      N4ITKBiasFieldCorrection
      ResampleDTIVolume
      ResampleScalarVectorDWIVolume 
-     ThresholdScalarVolume
-     AddScalarVolumes
-     BSplineToDeformationField
-     CastScalarVolume
-     CheckerBoardFilter
-     ConnectedComponent
-     DWIJointRicianLMMSEFilter
-     DWIRicianLMMSEFilter
-     GaussianBlurImageFilter
-     GradientAnisotropicDiffusion
-     GrayscaleFillHoleImageFilter
-     HistogramMatching
-     ImageLabelCombine
-     LabelMapSmoothing
-     MaskScalarVolume
-     OrientScalarVolume
-     RobustStatisticsSegmenter
-     SimpleRegionGrowingSegmentation
-     SubtractScalarVolumes
-     ThresholdScalarVolume
-     VotingBinaryHoleFillingImageFilter
+#     ThresholdScalarVolume
+#     AddScalarVolumes
+#     BSplineToDeformationField
+#     CastScalarVolume
+#     CheckerBoardFilter
+#     ConnectedComponent
+#     DWIJointRicianLMMSEFilter
+#     DWIRicianLMMSEFilter
+#     GaussianBlurImageFilter
+#     GradientAnisotropicDiffusion
+#     GrayscaleFillHoleImageFilter
+#     HistogramMatching
+#     ImageLabelCombine
+#     LabelMapSmoothing
+#     MaskScalarVolume
+#     OrientScalarVolume
+#     RobustStatisticsSegmenter
+#     SimpleRegionGrowingSegmentation
+#     SubtractScalarVolumes
+#     ThresholdScalarVolume
+#     VotingBinaryHoleFillingImageFilter
      #MultiplyScalarVolumes->vtkITK
      #DWIToDTIEstimation->vtkITK+MRML
      #DWIUnbiasedNonLocalMeansFilter->vtkITK+MRML
