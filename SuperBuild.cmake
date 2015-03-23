@@ -76,6 +76,7 @@ set( ListProjects
   SlicerCLI
   teem
   neoseg
+  ABC
 )
 
  foreach( var ${ListProjects})
@@ -383,4 +384,8 @@ endif()
 
 if(BUILD_neoseg)
   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/neoseg-install/bin/neoseg DESTINATION bin)
+endif()
+
+if(BUILD_ABC)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/ABC-install/bin/ABC DESTINATION bin)
 endif()
