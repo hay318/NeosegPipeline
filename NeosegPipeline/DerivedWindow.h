@@ -14,10 +14,13 @@
 #include <QDropEvent>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <QList>
 
 // My Specific Librairies
 #include "ui_Window.h"
 #include "ui_About.h"
+#include "ui_neosegParameters.h"
+#include "ui_ABCParameters.h"
 #include "Pipeline.h"
 #include "XmlReader.h"
 #include "XmlWriter.h"
@@ -132,6 +135,9 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    // Atlas Registration //
    void changeUsingMaskAtlas(bool) ;
 
+   //Tissue Segmentation
+   void tissueSegmentationSoftwareSelection() ;
+
    // Computing System
    void changeComputingSystem(int index);
 
@@ -180,11 +186,15 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    // Exit Application 
    void closeEvent(QCloseEvent *event);
 
+   //ABC dynamic UI
+   void updateNumbersOfPriorsForABC(int nbPriors) ;
+
    private :
    
    // Window
    Ui_Window ui;
-
+   Ui::ABCParameters *abcParameters ;
+   Ui::neosegParameters *neosegParameters ;
    // Pipeline 
    Pipeline* m_pipeline;
 
@@ -205,7 +215,10 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    QString m_existingAtlases_path;
    QStringList m_goodAtlases;
    QStringList m_wrongAtlases;  
-   QStringList m_selectedAtlases; 
+   QStringList m_selectedAtlases;
+
+   //ABC dynamic UI
+   QList<QDoubleSpinBox*> abcPriorCheckBoxes ;
 
    bool m_parametersSet;
    bool m_executablesSet;

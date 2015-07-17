@@ -5,6 +5,13 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    setupUi(this);
    setAcceptDrops(true);
 
+   neosegParameters = new Ui::neosegParameters ;
+   neosegParameters->setupUi( this->softwareFrame ) ;
+   abcParameters = new Ui::ABCParameters ;
+   abcParameters->setupUi(this->softwareFrame);
+   this->radioNeoseg->setChecked( true ) ;
+   this->radioABC->setChecked( false ) ;
+
    m_parametersSet = false; 
    m_executablesSet = false; 
    m_pipelineWriten = false; 
@@ -164,6 +171,13 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    // Display Results  
    connect(displayResults_button, SIGNAL(clicked()), this, SLOT(displayResults())); 
    
+   // Display ABC options or neoseg options in "Tissue Segmentation" tab
+   connect( radioNeoseg, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
+   connect( radioABC, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
+   // Update number of priors for ABC
+   connect( abcParameters->abcNbPriors, SIGNAL(	valueChanged(int)), this, SLOT(updateNumbersOfPriorsForABC(int)) ) ;
+
+
    numberOfRegistrations_spinBox->setEnabled(true); 
    numberOfGB_spinBox->setEnabled(false); 
 
@@ -184,6 +198,49 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    registrations_comboBox->setEnabled(false); 
 
    this->adjustSize();
+   // We run the function "tissueSegmentationSoftwareSelection" once to initialize the display.
+   tissueSegmentationSoftwareSelection() ;
+   updateNumbersOfPriorsForABC(1);
+}
+
+
+void DerivedWindow::updateNumbersOfPriorsForABC(int nbPriors)
+{
+    std::cout<<"plop:"<<nbPriors<<std::endl;
+    if( nbPriors > abcPriorCheckBoxes.size() )
+    {
+        for( int i = abcPriorCheckBoxes.size() ; i < nbPriors ; i++ )
+        {
+            QLabel *labelsp = new QLabel;
+            labelsp->setText( QString("%1:").arg(i) ) ;
+            abcParameters->nbPriorLayout->addWidget(labelsp );
+            QDoubleSpinBox *dspin = new QDoubleSpinBox ;
+            abcPriorCheckBoxes.push_back( dspin ) ;
+            dspin->setParent(abcParameters->priorFrame);
+            QHBoxLayout *postphlayout = new QHBoxLayout ;
+            QCheckBox *reassignSmallIsland = new QCheckBox ;
+            postphlayout->addWidget(reassignSmallIsland);
+            postphlayout->addSpacerItem(new QSpacerItem(10,0, QSizePolicy::Expanding, QSizePolicy::Ignored));
+            QSpinBox *spin = new QSpinBox ;
+            postphlayout->addWidget(spin);
+            postphlayout->setParent(abcParameters->ppFrame) ;
+            this->repaint();
+        }
+    }
+}
+
+void DerivedWindow::tissueSegmentationSoftwareSelection()
+{
+    if( this->radioNeoseg->isChecked() )
+    {
+        neosegParameters->frame->show() ;
+        abcParameters->frame->hide() ;
+    }
+    else
+    {
+        neosegParameters->frame->hide() ;
+        abcParameters->frame->show() ;
+    }
 }
 
 void DerivedWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -924,9 +981,9 @@ void DerivedWindow::initializeXMLParameters()
    usingFA_checkBox->setChecked(m_parameters->getUsingFA()); 
    usingAD_checkBox->setChecked(m_parameters->getUsingAD()); 
 
-   computing3LabelsSeg_checkBox->setChecked(m_parameters->getComputing3LabelsSeg() ) ;
-   reassigningWhite_checkBox->setChecked(m_parameters->getReassigningWhiteMatter());
-   whiteThreshold_spinBox->setValue(m_parameters->getSizeThreshold()); 
+   neosegParameters->computing3LabelsSeg_checkBox->setChecked(m_parameters->getComputing3LabelsSeg() ) ;
+   neosegParameters->reassigningWhite_checkBox->setChecked(m_parameters->getReassigningWhiteMatter());
+   neosegParameters->whiteThreshold_spinBox->setValue(m_parameters->getSizeThreshold());
 
    overwriting_checkBox->setChecked(m_parameters->getOverwriting()); 
    cleaningUp_checkBox->setChecked(m_parameters->getCleaningUp()); 
@@ -1035,17 +1092,17 @@ void DerivedWindow::initializeXMLParameters()
    numberOfIterations_spinBox->setValue(m_neosegParameters->getNumberOfIterations()); 
    timeStep_spinBox->setValue(m_neosegParameters->getTimeStep()); 
 
-   priorThreshold_spinBox->setValue(m_neosegParameters->getPriorThreshold()); 
-   maxDegree_spinBox->setValue(m_neosegParameters->getMaxBiasDegree());
+   neosegParameters->priorThreshold_spinBox->setValue(m_neosegParameters->getPriorThreshold());
+   neosegParameters->maxDegree_spinBox->setValue(m_neosegParameters->getMaxBiasDegree());
 
-   prior1_spinBox->setValue(m_neosegParameters->getPrior1());
-   prior2_spinBox->setValue(m_neosegParameters->getPrior2());
-   prior3_spinBox->setValue(m_neosegParameters->getPrior3());
-   prior4_spinBox->setValue(m_neosegParameters->getPrior4());
-   prior5_spinBox->setValue(m_neosegParameters->getPrior5());
+   neosegParameters->prior1_spinBox->setValue(m_neosegParameters->getPrior1());
+   neosegParameters->prior2_spinBox->setValue(m_neosegParameters->getPrior2());
+   neosegParameters->prior3_spinBox->setValue(m_neosegParameters->getPrior3());
+   neosegParameters->prior4_spinBox->setValue(m_neosegParameters->getPrior4());
+   neosegParameters->prior5_spinBox->setValue(m_neosegParameters->getPrior5());
 
-   refinement_checkBox->setChecked(m_neosegParameters->getRefinement());
-   initialParzenKernelWidth_spinBox->setValue(m_neosegParameters->getInitialParzenKernelWidth());
+   neosegParameters->refinement_checkBox->setChecked(m_neosegParameters->getRefinement());
+   neosegParameters->initialParzenKernelWidth_spinBox->setValue(m_neosegParameters->getInitialParzenKernelWidth());
    if( newAtlas_radioButton->isChecked() )
    {
       atlasGeneration_tab->setDisabled( false ) ;
@@ -1141,8 +1198,8 @@ void DerivedWindow::setParameters()
    m_parameters->setUsingAD(usingAD_checkBox->isChecked());
 
    // Reassigning White Matter
-   m_parameters->setReassigningWhiteMatter(reassigningWhite_checkBox->isChecked()); 
-   m_parameters->setSizeThreshold(whiteThreshold_spinBox->value());
+   m_parameters->setReassigningWhiteMatter(neosegParameters->reassigningWhite_checkBox->isChecked());
+   m_parameters->setSizeThreshold(neosegParameters->whiteThreshold_spinBox->value());
 
 
    // Computation
@@ -1212,18 +1269,18 @@ void DerivedWindow::setParameters()
    m_neosegParameters->setNumberOfIterations(numberOfIterations_spinBox->value());
    m_neosegParameters->setTimeStep(timeStep_spinBox->value()); 
 
-   m_neosegParameters->setPriorThreshold(priorThreshold_spinBox->value()); 
-   m_neosegParameters->setMaxBiasDegree(maxDegree_spinBox->value()); 
-   m_neosegParameters->setPrior1(prior1_spinBox->value()); 
-   m_neosegParameters->setPrior2(prior2_spinBox->value()); 
-   m_neosegParameters->setPrior3(prior3_spinBox->value()); 
-   m_neosegParameters->setPrior4(prior4_spinBox->value()); 
-   m_neosegParameters->setPrior5(prior5_spinBox->value()); 
+   m_neosegParameters->setPriorThreshold(neosegParameters->priorThreshold_spinBox->value());
+   m_neosegParameters->setMaxBiasDegree(neosegParameters->maxDegree_spinBox->value());
+   m_neosegParameters->setPrior1(neosegParameters->prior1_spinBox->value());
+   m_neosegParameters->setPrior2(neosegParameters->prior2_spinBox->value());
+   m_neosegParameters->setPrior3(neosegParameters->prior3_spinBox->value());
+   m_neosegParameters->setPrior4(neosegParameters->prior4_spinBox->value());
+   m_neosegParameters->setPrior5(neosegParameters->prior5_spinBox->value());
 
-   m_neosegParameters->setRefinement(refinement_checkBox->isChecked());
-   m_neosegParameters->setInitialParzenKernelWidth(initialParzenKernelWidth_spinBox->value());
+   m_neosegParameters->setRefinement(neosegParameters->refinement_checkBox->isChecked());
+   m_neosegParameters->setInitialParzenKernelWidth(neosegParameters->initialParzenKernelWidth_spinBox->value());
 
-   m_parameters->setComputing3LabelsSeg(computing3LabelsSeg_checkBox->isChecked());
+   m_parameters->setComputing3LabelsSeg(neosegParameters->computing3LabelsSeg_checkBox->isChecked());
    m_parametersSet = true;
 }
 
@@ -1315,7 +1372,7 @@ void DerivedWindow::setParametersWidgetEnabled(bool enabled)
    // Neoseg 
    neosegModalities_groupBox->setEnabled(enabled);
    neosegParameters_groupBox->setEnabled(enabled);
-   mergedSegmentation_groupBox->setEnabled(enabled);
+   neosegParameters->mergedSegmentation_groupBox->setEnabled(enabled);
 
    // Software
    Executables_groupBox->setEnabled(enabled);
