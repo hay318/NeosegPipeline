@@ -95,6 +95,8 @@ set(SLICER_CLI_DO_NOT_BUILD_ALL ON )
 set(BUILD_CLI_ResampleScalarVectorDWIVolume ON )
 set(BUILD_CLI_ResampleDTIVolume ON )
 set(BUILD_CLI_N4ITKBiasFieldCorrection ON )
+
+set(Slicer_Revision 23774) 
 #-----------------------------------------------------------------------------
 # Define Superbuild global variables
 #-----------------------------------------------------------------------------

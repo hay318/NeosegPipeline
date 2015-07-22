@@ -122,21 +122,24 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
       -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET})
   endif()
   ### --- Project specific additions here
+
+  if(NOT DEFINED Slicer_Revision)
+    set( Slicer_Revision 0) 
+  endif()
+
   set(${proj}_CMAKE_OPTIONS
     -DUSE_SYSTEM_ITK:BOOL=ON
     -DUSE_SYSTEM_VTK:BOOL=ON
     -DUSE_SYSTEM_SlicerExecutionModel:BOOL=ON
     ${SLICER_CLI_TO_BUILD}
     -Dcli-modules_SUPERBUILD:BOOL=OFF
-    -DSlicer_Revision:STRING=22599#Builds Slicer extension at SVN revision 22599 (=Slicer 4.3.1)
+    -DSlicer_Revision:STRING=${Slicer_Revision}#Builds Slicer extension at SVN revision 22599 (=Slicer 4.3.1)
     )
 
   ### --- End Project specific additions
   set( ${proj}_REPOSITORY ${git_protocol}://github.com/NIRALUser/SlicerCLI.git )
   set( ${proj}_GIT_TAG 8acfde9f975d7e199ee6f500e4c5b9afbf7ebeb6 )
-  if( NOT DEFINED Slicer_Revision )
-    set( Slicer_Revision 0 ) 
-  endif()
+  
   ExternalProject_Add(${proj}
     GIT_REPOSITORY ${${proj}_REPOSITORY}
     GIT_TAG ${${proj}_GIT_TAG}
