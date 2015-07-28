@@ -199,6 +199,7 @@ DerivedWindow::DerivedWindow() : Ui_Window()
 
    this->adjustSize();
    // We run the function "tissueSegmentationSoftwareSelection" once to initialize the display.
+   radioABC->setChecked(true);
    tissueSegmentationSoftwareSelection() ;
    updateNumbersOfPriorsForABC(1);
 }
@@ -206,26 +207,26 @@ DerivedWindow::DerivedWindow() : Ui_Window()
 
 void DerivedWindow::updateNumbersOfPriorsForABC(int nbPriors)
 {
-    std::cout<<"plop:"<<nbPriors<<std::endl;
-    if( nbPriors > abcPriorCheckBoxes.size() )
+    if( nbPriors >= (int)vectorABCPriorCheckBoxes.size() )
     {
-        for( int i = abcPriorCheckBoxes.size() ; i < nbPriors ; i++ )
-        {
-            QLabel *labelsp = new QLabel;
-            labelsp->setText( QString("%1:").arg(i) ) ;
-            abcParameters->nbPriorLayout->addWidget(labelsp );
-            QDoubleSpinBox *dspin = new QDoubleSpinBox ;
-            abcPriorCheckBoxes.push_back( dspin ) ;
-            dspin->setParent(abcParameters->priorFrame);
-            QHBoxLayout *postphlayout = new QHBoxLayout ;
-            QCheckBox *reassignSmallIsland = new QCheckBox ;
-            postphlayout->addWidget(reassignSmallIsland);
-            postphlayout->addSpacerItem(new QSpacerItem(10,0, QSizePolicy::Expanding, QSizePolicy::Ignored));
-            QSpinBox *spin = new QSpinBox ;
-            postphlayout->addWidget(spin);
-            postphlayout->setParent(abcParameters->ppFrame) ;
-            this->repaint();
-        }
+
+        PriorSpinBox* psb = new PriorSpinBox(vectorABCPriorCheckBoxes.size() + 1);
+        vectorABCPriorCheckBoxes.push_back( psb ) ;
+
+//            QHBoxLayout *postphlayout = new QHBoxLayout ;
+//            QCheckBox *reassignSmallIsland = new QCheckBox ;
+//            postphlayout->addWidget(reassignSmallIsland);
+//            postphlayout->addSpacerItem(new QSpacerItem(10,0, QSizePolicy::Expanding, QSizePolicy::Ignored));
+//            QSpinBox *spin = new QSpinBox ;
+//            postphlayout->addWidget(spin);
+//            postphlayout->setParent(abcParameters->ppFrame) ;
+
+
+        abcParameters->nbPriorLayout->addLayout(psb);
+        this->repaint();
+    }else if(vectorABCPriorCheckBoxes.size() > 0){
+        delete vectorABCPriorCheckBoxes[vectorABCPriorCheckBoxes.size() - 1];
+        vectorABCPriorCheckBoxes.pop_back();
     }
 }
 
@@ -828,14 +829,20 @@ void DerivedWindow::enterExecutable(QString executable_name)
     Executable executable = m_executables_map[executable_name];
 
     QString executable_path = (executable.enter_lineEdit)->text();
-    if( m_executables->checkExecutablePath( executable_name , executable_path) )
-    {
-        (executable.enter_lineEdit)->setText(executable_path) ;
-        m_executables->setExecutablePath( executable_name , executable_path ) ;
-    }
-    else
-    {
-        QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable or is the incorrect version"));
+
+    std::cout<<executable_name.toStdString()<<std::endl;
+    std::cout<<executable_path.toStdString()<<std::endl;
+
+    if(executable_path.toStdString().compare("") != 0){
+        if( m_executables->checkExecutablePath( executable_name , executable_path) )
+        {
+            (executable.enter_lineEdit)->setText(executable_path) ;
+            m_executables->setExecutablePath( executable_name , executable_path ) ;
+        }
+        else
+        {
+            QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable or is the incorrect version"));
+        }
     }
 }
 
@@ -1153,6 +1160,23 @@ void DerivedWindow::setData()
    {
       createOutput(output_lineEdit->text()); 
    }
+   if(this->radioNeoseg->isChecked()){
+       m_parameters->setTissueSegmentationType(0);
+   }else{
+       m_parameters->setTissueSegmentationType(1);
+       std::vector<double> coeffs;
+       for(unsigned i = 0; i < vectorABCPriorCheckBoxes.size(); i++){
+           PriorSpinBox* priorspin = vectorABCPriorCheckBoxes[i];
+           coeffs.push_back(priorspin->dspin->value());
+       }
+       m_parameters->setABCPriorsCoefficients(coeffs);
+       m_parameters->setABCInitialDistributorEstimatorType(this->abcParameters->initialDistributionEstimatorCombo->currentText());
+       m_parameters->setABCMaximumDegreeBiasField(this->abcParameters->maxDegree_spinBox->value());
+       m_parameters->setABCOutputImageFormat(this->abcParameters->comboBoxOutputImageFormat->currentText());
+   }
+
+
+
    m_parameters->setOutput(output_lineEdit->text()); 
 }
 
@@ -1697,8 +1721,7 @@ void DerivedWindow::closeEvent(QCloseEvent *event)
    }
 }
 
-
-
-
-
-
+void DerivedWindow::on_comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1)
+{
+    m_parameters->setABCOutputImageFormat(arg1);
+}

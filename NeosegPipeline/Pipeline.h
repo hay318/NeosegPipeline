@@ -28,6 +28,7 @@
 #include "ExistingAtlasRegistration.h"
 #include "NeosegExecution.h"
 #include "XmlWriter.h"
+#include "ABCExecution.h"
 
 
 class Pipeline
@@ -72,6 +73,7 @@ class Pipeline
    void writeAtlasGeneration();
    void writeExistingAtlasRegistration();
    void writeNeosegExecution();
+   void writeABCExecution();
 
    // Write Main Script 
    void initializeMainScript();
@@ -93,6 +95,7 @@ class Pipeline
    AtlasGeneration* m_atlasGeneration; 
    ExistingAtlasRegistration* m_existingAtlasRegistration; 
    NeosegExecution* m_neosegExecution; 
+   ABCExecution* m_ABCExecution;
 
    PipelineParameters* m_parameters; 
 

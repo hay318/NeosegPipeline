@@ -189,7 +189,10 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    //ABC dynamic UI
    void updateNumbersOfPriorsForABC(int nbPriors) ;
 
-   private :
+private slots:
+   void on_comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1);
+
+private :
    
    // Window
    Ui_Window ui;
@@ -218,11 +221,35 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    QStringList m_selectedAtlases;
 
    //ABC dynamic UI
-   QList<QDoubleSpinBox*> abcPriorCheckBoxes ;
+   class PriorSpinBox : public QHBoxLayout{
+   public:
+       PriorSpinBox(int n){
+
+           labelsp = new QLabel();
+           labelsp->setText( QString("Prior %1 coefficient:").arg(n) ) ;
+           this->addWidget(labelsp );
+
+
+           dspin = new QDoubleSpinBox();
+           dspin->setSingleStep(0.1);
+           dspin->setMinimum(0);
+           dspin->setValue(1);
+           this->addWidget(dspin);
+       }
+
+       ~PriorSpinBox(){
+           delete labelsp;
+           delete dspin;
+       }
+       QLabel *labelsp;
+       QDoubleSpinBox *dspin;
+   };
+   std::vector<PriorSpinBox*> vectorABCPriorCheckBoxes ;
 
    bool m_parametersSet;
    bool m_executablesSet;
    bool m_pipelineWriten; 
+   QString m_abcOutputImageFormat;
 
    MainScriptThread* m_thread; 
 
