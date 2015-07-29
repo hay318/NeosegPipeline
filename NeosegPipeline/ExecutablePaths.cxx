@@ -12,10 +12,10 @@ ExecutablePaths::ExecutablePaths()
    #endif
    m_splitPath = path.split(separator);
    // Executables with version
-   m_executables_withVersionLongFlag << "SegPostProcessCLP" << "python" << "N4ITKBiasFieldCorrection" << "dtiestim" << "dtiprocess" << "ResampleScalarVectorDWIVolume" << "WeightedLabelsAverage" << "ReassignWhiteMatter" << "neoseg" << "SpreadFA" ;
+   m_executables_withVersionLongFlag << "SegPostProcessCLP" << "python" << "N4ITKBiasFieldCorrection" << "dtiestim" << "dtiprocess" << "ResampleScalarVectorDWIVolume" << "WeightedLabelsAverage" << "ReassignWhiteMatter" << "neoseg" << "SpreadFA" << "ABC";
    m_executables_withVersionShortFlag << "ImageMath";
    m_executables_withVersionArgument << "ITKTransformTools";
-   m_executables_withoutVersionFlag << "bet2" << "ANTS" << "SNAP" << "unu";
+   m_executables_withHelpVersionFlag << "bet2" << "ANTS" << "SNAP" << "unu" ;
    m_executables_versions.insert("SegPostProcessCLP","1.0");
    m_executables_versions.insert("N4ITKBiasFieldCorrection","9");
    m_executables_versions.insert("dtiestim","1.1.2");
@@ -28,7 +28,7 @@ ExecutablePaths::ExecutablePaths()
    m_executables_versions.insert("ImageMath","1.1");
    m_executables_versions.insert("ITKTransformTools","1.1.0");
    m_executables_versions.insert("python","2.7.3");
-
+   m_executables_versions.insert("ABC","1.5.1");
    m_skipExecutables.append("InsightSNAP");
 }
 
@@ -142,9 +142,17 @@ bool ExecutablePaths::checkExecutablePath(QString executable_name, QString execu
    {
       command =  executable_path + " version "; 
    }
-   else
+   else if(m_executables_withHelpVersionFlag.contains(executable_name))
    {
-      command =  executable_path + " --help"; 
+      command =  executable_path + " --help";
+   }
+   else if( m_executables_withoutFlag.contains(executable_name))
+   {
+      command =  executable_path ;
+   }
+   else//Executable cannot be tested because it is not defined how to test it. It belongs to no QStringList that are used above to check that it runs
+   {
+      return false ;
    }
    std::string expected_version = m_executables_versions.value( executable_name , "-" ) ;
    QProcess test_process;   

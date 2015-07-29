@@ -4,6 +4,8 @@ Pipeline::Pipeline()
 {
    m_processing_name = "Processing";
    m_indent = "  " ; // 2 white-spaces
+   m_neosegExecution = 0;
+   m_ABCExecution = 0;
 }
 
 Pipeline::~Pipeline()
@@ -207,6 +209,27 @@ void Pipeline::writeExistingAtlasRegistration()
    m_parameters->setExistingAtlas(m_existingAtlasRegistration->getOutput() , false );
 }
 
+void Pipeline::writeABCExecution(){
+    QString directory_name = "5.ABCExecution";
+    QString directory_path = createModuleDirectory(directory_name);
+
+    QString module_name = "abcExecution";
+    m_ABCExecution = new::ABCExecution(module_name);
+    m_ABCExecution->setIndent(m_indent);
+    m_ABCExecution->SetPipelineParameters(m_parameters);
+    m_ABCExecution->setModuleDirectory(directory_path);
+    m_ABCExecution->setProcessingDirectory(m_processing_path);
+    m_ABCExecution->setExecutablePaths(m_parameters->getExecutablePaths());
+    m_ABCExecution->setSuffix(m_parameters->getSuffix());
+    m_ABCExecution->setOverwriting(m_parameters->getOverwriting());
+    m_ABCExecution->setStoppingIfError(m_parameters->getStoppingIfError());
+
+    m_ABCExecution->update();
+
+    m_importingModules += "import " + module_name +"\n";
+    m_runningModules += module_name + ".run()\n";
+
+}
 
 void Pipeline::writeNeosegExecution()
 {
@@ -326,7 +349,9 @@ void Pipeline::writeMainScript()
 
    m_script += m_runningModules + "\n"; 
 
-   copySegmentations();
+   if(m_neosegExecution){
+       copySegmentations();
+   }
 
    m_script += "end = datetime.datetime.now()\n\n";
 
@@ -373,7 +398,14 @@ void Pipeline::cleanUp()
       m_existingAtlasRegistration->cleanUp(); 
    }
 
-   m_neosegExecution->cleanUp();  
+   if(m_neosegExecution){
+       m_neosegExecution->cleanUp();
+   }
+
+   if(m_ABCExecution){
+       m_ABCExecution->cleanUp();
+   }
+
 }
 
 void Pipeline::writeXMLFiles()
@@ -423,7 +455,12 @@ void Pipeline::writePipeline()
    {
       writeExistingAtlasRegistration(); 
    }
-   writeNeosegExecution();
+   if(m_parameters->getTissueSegmentationType() == 0){
+       writeNeosegExecution();
+   }else{
+       writeABCExecution();
+   }
+
    writeMainScript();
 
 }

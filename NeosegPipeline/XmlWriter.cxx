@@ -184,25 +184,46 @@ void XmlWriter::writeParametersConfiguration(QString file_path)
 {
    QFile* file = new::QFile(file_path);
    file->open(QIODevice::WriteOnly);
-
    QXmlStreamWriter* stream = new::QXmlStreamWriter(file);
    stream->setAutoFormatting(true);
 
-   stream->writeStartDocument(); 
+   if(m_parameters->getTissueSegmentationType() == 0){
+       stream->writeStartDocument();
+       stream->writeDTD("<!DOCTYPE Neoseg-pipeline-parameters>");
 
-   stream->writeDTD("<!DOCTYPE Neoseg-pipeline-parameters>");
+       stream->writeStartElement("Parameters");
 
-   stream->writeStartElement("Parameters");
+       writeGeneralParameters(stream);
+       writeAntsParameters(stream, m_parameters->getAntsParametersDTI());
+       writeAntsParameters(stream, m_parameters->getAntsParametersAtlas());
 
-   writeGeneralParameters(stream);  
-   writeAntsParameters(stream, m_parameters->getAntsParametersDTI());
-   writeAntsParameters(stream, m_parameters->getAntsParametersAtlas());
-   writeNeosegParameters(stream); 
+       writeNeosegParameters(stream);
 
-   stream->writeEndElement();
+       stream->writeEndElement();
+       stream->writeEndDocument();
+   }else if(m_parameters->getTissueSegmentationType() == 1){
 
-   stream->writeEndDocument();
+       QString abcconf = m_parameters->getPrefix() + QString("ABC-execution.xml");
 
+       stream->writeStartDocument();
+       stream->writeDTD("<!DOCTYPE ABC-pipeline-parameters>");
+
+       stream->writeStartElement("Parameters");
+
+       writeGeneralParameters(stream);
+       writeAntsParameters(stream, m_parameters->getAntsParametersDTI());
+       writeAntsParameters(stream, m_parameters->getAntsParametersAtlas());
+
+       stream->writeStartElement("ABC-parameters");
+       stream->writeStartElement("Configuration");
+       stream->writeAttribute("file", abcconf);
+       stream->writeEndElement();
+       stream->writeEndElement();
+
+       stream->writeEndElement();
+       stream->writeEndDocument();
+
+   }
    file->close(); 
 }
 
@@ -227,6 +248,8 @@ void XmlWriter::writeExecutables(QXmlStreamWriter* stream)
    writeElement(stream, "neoseg", "path", executablePaths->getExecutablePath("neoseg"));
    writeElement(stream, "ReassignWhiteMatter", "path", executablePaths->getExecutablePath("ReassignWhiteMatter"));
    writeElement(stream, "InsightSNAP", "path", executablePaths->getExecutablePath("InsightSNAP"));
+   writeElement(stream, "ABC", "path", executablePaths->getExecutablePath("ABC"));
+
    stream->writeEndElement(); 
 
    LibraryPaths* libraryPaths = m_parameters->getLibraryPaths();

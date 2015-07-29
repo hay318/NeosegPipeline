@@ -244,7 +244,60 @@ class PipelineParameters
 
    QString checkImages();
 
+
+   // Type of tissue segmentation 0 for Neoseg 1 for ABC
+   void setTissueSegmentationType(int type){
+       m_abcTissueSegmentationType = type;
+   }
+
+   /*
+    * @return Type of tissue segmentation 0 for Neoseg 1 for ABC
+    */
+   int getTissueSegmentationType(){
+       return m_abcTissueSegmentationType;
+   }
+
+
+   //Parameters for ABC execution
+   void setABCPriorsCoefficients(std::vector<double> priorsCoefficients){
+       m_abcPriorsCoefficients = priorsCoefficients;
+   }
+
+   std::vector<double> getABCPriorsCoefficients(){
+       return m_abcPriorsCoefficients;
+   }
+
+   void setABCInitialDistributorEstimatorType(QString estimator){
+       m_abcInitialDistributorEstimator = estimator;
+   }
+
+   QString getABCInitialDistributorEstimatorType(){
+       return m_abcInitialDistributorEstimator;
+   }
+
+   void setABCMaximumDegreeBiasField(double bias){
+       m_abcMaximumDegreeBiasField = bias;
+   }
+
+   double getABCMaximumDegreeBiasField(){
+       return m_abcMaximumDegreeBiasField;
+   }
+
+   void setABCOutputImageFormat(QString format){
+       m_abcOutputImageFormat = format;
+   }
+
+   QString getABCOutputImageFormat(){
+       return m_abcOutputImageFormat;
+   }
+
    private:
+
+   int m_abcTissueSegmentationType;
+   std::vector<double> m_abcPriorsCoefficients;
+   QString m_abcInitialDistributorEstimator;
+   double m_abcMaximumDegreeBiasField;
+   QString m_abcOutputImageFormat;
 
    QString m_programPath; 
    

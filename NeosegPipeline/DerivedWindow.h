@@ -14,10 +14,13 @@
 #include <QDropEvent>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <QList>
 
 // My Specific Librairies
 #include "ui_Window.h"
 #include "ui_About.h"
+#include "ui_neosegParameters.h"
+#include "ui_ABCParameters.h"
 #include "Pipeline.h"
 #include "XmlReader.h"
 #include "XmlWriter.h"
@@ -132,6 +135,9 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    // Atlas Registration //
    void changeUsingMaskAtlas(bool) ;
 
+   //Tissue Segmentation
+   void tissueSegmentationSoftwareSelection() ;
+
    // Computing System
    void changeComputingSystem(int index);
 
@@ -180,11 +186,18 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    // Exit Application 
    void closeEvent(QCloseEvent *event);
 
-   private :
+   //ABC dynamic UI
+   void updateNumbersOfPriorsForABC(int nbPriors) ;
+
+private slots:
+   void on_comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1);
+
+private :
    
    // Window
    Ui_Window ui;
-
+   Ui::ABCParameters *abcParameters ;
+   Ui::neosegParameters *neosegParameters ;
    // Pipeline 
    Pipeline* m_pipeline;
 
@@ -205,11 +218,38 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    QString m_existingAtlases_path;
    QStringList m_goodAtlases;
    QStringList m_wrongAtlases;  
-   QStringList m_selectedAtlases; 
+   QStringList m_selectedAtlases;
+
+   //ABC dynamic UI
+   class PriorSpinBox : public QHBoxLayout{
+   public:
+       PriorSpinBox(int n){
+
+           labelsp = new QLabel();
+           labelsp->setText( QString("Prior %1 coefficient:").arg(n) ) ;
+           this->addWidget(labelsp );
+
+
+           dspin = new QDoubleSpinBox();
+           dspin->setSingleStep(0.1);
+           dspin->setMinimum(0);
+           dspin->setValue(1);
+           this->addWidget(dspin);
+       }
+
+       ~PriorSpinBox(){
+           delete labelsp;
+           delete dspin;
+       }
+       QLabel *labelsp;
+       QDoubleSpinBox *dspin;
+   };
+   std::vector<PriorSpinBox*> vectorABCPriorCheckBoxes ;
 
    bool m_parametersSet;
    bool m_executablesSet;
    bool m_pipelineWriten; 
+   QString m_abcOutputImageFormat;
 
    MainScriptThread* m_thread; 
 

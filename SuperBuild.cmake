@@ -76,6 +76,7 @@ set( ListProjects
   SlicerCLI
   teem
   neoseg
+  ABC
 )
 
  foreach( var ${ListProjects})
@@ -94,6 +95,8 @@ set(SLICER_CLI_DO_NOT_BUILD_ALL ON )
 set(BUILD_CLI_ResampleScalarVectorDWIVolume ON )
 set(BUILD_CLI_ResampleDTIVolume ON )
 set(BUILD_CLI_N4ITKBiasFieldCorrection ON )
+
+set(Slicer_Revision 23774) 
 #-----------------------------------------------------------------------------
 # Define Superbuild global variables
 #-----------------------------------------------------------------------------
@@ -383,4 +386,8 @@ endif()
 
 if(BUILD_neoseg)
   install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/neoseg-install/bin/neoseg DESTINATION bin)
+endif()
+
+if(BUILD_ABC)
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/ABC-install/bin/ABC DESTINATION bin)
 endif()

@@ -5,6 +5,13 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    setupUi(this);
    setAcceptDrops(true);
 
+   neosegParameters = new Ui::neosegParameters ;
+   neosegParameters->setupUi( this->softwareFrame ) ;
+   abcParameters = new Ui::ABCParameters ;
+   abcParameters->setupUi(this->softwareFrame);
+   this->radioNeoseg->setChecked( true ) ;
+   this->radioABC->setChecked( false ) ;
+
    m_parametersSet = false; 
    m_executablesSet = false; 
    m_pipelineWriten = false; 
@@ -164,6 +171,10 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    // Display Results  
    connect(displayResults_button, SIGNAL(clicked()), this, SLOT(displayResults())); 
    
+   // Display ABC options or neoseg options in "Tissue Segmentation" tab
+   connect( radioNeoseg, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
+   connect( radioABC, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
+
    numberOfRegistrations_spinBox->setEnabled(true); 
    numberOfGB_spinBox->setEnabled(false); 
 
@@ -184,6 +195,55 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    registrations_comboBox->setEnabled(false); 
 
    this->adjustSize();
+   // We run the function "tissueSegmentationSoftwareSelection" once to initialize the display.
+   radioABC->setChecked(true);
+   tissueSegmentationSoftwareSelection() ;
+   updateNumbersOfPriorsForABC(1);
+   updateNumbersOfPriorsForABC(2);
+   updateNumbersOfPriorsForABC(3);
+   updateNumbersOfPriorsForABC(4);
+
+   this->abcParameters->lineEditNbPriors->setText(QString::number(4));
+}
+
+
+void DerivedWindow::updateNumbersOfPriorsForABC(int nbPriors)
+{
+    if( nbPriors >= (int)vectorABCPriorCheckBoxes.size() )
+    {
+
+        PriorSpinBox* psb = new PriorSpinBox(vectorABCPriorCheckBoxes.size() + 1);
+        vectorABCPriorCheckBoxes.push_back( psb ) ;
+
+//            QHBoxLayout *postphlayout = new QHBoxLayout ;
+//            QCheckBox *reassignSmallIsland = new QCheckBox ;
+//            postphlayout->addWidget(reassignSmallIsland);
+//            postphlayout->addSpacerItem(new QSpacerItem(10,0, QSizePolicy::Expanding, QSizePolicy::Ignored));
+//            QSpinBox *spin = new QSpinBox ;
+//            postphlayout->addWidget(spin);
+//            postphlayout->setParent(abcParameters->ppFrame) ;
+
+
+        abcParameters->nbPriorLayout->addLayout(psb);
+        this->repaint();
+    }else if(vectorABCPriorCheckBoxes.size() > 0){
+        delete vectorABCPriorCheckBoxes[vectorABCPriorCheckBoxes.size() - 1];
+        vectorABCPriorCheckBoxes.pop_back();
+    }
+}
+
+void DerivedWindow::tissueSegmentationSoftwareSelection()
+{
+    if( this->radioNeoseg->isChecked() )
+    {
+        neosegParameters->frame->show() ;
+        abcParameters->frame->hide() ;
+    }
+    else
+    {
+        neosegParameters->frame->hide() ;
+        abcParameters->frame->show() ;
+    }
 }
 
 void DerivedWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -326,6 +386,9 @@ void DerivedWindow::initializeExecutablesMap()
 
    Executable InsightSNAP = {InsightSNAP_button, InsightSNAP_lineEdit, resetInsightSNAP_button};
    m_executables_map.insert("InsightSNAP", InsightSNAP);
+
+   Executable ABC = {ABC_button, ABC_lineEdit, resetABC_button};
+   m_executables_map.insert("ABC", ABC);
 }
 
 void DerivedWindow::initializeLibrariesMap()
@@ -768,14 +831,20 @@ void DerivedWindow::enterExecutable(QString executable_name)
     Executable executable = m_executables_map[executable_name];
 
     QString executable_path = (executable.enter_lineEdit)->text();
-    if( m_executables->checkExecutablePath( executable_name , executable_path) )
-    {
-        (executable.enter_lineEdit)->setText(executable_path) ;
-        m_executables->setExecutablePath( executable_name , executable_path ) ;
-    }
-    else
-    {
-        QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable or is the incorrect version"));
+
+    std::cout<<executable_name.toStdString()<<std::endl;
+    std::cout<<executable_path.toStdString()<<std::endl;
+
+    if(executable_path.toStdString().compare("") != 0){
+        if( m_executables->checkExecutablePath( executable_name , executable_path) )
+        {
+            (executable.enter_lineEdit)->setText(executable_path) ;
+            m_executables->setExecutablePath( executable_name , executable_path ) ;
+        }
+        else
+        {
+            QMessageBox::critical(this, executable_name, executable_path + tr("\nis not executable or is the incorrect version"));
+        }
     }
 }
 
@@ -803,6 +872,7 @@ void DerivedWindow::resetAllExecutables()
    resetExecutable("neoseg"); 
    resetExecutable("ReassignWhiteMatter"); 
    resetExecutable("InsightSNAP");
+   resetExecutable("ABC");
 }
 
 
@@ -920,9 +990,9 @@ void DerivedWindow::initializeXMLParameters()
    usingFA_checkBox->setChecked(m_parameters->getUsingFA()); 
    usingAD_checkBox->setChecked(m_parameters->getUsingAD()); 
 
-   computing3LabelsSeg_checkBox->setChecked(m_parameters->getComputing3LabelsSeg() ) ;
-   reassigningWhite_checkBox->setChecked(m_parameters->getReassigningWhiteMatter());
-   whiteThreshold_spinBox->setValue(m_parameters->getSizeThreshold()); 
+   neosegParameters->computing3LabelsSeg_checkBox->setChecked(m_parameters->getComputing3LabelsSeg() ) ;
+   neosegParameters->reassigningWhite_checkBox->setChecked(m_parameters->getReassigningWhiteMatter());
+   neosegParameters->whiteThreshold_spinBox->setValue(m_parameters->getSizeThreshold());
 
    overwriting_checkBox->setChecked(m_parameters->getOverwriting()); 
    cleaningUp_checkBox->setChecked(m_parameters->getCleaningUp()); 
@@ -1031,17 +1101,17 @@ void DerivedWindow::initializeXMLParameters()
    numberOfIterations_spinBox->setValue(m_neosegParameters->getNumberOfIterations()); 
    timeStep_spinBox->setValue(m_neosegParameters->getTimeStep()); 
 
-   priorThreshold_spinBox->setValue(m_neosegParameters->getPriorThreshold()); 
-   maxDegree_spinBox->setValue(m_neosegParameters->getMaxBiasDegree());
+   neosegParameters->priorThreshold_spinBox->setValue(m_neosegParameters->getPriorThreshold());
+   neosegParameters->maxDegree_spinBox->setValue(m_neosegParameters->getMaxBiasDegree());
 
-   prior1_spinBox->setValue(m_neosegParameters->getPrior1());
-   prior2_spinBox->setValue(m_neosegParameters->getPrior2());
-   prior3_spinBox->setValue(m_neosegParameters->getPrior3());
-   prior4_spinBox->setValue(m_neosegParameters->getPrior4());
-   prior5_spinBox->setValue(m_neosegParameters->getPrior5());
+   neosegParameters->prior1_spinBox->setValue(m_neosegParameters->getPrior1());
+   neosegParameters->prior2_spinBox->setValue(m_neosegParameters->getPrior2());
+   neosegParameters->prior3_spinBox->setValue(m_neosegParameters->getPrior3());
+   neosegParameters->prior4_spinBox->setValue(m_neosegParameters->getPrior4());
+   neosegParameters->prior5_spinBox->setValue(m_neosegParameters->getPrior5());
 
-   refinement_checkBox->setChecked(m_neosegParameters->getRefinement());
-   initialParzenKernelWidth_spinBox->setValue(m_neosegParameters->getInitialParzenKernelWidth());
+   neosegParameters->refinement_checkBox->setChecked(m_neosegParameters->getRefinement());
+   neosegParameters->initialParzenKernelWidth_spinBox->setValue(m_neosegParameters->getInitialParzenKernelWidth());
    if( newAtlas_radioButton->isChecked() )
    {
       atlasGeneration_tab->setDisabled( false ) ;
@@ -1071,7 +1141,7 @@ void DerivedWindow::initializeExecutables()
    ReassignWhiteMatter_lineEdit->setText(m_executables->getExecutablePath("ReassignWhiteMatter"));
    Neoseg_lineEdit->setText(m_executables->getExecutablePath("neoseg"));
    InsightSNAP_lineEdit->setText(m_executables->getExecutablePath("InsightSNAP"));
-
+   ABC_lineEdit->setText(m_executables->getExecutablePath("ABC"));
    // Libraries
    FSL_lineEdit->setText(m_libraries->getLibraryPath("FSL"));
 }
@@ -1092,6 +1162,23 @@ void DerivedWindow::setData()
    {
       createOutput(output_lineEdit->text()); 
    }
+   if(this->radioNeoseg->isChecked()){
+       m_parameters->setTissueSegmentationType(0);
+   }else{
+       m_parameters->setTissueSegmentationType(1);
+       std::vector<double> coeffs;
+       for(unsigned i = 0; i < vectorABCPriorCheckBoxes.size(); i++){
+           PriorSpinBox* priorspin = vectorABCPriorCheckBoxes[i];
+           coeffs.push_back(priorspin->dspin->value());
+       }
+       m_parameters->setABCPriorsCoefficients(coeffs);
+       m_parameters->setABCInitialDistributorEstimatorType(this->abcParameters->initialDistributionEstimatorCombo->currentText());
+       m_parameters->setABCMaximumDegreeBiasField(this->abcParameters->maxDegree_spinBox->value());
+       m_parameters->setABCOutputImageFormat(this->abcParameters->comboBoxOutputImageFormat->currentText());
+   }
+
+
+
    m_parameters->setOutput(output_lineEdit->text()); 
 }
 
@@ -1137,8 +1224,8 @@ void DerivedWindow::setParameters()
    m_parameters->setUsingAD(usingAD_checkBox->isChecked());
 
    // Reassigning White Matter
-   m_parameters->setReassigningWhiteMatter(reassigningWhite_checkBox->isChecked()); 
-   m_parameters->setSizeThreshold(whiteThreshold_spinBox->value());
+   m_parameters->setReassigningWhiteMatter(neosegParameters->reassigningWhite_checkBox->isChecked());
+   m_parameters->setSizeThreshold(neosegParameters->whiteThreshold_spinBox->value());
 
 
    // Computation
@@ -1208,18 +1295,18 @@ void DerivedWindow::setParameters()
    m_neosegParameters->setNumberOfIterations(numberOfIterations_spinBox->value());
    m_neosegParameters->setTimeStep(timeStep_spinBox->value()); 
 
-   m_neosegParameters->setPriorThreshold(priorThreshold_spinBox->value()); 
-   m_neosegParameters->setMaxBiasDegree(maxDegree_spinBox->value()); 
-   m_neosegParameters->setPrior1(prior1_spinBox->value()); 
-   m_neosegParameters->setPrior2(prior2_spinBox->value()); 
-   m_neosegParameters->setPrior3(prior3_spinBox->value()); 
-   m_neosegParameters->setPrior4(prior4_spinBox->value()); 
-   m_neosegParameters->setPrior5(prior5_spinBox->value()); 
+   m_neosegParameters->setPriorThreshold(neosegParameters->priorThreshold_spinBox->value());
+   m_neosegParameters->setMaxBiasDegree(neosegParameters->maxDegree_spinBox->value());
+   m_neosegParameters->setPrior1(neosegParameters->prior1_spinBox->value());
+   m_neosegParameters->setPrior2(neosegParameters->prior2_spinBox->value());
+   m_neosegParameters->setPrior3(neosegParameters->prior3_spinBox->value());
+   m_neosegParameters->setPrior4(neosegParameters->prior4_spinBox->value());
+   m_neosegParameters->setPrior5(neosegParameters->prior5_spinBox->value());
 
-   m_neosegParameters->setRefinement(refinement_checkBox->isChecked());
-   m_neosegParameters->setInitialParzenKernelWidth(initialParzenKernelWidth_spinBox->value());
+   m_neosegParameters->setRefinement(neosegParameters->refinement_checkBox->isChecked());
+   m_neosegParameters->setInitialParzenKernelWidth(neosegParameters->initialParzenKernelWidth_spinBox->value());
 
-   m_parameters->setComputing3LabelsSeg(computing3LabelsSeg_checkBox->isChecked());
+   m_parameters->setComputing3LabelsSeg(neosegParameters->computing3LabelsSeg_checkBox->isChecked());
    m_parametersSet = true;
 }
 
@@ -1241,7 +1328,8 @@ void DerivedWindow::setExecutables()
    m_executables->setExecutablePath("SpreadFA", SpreadFA_lineEdit->text()); 
    m_executables->setExecutablePath("ReassignWhiteMatter", ReassignWhiteMatter_lineEdit->text()); 
    m_executables->setExecutablePath("neoseg", Neoseg_lineEdit->text()); 
-   m_executables->setExecutablePath("InsightSNAP", InsightSNAP_lineEdit->text()); 
+   m_executables->setExecutablePath("InsightSNAP", InsightSNAP_lineEdit->text());
+   m_executables->setExecutablePath("ABC", ABC_lineEdit->text());
 
    m_libraries->setLibraryPath("FSL", FSL_lineEdit->text());    
 
@@ -1310,7 +1398,7 @@ void DerivedWindow::setParametersWidgetEnabled(bool enabled)
    // Neoseg 
    neosegModalities_groupBox->setEnabled(enabled);
    neosegParameters_groupBox->setEnabled(enabled);
-   mergedSegmentation_groupBox->setEnabled(enabled);
+   neosegParameters->mergedSegmentation_groupBox->setEnabled(enabled);
 
    // Software
    Executables_groupBox->setEnabled(enabled);
@@ -1635,8 +1723,7 @@ void DerivedWindow::closeEvent(QCloseEvent *event)
    }
 }
 
-
-
-
-
-
+void DerivedWindow::on_comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1)
+{
+    m_parameters->setABCOutputImageFormat(arg1);
+}

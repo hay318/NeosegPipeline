@@ -18,7 +18,7 @@ FIND_PACKAGE(ITK REQUIRED)
 INCLUDE(${ITK_USE_FILE})
 
 QT4_ADD_RESOURCES(RESOURCES resources.qrc)
-QT4_WRAP_UI(UI_SOURCES Window.ui About.ui)
+QT4_WRAP_UI(UI_SOURCES Window.ui neosegParameters.ui ABCParameters.ui About.ui)
 QT4_WRAP_CPP(MOC_SOURCES DerivedWindow.h MainScriptThread.h)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}
@@ -47,6 +47,7 @@ SET(NeosegPipeline_SOURCE  main.cxx
                            NeosegExecution.cxx
                            DtiRegistration.cxx
                            MainScriptThread.cxx
+                           ABCExecution.cxx
 )
 
 SET(NeosegPipeline_HEADERS NeosegPipelineTool.h
@@ -75,6 +76,7 @@ SET(NeosegPipeline_HEADERS NeosegPipelineTool.h
                            MainScriptThread.h
                            Origin.h
                            MinMax.h
+                           ABCExecution.h
 )
 
 FILE(READ NeosegPipeline.xml var)
