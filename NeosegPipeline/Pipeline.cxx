@@ -349,7 +349,9 @@ void Pipeline::writeMainScript()
 
    m_script += m_runningModules + "\n"; 
 
-   copySegmentations();
+   if(m_neosegExecution){
+       copySegmentations();
+   }
 
    m_script += "end = datetime.datetime.now()\n\n";
 

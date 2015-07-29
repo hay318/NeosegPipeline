@@ -28,6 +28,11 @@ public:
 
 private:
     PipelineParameters* m_parameters;
+
+
+    void addRename(QString s1, QString s2);
+    void addRename(QStringList l1, QStringList l2);
+
 };
 
 #endif // ABCEXECUTION_H
