@@ -174,9 +174,6 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    // Display ABC options or neoseg options in "Tissue Segmentation" tab
    connect( radioNeoseg, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
    connect( radioABC, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
-   // Update number of priors for ABC
-   connect( abcParameters->abcNbPriors, SIGNAL(	valueChanged(int)), this, SLOT(updateNumbersOfPriorsForABC(int)) ) ;
-
 
    numberOfRegistrations_spinBox->setEnabled(true); 
    numberOfGB_spinBox->setEnabled(false); 
@@ -202,6 +199,11 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    radioABC->setChecked(true);
    tissueSegmentationSoftwareSelection() ;
    updateNumbersOfPriorsForABC(1);
+   updateNumbersOfPriorsForABC(2);
+   updateNumbersOfPriorsForABC(3);
+   updateNumbersOfPriorsForABC(4);
+
+   this->abcParameters->lineEditNbPriors->setText(QString::number(4));
 }
 
 

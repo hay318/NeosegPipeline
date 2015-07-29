@@ -127,7 +127,14 @@ void ABCExecution::writeABCParameters(QXmlStreamWriter *stream){
     stream->writeTextElement(QString("ORIENTATION"), QString("file"));
     stream->writeEndElement();
 
-    stream->writeTextElement(QString("FILTER-ITERATIONS"), QString::number(m_parameters->getNeosegParameters()->getNumberOfIterations()));//This is not used in this filter, set to 0
+    if(m_parameters->getUsingAD() || m_parameters->getUsingFA()){
+        stream->writeStartElement("IMAGE");
+        stream->writeTextElement(QString("FILE"), QString(m_parameters->getDWI()));
+        stream->writeTextElement(QString("ORIENTATION"), QString("file"));
+        stream->writeEndElement();
+    }
+
+    stream->writeTextElement(QString("FILTER-ITERATIONS"), QString::number(m_parameters->getNeosegParameters()->getNumberOfIterations()));
     stream->writeTextElement(QString("FILTER-TIME-STEP"), QString::number(m_parameters->getNeosegParameters()->getTimeStep()));
     stream->writeTextElement(QString("FILTER-METHOD"), m_parameters->getNeosegParameters()->getFilterMethod());
 

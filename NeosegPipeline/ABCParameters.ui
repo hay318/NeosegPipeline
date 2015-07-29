@@ -200,31 +200,6 @@
           </widget>
          </item>
          <item>
-          <widget class="QFrame" name="frame_2">
-           <property name="frameShape">
-            <enum>QFrame::NoFrame</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Plain</enum>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLabel" name="label_8">
-              <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
-              </property>
-              <property name="lineWidth">
-               <number>0</number>
-              </property>
-              <property name="text">
-               <string>Global spatial priors :</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
           <widget class="QWidget" name="widget_17" native="true">
            <layout class="QGridLayout" name="gridLayout_5">
             <property name="topMargin">
@@ -236,19 +211,34 @@
             <item row="2" column="3">
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <widget class="QLabel" name="label">
+               <widget class="QLabel" name="label_8">
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="lineWidth">
+                 <number>0</number>
+                </property>
                 <property name="text">
-                 <string>Number of priors</string>
+                 <string>Global spatial priors in atlas population directory:</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="abcNbPriors">
-                <property name="minimum">
-                 <number>1</number>
+               <widget class="QLineEdit" name="lineEditNbPriors">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
-                <property name="value">
-                 <number>1</number>
+                <property name="minimumSize">
+                 <size>
+                  <width>20</width>
+                  <height>10</height>
+                 </size>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -303,7 +293,7 @@
                  <x>0</x>
                  <y>0</y>
                  <width>648</width>
-                 <height>147</height>
+                 <height>212</height>
                 </rect>
                </property>
                <layout class="QHBoxLayout" name="horizontalLayout">
