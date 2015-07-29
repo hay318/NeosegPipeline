@@ -64,7 +64,11 @@ class AtlasGeneration : public Script
 
    void cleanUp();
 
-   private:
+   void setUseT1(bool uset1){
+       m_UseT1 = uset1;
+   }
+
+private:
 
    // Input 
    std::vector<Atlas>   m_atlasPopulation;
@@ -77,7 +81,8 @@ class AtlasGeneration : public Script
    double               m_FASigmaScale; 
    double               m_FAWeight; 
    double               m_FASmoothingSize; 
-   double               m_neightborhoodRadius; 
+   double               m_neightborhoodRadius;
+   bool                 m_UseT1;
 
    // Directories
    QDir*                m_priorProbabilities_dir; 

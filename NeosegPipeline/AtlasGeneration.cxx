@@ -8,6 +8,7 @@ AtlasGeneration::AtlasGeneration(QString module) : Script(module)
    m_rest.name="rest";
    m_templateT1.name="templateT1";
    m_templateT2.name="templateT2";
+   m_UseT1 = true;
 }
 
 void AtlasGeneration::setAtlasPopulation(std::vector<Atlas> atlasPopulation)
@@ -180,7 +181,13 @@ void AtlasGeneration::generateWeightedAveragedLabels()
    m_script += m_indent + "if checkFileExistence(parameters_path)==False:\n";
    m_script += m_indent + m_indent + "logger.info('- Writing the XML file...')\n";
    m_script += m_indent + m_indent + "parameters = Element('WEIGHTED-AVERAGED-LABELS-PARAMETERS')\n";
-   addSubElement("parameters", "Input", "INPUT", m_neo.T1);
+   std::cout<<m_neo.T1.toStdString()<<std::endl;
+   if(m_UseT1){
+       addSubElement("parameters", "Input", "INPUT", m_neo.T1);
+   }else{
+       addSubElement("parameters", "Input", "INPUT", m_neo.T2);
+   }
+
    m_script += m_indent + m_indent + "atlasPopulation = SubElement(parameters, 'ATLAS-POPULATION')\n";
 
    std::vector<Atlas>::iterator it;
@@ -193,17 +200,26 @@ void AtlasGeneration::generateWeightedAveragedLabels()
       if(atlas.probabilistic)
       {
          m_script += m_indent + m_indent + "atlas = SubElement(atlasPopulation, 'PROBABILISTIC-ATLAS')\n";
-         addSubElement("atlas", "image", "IMAGE", (*it).T2); 
-         addSubElement("atlas", "seg", "WHITE", (*it).white);
-         addSubElement("atlas", "seg", "GRAY", (*it).gray);
-         addSubElement("atlas", "seg", "CSF", (*it).csf);
+         if(m_UseT1){
+             addSubElement("atlas", "image", "IMAGE", atlas.T1);
+         }else{
+             addSubElement("atlas", "image", "IMAGE", atlas.T2);
+         }
+
+         addSubElement("atlas", "seg", "WHITE", atlas.white);
+         addSubElement("atlas", "seg", "GRAY", atlas.gray);
+         addSubElement("atlas", "seg", "CSF", atlas.csf);
       }
 
       else
       {
          m_script += m_indent + m_indent + "atlas = SubElement(atlasPopulation, 'ATLAS')\n";
-         addSubElement("atlas", "image", "IMAGE", (*it).T2); 
-         addSubElement("atlas", "seg", "SEG", (*it).seg);
+         if(m_UseT1){
+             addSubElement("atlas", "image", "IMAGE", atlas.T1);
+         }else{
+             addSubElement("atlas", "image", "IMAGE", atlas.T2);
+         }
+         addSubElement("atlas", "seg", "SEG", atlas.seg);
       }
    }
    

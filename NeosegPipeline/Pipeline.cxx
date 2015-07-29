@@ -177,6 +177,8 @@ void Pipeline::writeAtlasGeneration()
    m_atlasGeneration->setOverwriting(m_parameters->getOverwriting()); 
    m_atlasGeneration->setStoppingIfError(m_parameters->getStoppingIfError());
 
+   m_atlasGeneration->setUseT1(m_parameters->getWeightsModalityIndex() == 0);
+
    m_atlasGeneration->update();
    m_importingModules += "import " + module_name + "\n"; 
    m_runningModules += module_name + ".run()\n"; 
