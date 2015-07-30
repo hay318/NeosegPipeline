@@ -16,8 +16,8 @@
 
 // General Librairies // 
 #include <vector>
-#include <iterator>
 #include <string>
+#include <map>
 
 // ITK Librairies //
 #include "itkImageToImageFilter.h"
@@ -86,16 +86,20 @@ namespace itk
      void ThreadedGenerateData( const OutputImageRegionType & outputRegionForThread, ThreadIdType threadId );
      void GenerateOutputInformation();
      void GenerateInputRequestedRegion();
+     void UpdateNumberOfOutputs(int n, InputImageRegionType inputRegion);
 
 private:
 
       //Input 
       InputImagePointerType                m_inputImage;
 
+      typedef std::map< InputImagePixelType, int > InputImageLabelIndexMapType;
+      InputImageLabelIndexMapType m_InputImageLabelIndexMap;
+
       // Outputs
-      OutputImagePointerType               m_white;   
-      OutputImagePointerType               m_gray; 
-      OutputImagePointerType               m_csf; 
+//      OutputImagePointerType               m_white;
+//      OutputImagePointerType               m_gray;
+//      OutputImagePointerType               m_csf;
 
       // Weights 
       bool                                 m_ComputingWeights;

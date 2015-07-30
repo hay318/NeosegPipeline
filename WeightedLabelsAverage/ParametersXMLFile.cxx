@@ -128,6 +128,11 @@ ParametersXMLFileReader
    {
       m_PObject->SetCsf(m_CurrentString);
    }
+
+   else if(itksys::SystemTools::Strucmp(name,"OUTPUT") == 0)
+   {
+      m_PObject->SetOutputDirectory(m_CurrentString);
+   }
 }
 
 void

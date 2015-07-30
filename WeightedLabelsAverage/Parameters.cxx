@@ -37,7 +37,7 @@ Parameters
       }
    }
 
-  if ( m_White.empty() || m_Gray.empty() || m_Csf.empty() )
+  if ( (m_White.empty() || m_Gray.empty() || m_Csf.empty()) && m_OutputDirectory.empty() )
   {
     return false;
   }

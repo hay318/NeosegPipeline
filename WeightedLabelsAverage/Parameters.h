@@ -54,7 +54,20 @@ class Parameters: public itk::Object
      // Checking Parameters
      virtual bool CheckValues();
 
+
+     void SetOutputDirectory(std::string output){
+         m_OutputDirectory = output;
+     }
+
 protected:
+
+     Parameters(){
+          m_White = "";
+          m_Gray = "";
+          m_Csf = "";
+
+          m_OutputDirectory = "";
+     }
 
      std::string m_Input;
 
@@ -67,6 +80,8 @@ protected:
      std::string m_White;
      std::string m_Gray;
      std::string m_Csf;
+
+     std::string m_OutputDirectory;
 };
 
 #endif
