@@ -133,7 +133,7 @@ namespace itk
       m_InputImageLabelIndexMap.clear();
       int indexOfLabel = 0;
 
-      for(int i = 0; i < m_AtlasPopulation.size(); i++){ //We'll go through all the atlas population
+      for(unsigned i = 0; i < m_AtlasPopulation.size(); i++){ //We'll go through all the atlas population
 
           int currentIndexOfLabel = 0; //This index will be used to check if the current atlas has the same number of labels as the first atlas
           InputImageLabelIndexMapType currentInputImageLabelIndexMap;
@@ -248,7 +248,7 @@ namespace itk
       OutputImageIndexType       index;
 
 //      std::vector<double> labels(4,0.0);
-      typedef std::map< double, double > MapLabelsType;
+      typedef std::map< InputImagePixelType, double > MapLabelsType;
       MapLabelsType labels;
 
       Atlas atlas;
@@ -271,7 +271,11 @@ namespace itk
          index = it.GetIndex();
 
          // Reinitialize labels
-         labels.clear();
+         typename InputImageLabelIndexMapType::iterator labelindexmapit;
+         for(labelindexmapit = m_InputImageLabelIndexMap.begin(); labelindexmapit != m_InputImageLabelIndexMap.end(); ++labelindexmapit){
+          labels[labelindexmapit->first] = 0;//Initialize all the existing labels to 0 for this iteration
+         }
+
          sumWeights = 0;
 
          if( ( m_inputImage->GetPixel( index ) ) != 0 )  // Inside the brain
@@ -296,23 +300,19 @@ namespace itk
                else
                {
                   label = (atlas.labels)->GetPixel( index );
-                  if(labels.find(label) == labels.end()){
-                      labels[label] = 0;
-                  }
                   labels[label] += weight;
-
                }
             }
 
-            MapLabelsType::iterator itlabels;
+            typename MapLabelsType::iterator itlabels;
             for(itlabels = labels.begin(); itlabels != labels.end(); ++itlabels){
                 sumWeights += itlabels->second;
             }
 
             if (sumWeights!=0){
-              for(itlabels = labels.begin(); itlabels != labels.end(); ++itlabels){//For each of the recorded labels for this index
-                double r = itlabels->second/sumWeights;
-                int outputIndex = m_InputImageLabelIndexMap[itlabels->first];//Using the label value, retrieve the output index
+              for(labelindexmapit = m_InputImageLabelIndexMap.begin(); labelindexmapit != m_InputImageLabelIndexMap.end(); ++labelindexmapit){
+                double r = labels[labelindexmapit->first]/sumWeights;
+                int outputIndex = labelindexmapit->second;//Using the label value, retrieve the output index
                 this->GetOutput(outputIndex)->SetPixel(index, r);//Change the output pixel to the normalized weighted value of r
               }
             }

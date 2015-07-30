@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 
 
    std::cout<<"Writing Outputs: "<<std::endl;
-   for(int i = 0; i < WeightedLabelsAverageFilter->GetNumberOfOutputs(); i++){
+   for(unsigned i = 0; i < WeightedLabelsAverageFilter->GetNumberOfOutputs(); i++){
     WriterType::Pointer writer_white = WriterType::New(); 
      writer_white->SetInput(WeightedLabelsAverageFilter->GetOutput(i)); 
      std::string outfilename = std::to_string(i + 1) + inputExtension;
