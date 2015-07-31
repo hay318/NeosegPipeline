@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 
    int start = 1;
    int addout = 0;
-   if(map.find(0) != map.end()){
+   if(map.find(0) == map.end()){//If the label 0 (background) is not found then we write all of the generated outputs. 
     start = 0;
     addout = 1;
    }
