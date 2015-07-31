@@ -54,10 +54,8 @@ class Parameters: public itk::Object
      // Checking Parameters
      virtual bool CheckValues();
 
-
-     void SetOutputDirectory(std::string output){
-         m_OutputDirectory = output;
-     }
+     itkGetMacro(OutputDirectory, std::string)
+     itkSetMacro(OutputDirectory, std::string)
 
 protected:
 

@@ -25,3 +25,4 @@ add_executable(WeightedLabelsAverage ${WeightedLabelsAverage_SOURCE} ${WeightedL
 TARGET_LINK_LIBRARIES(WeightedLabelsAverage ${ITK_LIBRARIES})
 
 install(TARGETS WeightedLabelsAverage RUNTIME DESTINATION bin)
+

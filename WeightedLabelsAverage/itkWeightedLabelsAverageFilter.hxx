@@ -133,7 +133,7 @@ namespace itk
       m_InputImageLabelIndexMap.clear();
       int indexOfLabel = 0;
 
-      for(int i = 0; i < m_AtlasPopulation.size(); i++){ //We'll go through all the atlas population
+      for(int i = 0; i < (int)m_AtlasPopulation.size(); i++){ //We'll go through all the atlas population
 
           int currentIndexOfLabel = 0; //This index will be used to check if the current atlas has the same number of labels as the first atlas
           InputImageLabelIndexMapType currentInputImageLabelIndexMap;
@@ -142,21 +142,29 @@ namespace itk
           it.GoToBegin();
           while(!it.IsAtEnd()){
               InputImagePixelType p = it.Get();
-              if(p != 0){//Assumming 0 is background!!!
-                  if(i == 0 && m_InputImageLabelIndexMap.find(p) == m_InputImageLabelIndexMap.end()){//We will check only for the first atlas, the rest of the atlas must have the same index (number) of labels
-                      m_InputImageLabelIndexMap[p] = indexOfLabel;
-                      indexOfLabel++;
-                  }else if(currentInputImageLabelIndexMap.find(p) == currentInputImageLabelIndexMap.end()){
-                      currentInputImageLabelIndexMap[p] = currentIndexOfLabel;
-                      currentIndexOfLabel++;
-                  }
+            
+              if(i == 0 && m_InputImageLabelIndexMap.find(p) == m_InputImageLabelIndexMap.end()){//We will check only for the first atlas, the rest of the atlas must have the same index (number) of labels
+                  m_InputImageLabelIndexMap[p] = indexOfLabel;
+                  indexOfLabel++;
+              }else if(currentInputImageLabelIndexMap.find(p) == currentInputImageLabelIndexMap.end()){
+                  currentInputImageLabelIndexMap[p] = currentIndexOfLabel;
+                  currentIndexOfLabel++;
               }
+              
               ++it;
           }
           if( i != 0 && currentIndexOfLabel != indexOfLabel){//We check if this is valid, comparing the number of labels from the first atlas to the rest
               std::string s = "Different number of labels in ATLAS, files! " + std::to_string(i);
               throw s;
           }
+      }
+
+      //Order labels ASC with the index. 
+      indexOfLabel = 0;
+      typename InputImageLabelIndexMapType::iterator itlabelindex;
+      for(itlabelindex = m_InputImageLabelIndexMap.begin(); itlabelindex != m_InputImageLabelIndexMap.end(); ++itlabelindex){
+        m_InputImageLabelIndexMap[itlabelindex->first] = indexOfLabel;
+        indexOfLabel++;
       }
 
       //  Generate the number of outputs

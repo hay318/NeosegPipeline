@@ -79,6 +79,12 @@ namespace itk
       itkSetMacro( RadiusValue, double );
       itkGetMacro( RadiusValue, double );
 
+      typedef std::map< InputImagePixelType, int > InputImageLabelIndexMapType;
+
+      InputImageLabelIndexMapType GetInputImagePixelType(){
+        return m_InputImageLabelIndexMap;
+      }
+
    protected:
 
      WeightedLabelsAverageFilter();
@@ -93,7 +99,7 @@ private:
       //Input 
       InputImagePointerType                m_inputImage;
 
-      typedef std::map< InputImagePixelType, int > InputImageLabelIndexMapType;
+      
       InputImageLabelIndexMapType m_InputImageLabelIndexMap;
 
       // Outputs

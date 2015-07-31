@@ -120,39 +120,50 @@ int main(int argc, char* argv[])
    // Update 
    WeightedLabelsAverageFilter->Update();
 
+   WeightedLabelsAverageFilterType::InputImageLabelIndexMapType map = WeightedLabelsAverageFilter->GetInputImagePixelType();
 
-   std::cout<<"Writing Outputs: "<<std::endl;
-   for(int i = 0; i < WeightedLabelsAverageFilter->GetNumberOfOutputs(); i++){
-    WriterType::Pointer writer_white = WriterType::New(); 
-     writer_white->SetInput(WeightedLabelsAverageFilter->GetOutput(i)); 
-     std::string outfilename = std::to_string(i + 1) + inputExtension;
-     std::cout<<"\t"<<outfilename<<std::endl;
-     writer_white->SetFileName(outfilename.c_str());
-     writer_white->SetUseCompression(true);
-     writer_white->Update();
+   int start = 1;
+   int addout = 0;
+   if(map.find(0) != map.end()){
+    start = 0;
+    addout = 1;
    }
 
+   std::cout<<"Writing Outputs: "<<std::endl;
 
-   // // Weighted Averaged White // 
-   // WriterType::Pointer writer_white = WriterType::New(); 
-   // writer_white->SetInput(WeightedLabelsAverageFilter->GetOutput(0)); 
-   // writer_white->SetFileName(parameters->GetWhite());
-   // writer_white->SetUseCompression(true);
-   // writer_white->Update();
+   if(parameters->GetOutputDirectory().empty()){
+      // Weighted Averaged White // 
+     WriterType::Pointer writer_white = WriterType::New(); 
+     writer_white->SetInput(WeightedLabelsAverageFilter->GetOutput(1)); 
+     writer_white->SetFileName(parameters->GetWhite());
+     writer_white->SetUseCompression(true);
+     writer_white->Update();
+     
+     // Weighted Averaged Gray // 
+     WriterType::Pointer writer_gray = WriterType::New(); 
+     writer_gray->SetInput(WeightedLabelsAverageFilter->GetOutput(2)); 
+     writer_gray->SetFileName(parameters->GetGray());
+     writer_gray->SetUseCompression(true);
+     writer_gray->Update();
+     
+     // Weighted Averaged Csf // 
+     WriterType::Pointer writer_csf = WriterType::New(); 
+     writer_csf->SetInput(WeightedLabelsAverageFilter->GetOutput(3)); 
+     writer_csf->SetFileName(parameters->GetCsf());
+     writer_csf->SetUseCompression(true);
+     writer_csf->Update();
+   }else{
+    for(int i = start; i < (int)WeightedLabelsAverageFilter->GetNumberOfOutputs(); i++){
+      WriterType::Pointer writer_white = WriterType::New(); 
+       writer_white->SetInput(WeightedLabelsAverageFilter->GetOutput(i)); 
+       std::string outfilename = parameters->GetOutputDirectory() + "/" + std::to_string(i + addout) + inputExtension;
+       std::cout<<"\t"<<outfilename<<std::endl;
+       writer_white->SetFileName(outfilename.c_str());
+       writer_white->SetUseCompression(true);
+       writer_white->Update();
+     }
+   }
    
-   // // Weighted Averaged Gray // 
-   // WriterType::Pointer writer_gray = WriterType::New(); 
-   // writer_gray->SetInput(WeightedLabelsAverageFilter->GetOutput(1)); 
-   // writer_gray->SetFileName(parameters->GetGray());
-   // writer_gray->SetUseCompression(true);
-   // writer_gray->Update();
-   
-   // // Weighted Averaged Csf // 
-   // WriterType::Pointer writer_csf = WriterType::New(); 
-   // writer_csf->SetInput(WeightedLabelsAverageFilter->GetOutput(2)); 
-   // writer_csf->SetFileName(parameters->GetCsf());
-   // writer_csf->SetUseCompression(true);
-   // writer_csf->Update();
 }
 
 
