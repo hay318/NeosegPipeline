@@ -68,6 +68,14 @@ class AtlasGeneration : public Script
        m_UseT1 = uset1;
    }
 
+   void setABCPipelineModeOn(){
+      m_ABCPipelineModeOn = true;
+   }
+
+   //Specific functions that generate the ABC scripts
+   void generatePriorsProbability();
+   void computeRestABC();
+
 private:
 
    // Input 
@@ -83,6 +91,7 @@ private:
    double               m_FASmoothingSize; 
    double               m_neightborhoodRadius;
    bool                 m_UseT1;
+   bool                 m_ABCPipelineModeOn;
 
    // Directories
    QDir*                m_priorProbabilities_dir; 
