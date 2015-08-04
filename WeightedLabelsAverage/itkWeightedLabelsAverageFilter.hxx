@@ -154,8 +154,9 @@ namespace itk
               ++it;
           }
           if( i != 0 && currentIndexOfLabel != indexOfLabel){//We check if this is valid, comparing the number of labels from the first atlas to the rest
-              std::string s = "Different number of labels in ATLAS, files! " + std::to_string(i);
-              throw s;
+              char buf[200];
+              sprintf(buf, "Different number of labels in ATLAS, files! %d", i);
+              throw buf;
           }
       }
 
