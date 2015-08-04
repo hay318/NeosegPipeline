@@ -156,7 +156,9 @@ int main(int argc, char* argv[])
     for(int i = start; i < (int)WeightedLabelsAverageFilter->GetNumberOfOutputs(); i++){
       WriterType::Pointer writer_white = WriterType::New(); 
        writer_white->SetInput(WeightedLabelsAverageFilter->GetOutput(i)); 
-       std::string outfilename = parameters->GetOutputDirectory() + "/" + std::to_string(i + addout) + inputExtension;
+       char buf[50];
+       sprintf(buf, "%d", i + addout);
+       std::string outfilename = parameters->GetOutputDirectory() + "/" + std::string(buf)  + inputExtension;
        std::cout<<"\t"<<outfilename<<std::endl;
        writer_white->SetFileName(outfilename.c_str());
        writer_white->SetUseCompression(true);
