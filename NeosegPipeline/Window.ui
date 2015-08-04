@@ -251,7 +251,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabs">
       <property name="currentIndex">
-       <number>4</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="data_tab">
        <attribute name="title">
@@ -286,14 +286,14 @@
               <item row="0" column="1">
                <widget class="QLineEdit" name="T1_lineEdit">
                 <property name="text">
-                 <string>/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_T1_Bias_regT2_regAtlas_corrected_EMS-stripped.nrrd</string>
+                 <string/>
                 </property>
                </widget>
               </item>
               <item row="1" column="1">
                <widget class="QLineEdit" name="T2_lineEdit">
                 <property name="text">
-                 <string>/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_T2_Bias_regAtlas_corrected_EMS-stripped.nrrd</string>
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -314,7 +314,7 @@
               <item row="2" column="1">
                <widget class="QLineEdit" name="mask_lineEdit">
                 <property name="text">
-                 <string>/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_mask.nrrd</string>
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -352,7 +352,7 @@
                  <item row="0" column="1">
                   <widget class="QLineEdit" name="DWI_lineEdit">
                    <property name="text">
-                    <string>/Users/prieto/NetBeansProjects/UNC/data/DWI.nrrd</string>
+                    <string/>
                    </property>
                   </widget>
                  </item>
@@ -453,7 +453,7 @@
               <item>
                <widget class="QLineEdit" name="output_lineEdit">
                 <property name="text">
-                 <string>/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/abcout</string>
+                 <string/>
                 </property>
                </widget>
               </item>

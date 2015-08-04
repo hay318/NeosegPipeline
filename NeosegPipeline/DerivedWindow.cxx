@@ -989,11 +989,11 @@ void DerivedWindow::initializeDataParameters()
 {
   prefix_lineEdit->setText(m_parameters->getPrefix());
   suffix_lineEdit->setText(m_parameters->getSuffix());
-//  output_lineEdit->setText(m_parameters->getOutput());
-//  T1_lineEdit->setText(m_parameters->getT1());
-//  T2_lineEdit->setText(m_parameters->getT2());
-//  mask_lineEdit->setText(m_parameters->getMask());
-//  DWI_lineEdit->setText(m_parameters->getDWI());
+  output_lineEdit->setText(m_parameters->getOutput());
+  T1_lineEdit->setText(m_parameters->getT1());
+  T2_lineEdit->setText(m_parameters->getT2());
+  mask_lineEdit->setText(m_parameters->getMask());
+  DWI_lineEdit->setText(m_parameters->getDWI());
 }
 
 void DerivedWindow::initializeXMLParameters()
