@@ -188,9 +188,13 @@ class DerivedWindow : public QMainWindow , public Ui_Window
 
    //ABC dynamic UI
    void updateNumbersOfPriorsForABC(int nbPriors) ;
+   //ABC dynamic UI
+   void updateNumbersOfPriorsForABC() ;
 
 private slots:
    void on_comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1);
+
+   void on_pushButtonUpdate_clicked();
 
 private :
    

@@ -1,4 +1,5 @@
 #include "DerivedWindow.h"
+#include "CountNumberOfLabels.h"
 
 DerivedWindow::DerivedWindow() : Ui_Window()
 {
@@ -175,6 +176,8 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    connect( radioNeoseg, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
    connect( radioABC, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
 
+   connect(this->abcParameters->pushButtonUpdate, SIGNAL(clicked()), this, SLOT(on_pushButtonUpdate_clicked()));
+
    numberOfRegistrations_spinBox->setEnabled(true); 
    numberOfGB_spinBox->setEnabled(false); 
 
@@ -198,12 +201,6 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    // We run the function "tissueSegmentationSoftwareSelection" once to initialize the display.
    radioABC->setChecked(true);
    tissueSegmentationSoftwareSelection() ;
-   updateNumbersOfPriorsForABC(1);
-   updateNumbersOfPriorsForABC(2);
-   updateNumbersOfPriorsForABC(3);
-   updateNumbersOfPriorsForABC(4);
-
-   this->abcParameters->lineEditNbPriors->setText(QString::number(4));
 }
 
 
@@ -211,25 +208,71 @@ void DerivedWindow::updateNumbersOfPriorsForABC(int nbPriors)
 {
     if( nbPriors >= (int)vectorABCPriorCheckBoxes.size() )
     {
+        for(int i = vectorABCPriorCheckBoxes.size(); i < nbPriors; i++ ){
+            PriorSpinBox* psb = new PriorSpinBox(i + 1);
+            vectorABCPriorCheckBoxes.push_back( psb ) ;
 
-        PriorSpinBox* psb = new PriorSpinBox(vectorABCPriorCheckBoxes.size() + 1);
-        vectorABCPriorCheckBoxes.push_back( psb ) ;
-
-//            QHBoxLayout *postphlayout = new QHBoxLayout ;
-//            QCheckBox *reassignSmallIsland = new QCheckBox ;
-//            postphlayout->addWidget(reassignSmallIsland);
-//            postphlayout->addSpacerItem(new QSpacerItem(10,0, QSizePolicy::Expanding, QSizePolicy::Ignored));
-//            QSpinBox *spin = new QSpinBox ;
-//            postphlayout->addWidget(spin);
-//            postphlayout->setParent(abcParameters->ppFrame) ;
+    //            QHBoxLayout *postphlayout = new QHBoxLayout ;
+    //            QCheckBox *reassignSmallIsland = new QCheckBox ;
+    //            postphlayout->addWidget(reassignSmallIsland);
+    //            postphlayout->addSpacerItem(new QSpacerItem(10,0, QSizePolicy::Expanding, QSizePolicy::Ignored));
+    //            QSpinBox *spin = new QSpinBox ;
+    //            postphlayout->addWidget(spin);
+    //            postphlayout->setParent(abcParameters->ppFrame) ;
 
 
-        abcParameters->nbPriorLayout->addLayout(psb);
+            abcParameters->nbPriorLayout->addLayout(psb);
+        }
         this->repaint();
     }else if(vectorABCPriorCheckBoxes.size() > 0){
-        delete vectorABCPriorCheckBoxes[vectorABCPriorCheckBoxes.size() - 1];
-        vectorABCPriorCheckBoxes.pop_back();
+        for(int i = vectorABCPriorCheckBoxes.size() - 1; i >= nbPriors; i--){
+            delete vectorABCPriorCheckBoxes[i];
+            vectorABCPriorCheckBoxes.pop_back();
+        }
     }
+}
+
+void DerivedWindow::updateNumbersOfPriorsForABC()
+{
+    std::vector<int> numberOfLabels;
+
+    m_parameters->setSelectedAtlases(m_selectedAtlases);
+    m_parameters->initializeAtlasPopulation();
+    std::vector<Atlas> atlas = m_parameters->getAtlasPopulation();
+
+    CountNumberOfLabels* count = new CountNumberOfLabels();
+    try{
+        for(int i = 0; i < (int)atlas.size(); i++){
+            Atlas a = atlas[i];
+            std::string fname = a.seg.toStdString();
+            if(fname.compare("")!=0){
+                count->SetFilename(fname);
+                count->Update();
+                numberOfLabels.push_back(count->GetNumberOfLabels());
+            }else{
+                numberOfLabels.push_back(4);//white, gray, csf, rest
+            }
+        }
+    }catch(itk::ExceptionObject exp){
+        std::cout<<exp.GetDescription()<<endl;
+    }
+
+    int first = 0;
+    if(numberOfLabels.size() > 0){
+        first = numberOfLabels[0];
+    }
+    for(int i = 1; i < (int)numberOfLabels.size(); i++){
+        if(numberOfLabels[i] != first){
+            QMessageBox msgBox;
+            msgBox.setText("A different number of labels has been detected in the Atlas population.");
+            msgBox.exec();
+            return;
+        }
+    }
+    delete count;
+
+    updateNumbersOfPriorsForABC(first);
+    this->abcParameters->lineEditNbPriors->setText(QString::number(first));
 }
 
 void DerivedWindow::tissueSegmentationSoftwareSelection()
@@ -575,6 +618,7 @@ void DerivedWindow::selectAtlasPopulationDirectory()
    atlasPopulationDirectory_lineEdit->setText(atlasPopulationDirectory);
    m_parameters->setAtlasPopulationDirectory( atlasPopulationDirectory_lineEdit->text() ) ;
    UpdateAtlasPopulationDirectoryDisplay() ;
+    updateNumbersOfPriorsForABC();
 }
 
 void DerivedWindow::enterAtlasPopulationDirectory()
@@ -1726,4 +1770,9 @@ void DerivedWindow::closeEvent(QCloseEvent *event)
 void DerivedWindow::on_comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1)
 {
     m_parameters->setABCOutputImageFormat(arg1);
+}
+
+void DerivedWindow::on_pushButtonUpdate_clicked()
+{
+    updateNumbersOfPriorsForABC();
 }

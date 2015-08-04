@@ -251,7 +251,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabs">
       <property name="currentIndex">
-       <number>5</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="data_tab">
        <attribute name="title">
@@ -284,10 +284,18 @@
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QLineEdit" name="T1_lineEdit"/>
+               <widget class="QLineEdit" name="T1_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QLineEdit" name="T2_lineEdit"/>
+               <widget class="QLineEdit" name="T2_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
               </item>
               <item row="1" column="0">
                <widget class="QPushButton" name="T2_button">
@@ -304,7 +312,11 @@
                </widget>
               </item>
               <item row="2" column="1">
-               <widget class="QLineEdit" name="mask_lineEdit"/>
+               <widget class="QLineEdit" name="mask_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -435,7 +447,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="output_lineEdit"/>
+               <widget class="QLineEdit" name="output_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
