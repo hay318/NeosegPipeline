@@ -176,7 +176,8 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    connect( radioNeoseg, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
    connect( radioABC, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
 
-   connect(this->abcParameters->pushButtonUpdate, SIGNAL(clicked()), this, SLOT(on_pushButtonUpdate_clicked()));
+   connect(this->abcParameters->pushButtonRefreshPriors, SIGNAL(clicked()), this, SLOT(pushButtonRefreshPriors()));
+   connect(this->abcParameters->comboBoxOutputImageFormat, SIGNAL(currentIndexChanged(QString)), this, SLOT(comboBoxOutputImageFormat_currentIndexChanged(QString)));
 
    numberOfRegistrations_spinBox->setEnabled(true); 
    numberOfGB_spinBox->setEnabled(false); 
@@ -1796,12 +1797,12 @@ void DerivedWindow::closeEvent(QCloseEvent *event)
    }
 }
 
-void DerivedWindow::on_comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1)
+void DerivedWindow::comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1)
 {
     m_parameters->setABCOutputImageFormat(arg1);
 }
 
-void DerivedWindow::on_pushButtonUpdate_clicked()
+void DerivedWindow::pushButtonRefreshPriors()
 {
     updateNumbersOfPriorsForABC();
 }
