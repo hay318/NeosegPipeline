@@ -291,6 +291,24 @@ class PipelineParameters
        return m_abcOutputImageFormat;
    }
 
+   typedef std::map<double, int> InputImageLabelMapType;
+   typedef InputImageLabelMapType::iterator InputImageLabelMapIteratorType;
+   void setImageLabelMap(InputImageLabelMapType labelsvaluetype){
+       m_ImageLabelMap = labelsvaluetype;
+   }
+
+   InputImageLabelMapType getImageLabelMap(){
+       return m_ImageLabelMap;
+   }
+
+   void setABCWhiteImageIndex(QString index){
+       m_ABCWhiteImageIndex = index;
+   }
+
+   QString getABCWhiteImageIndex(){
+       return m_ABCWhiteImageIndex;
+   }
+
    private:
 
    int m_abcTissueSegmentationType;
@@ -298,6 +316,8 @@ class PipelineParameters
    QString m_abcInitialDistributorEstimator;
    double m_abcMaximumDegreeBiasField;
    QString m_abcOutputImageFormat;
+   InputImageLabelMapType m_ImageLabelMap;
+   QString m_ABCWhiteImageIndex;
 
    QString m_programPath; 
    

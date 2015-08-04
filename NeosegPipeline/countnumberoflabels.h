@@ -21,7 +21,8 @@ public:
 
     typedef itk::ImageRegionIterator<InputImageType> InputImageIteratorType;
 
-    typedef map< InputPixelType, int > InputImageLabelMap;
+    typedef map< InputPixelType, int > InputImageLabelMapType;
+    typedef InputImageLabelMapType::iterator InputImageLabelMapIteratorType;
 
     int GetNumberOfLabels(){
         return m_NumberOfLabels;
@@ -31,12 +32,17 @@ public:
         m_Filename = filename;
     }
 
+    InputImageLabelMapType GetImageLabelMap(){
+        return m_ImageLabelMap;
+    }
+
     void Update();
 
 private:
 
     string m_Filename;
     int m_NumberOfLabels;
+    InputImageLabelMapType m_ImageLabelMap;
 
 
 };

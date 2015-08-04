@@ -249,6 +249,9 @@ void DerivedWindow::updateNumbersOfPriorsForABC()
                 count->SetFilename(fname);
                 count->Update();
                 numberOfLabels.push_back(count->GetNumberOfLabels());
+                if(i == 0){
+                    m_parameters->setImageLabelMap(count->GetImageLabelMap());
+                }
             }else{
                 numberOfLabels.push_back(4);//white, gray, csf, rest
             }
@@ -272,6 +275,22 @@ void DerivedWindow::updateNumbersOfPriorsForABC()
     delete count;
 
     updateNumbersOfPriorsForABC(first);
+    this->comboBoxLabelValueFA->clear();
+
+    PipelineParameters::InputImageLabelMapType labelmap = m_parameters->getImageLabelMap();
+    PipelineParameters::InputImageLabelMapIteratorType itmap;
+
+    if(labelmap.size() > 0){
+        for(itmap  = labelmap.begin(); itmap != labelmap.end(); ++itmap){
+            if(itmap->first != 0){
+                this->comboBoxLabelValueFA->addItem(QString::number(itmap->first));
+            }
+        }
+    }else{
+        this->comboBoxLabelValueFA->addItem(QString("white"));
+    }
+
+
     this->abcParameters->lineEditNbPriors->setText(QString::number(first));
 }
 
@@ -970,11 +989,11 @@ void DerivedWindow::initializeDataParameters()
 {
   prefix_lineEdit->setText(m_parameters->getPrefix());
   suffix_lineEdit->setText(m_parameters->getSuffix());
-  output_lineEdit->setText(m_parameters->getOutput());
-  T1_lineEdit->setText(m_parameters->getT1());
-  T2_lineEdit->setText(m_parameters->getT2());
-  mask_lineEdit->setText(m_parameters->getMask());
-  DWI_lineEdit->setText(m_parameters->getDWI());
+//  output_lineEdit->setText(m_parameters->getOutput());
+//  T1_lineEdit->setText(m_parameters->getT1());
+//  T2_lineEdit->setText(m_parameters->getT2());
+//  mask_lineEdit->setText(m_parameters->getMask());
+//  DWI_lineEdit->setText(m_parameters->getDWI());
 }
 
 void DerivedWindow::initializeXMLParameters()
@@ -1352,6 +1371,15 @@ void DerivedWindow::setParameters()
 
    m_parameters->setComputing3LabelsSeg(neosegParameters->computing3LabelsSeg_checkBox->isChecked());
    m_parametersSet = true;
+
+   if(this->comboBoxLabelValueFA->currentText().compare(QString("white")) == 0){
+       m_parameters->setABCWhiteImageIndex(QString("white"));
+   }else{
+       double combovalue = this->comboBoxLabelValueFA->currentText().toDouble();
+       int index = m_parameters->getImageLabelMap()[combovalue];
+       m_parameters->setABCWhiteImageIndex(QString::number(index));
+   }
+
 }
 
 void DerivedWindow::setExecutables()

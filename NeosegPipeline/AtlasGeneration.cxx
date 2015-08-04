@@ -10,6 +10,7 @@ AtlasGeneration::AtlasGeneration(QString module) : Script(module)
    m_templateT2.name="templateT2";
    m_UseT1 = true;
    m_ABCPipelineModeOn = false;
+   m_ABCWhiteLabelOutputIndexString = "";
 }
 
 void AtlasGeneration::setAtlasPopulation(std::vector<Atlas> atlasPopulation)
@@ -162,19 +163,25 @@ void AtlasGeneration::generateTemplate(TemplateImage& templateImage)
 
 void AtlasGeneration::generateWeightedAveragedLabels()
 {
-   QStringList argumentsList;
+//   QStringList argumentsList;
 
-   m_white.output = m_white.name + "_average";
-   m_gray.output = m_gray.name + "_average";
-   m_csf.output = m_csf.name + "_average";
+   QString whiteAverage = "";
+   QString grayAverage = "";
+   QString csfAverage = "";
 
-   QString whiteAverage = m_white.dir->filePath(m_white.name + "-average" + m_suffix + ".nrrd");
-   QString grayAverage = m_gray.dir->filePath(m_gray.name + "-average" + m_suffix + ".nrrd");
-   QString csfAverage = m_csf.dir->filePath(m_csf.name + "-average" + m_suffix + ".nrrd");
+   if(!m_ABCPipelineModeOn){
+       m_white.output = m_white.name + "_average";
+       m_gray.output = m_gray.name + "_average";
+       m_csf.output = m_csf.name + "_average";
 
-   m_script += m_indent + "" + m_white.output + " = '" + whiteAverage + "'\n";
-   m_script += m_indent + "" + m_gray.output + " = '" + grayAverage + "'\n";
-   m_script += m_indent + "" + m_csf.output + " = '" + csfAverage + "'\n";
+       whiteAverage = m_white.dir->filePath(m_white.name + "-average" + m_suffix + ".nrrd");
+       grayAverage = m_gray.dir->filePath(m_gray.name + "-average" + m_suffix + ".nrrd");
+       csfAverage = m_csf.dir->filePath(m_csf.name + "-average" + m_suffix + ".nrrd");
+
+       m_script += m_indent + "" + m_white.output + " = '" + whiteAverage + "'\n";
+       m_script += m_indent + "" + m_gray.output + " = '" + grayAverage + "'\n";
+       m_script += m_indent + "" + m_csf.output + " = '" + csfAverage + "'\n";
+   }
 
    QString m_XML_path = m_priorProbabilities_dir->filePath("parameters.xml");
    m_script += m_indent + "parameters_path = \"" + m_XML_path + "\"\n";
@@ -332,7 +339,13 @@ void AtlasGeneration::extractWMFromFA()
 
    QString whitePlusFA = m_white.dir->filePath(m_prefix + "white" + "-plusFA" + m_suffix + ".nrrd");
    m_outputs.insert(m_white.output, whitePlusFA);
-   m_argumentsList << "ImageMath" << m_white.input << "'-add'" << "weightedFA" << "'-type'" << "'float'" << "'-outfile'" << m_white.output;
+   if(m_ABCPipelineModeOn){
+       QString filename = "'" + this->getOutput() + "/temp/priorProbabilities/" + m_ABCWhiteLabelOutputIndexString + ".nrrd'";
+       m_argumentsList << "ImageMath" << filename << "'-add'" << "weightedFA" << "'-type'" << "'float'" << "'-outfile'" << filename;
+   }else{
+       m_argumentsList << "ImageMath" << m_white.input << "'-add'" << "weightedFA" << "'-type'" << "'float'" << "'-outfile'" << m_white.output;
+   }
+
    m_log = "- Adding the FA to the white average...";
    execute();
    m_unnecessaryFiles << whitePlusFA;
@@ -492,6 +505,13 @@ void AtlasGeneration::implementRun()
    m_script += m_indent + "logger.info('Computing weighted labels averages...')\n";
    generateWeightedAveragedLabels();
 
+   if(m_includingFA)
+   {
+      m_script += m_indent + "# Extract WM From FA #\n";
+      m_script += m_indent + "logger.info('Extracting and adding the FA to the white average :')\n";
+      extractWMFromFA();
+   }
+
    if(m_ABCPipelineModeOn){
        m_script += m_indent + "# Compute Priors Probability #\n";
        m_script += m_indent + "logger.info('Computing priors probability :')\n";
@@ -507,12 +527,6 @@ void AtlasGeneration::implementRun()
        execfunct = "computeRestABC(" + arrayname + ")\n"; //This executes the function in the python script with the previous arrayname as parameter
        m_script += m_indent + execfunct;
    }else{
-       if(m_includingFA)
-       {
-          m_script += m_indent + "# Extract WM From FA #\n";
-          m_script += m_indent + "logger.info('Extracting and adding the FA to the white average :')\n";
-          extractWMFromFA();
-       }
 
        m_script += m_indent + "# Compute White Probability #\n";
        m_script += m_indent + "logger.info('Computing white probability :')\n";

@@ -76,6 +76,10 @@ class AtlasGeneration : public Script
    void generatePriorsProbability();
    void computeRestABC();
 
+   void setABCWhiteLabelOutputIndexString(QString index){
+       m_ABCWhiteLabelOutputIndexString = index;
+   }
+
 private:
 
    // Input 
@@ -92,6 +96,7 @@ private:
    double               m_neightborhoodRadius;
    bool                 m_UseT1;
    bool                 m_ABCPipelineModeOn;
+   QString              m_ABCWhiteLabelOutputIndexString;
 
    // Directories
    QDir*                m_priorProbabilities_dir; 

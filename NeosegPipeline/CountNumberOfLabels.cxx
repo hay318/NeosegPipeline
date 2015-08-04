@@ -22,7 +22,7 @@ void CountNumberOfLabels::Update()
   reader->Update();
   InputImagePointerType inputImage = reader->GetOutput();
 
-  InputImageLabelMap inputLabelsMap;
+  m_ImageLabelMap.clear();
 
   InputImageIteratorType it(inputImage, inputImage->GetLargestPossibleRegion());
   it.GoToBegin();
@@ -32,14 +32,22 @@ void CountNumberOfLabels::Update()
   while(!it.IsAtEnd()){
     InputPixelType p = it.Get();
       
-    if(inputLabelsMap.find(p) == inputLabelsMap.end()){
-      inputLabelsMap[p] = labelIndex;
+    if(m_ImageLabelMap.find(p) == m_ImageLabelMap.end()){
+      m_ImageLabelMap[p] = labelIndex;
       labelIndex++;
     }
         
     ++it;
   }
 
-  m_NumberOfLabels = inputLabelsMap.size();
+
+  InputImageLabelMapIteratorType itmap;
+  labelIndex = 0;
+  for(itmap = m_ImageLabelMap.begin(); itmap != m_ImageLabelMap.end(); ++itmap){
+      m_ImageLabelMap[itmap->first] = labelIndex;
+      labelIndex++;
+  }
+
+  m_NumberOfLabels = m_ImageLabelMap.size();
 
 }

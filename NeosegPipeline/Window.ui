@@ -251,7 +251,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabs">
       <property name="currentIndex">
-       <number>0</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="data_tab">
        <attribute name="title">
@@ -286,14 +286,14 @@
               <item row="0" column="1">
                <widget class="QLineEdit" name="T1_lineEdit">
                 <property name="text">
-                 <string/>
+                 <string>/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_T1_Bias_regT2_regAtlas_corrected_EMS-stripped.nrrd</string>
                 </property>
                </widget>
               </item>
               <item row="1" column="1">
                <widget class="QLineEdit" name="T2_lineEdit">
                 <property name="text">
-                 <string/>
+                 <string>/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_T2_Bias_regAtlas_corrected_EMS-stripped.nrrd</string>
                 </property>
                </widget>
               </item>
@@ -314,7 +314,7 @@
               <item row="2" column="1">
                <widget class="QLineEdit" name="mask_lineEdit">
                 <property name="text">
-                 <string/>
+                 <string>/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_mask.nrrd</string>
                 </property>
                </widget>
               </item>
@@ -350,7 +350,11 @@
                   <number>0</number>
                  </property>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="DWI_lineEdit"/>
+                  <widget class="QLineEdit" name="DWI_lineEdit">
+                   <property name="text">
+                    <string>/Users/prieto/NetBeansProjects/UNC/data/DWI.nrrd</string>
+                   </property>
+                  </widget>
                  </item>
                  <item row="0" column="0">
                   <widget class="QPushButton" name="DWI_button">
@@ -449,7 +453,7 @@
               <item>
                <widget class="QLineEdit" name="output_lineEdit">
                 <property name="text">
-                 <string/>
+                 <string>/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/abcout</string>
                 </property>
                </widget>
               </item>
@@ -2187,6 +2191,29 @@ p, li { white-space: pre-wrap; }
                  </size>
                 </property>
                </spacer>
+              </item>
+              <item row="1" column="3">
+               <spacer name="horizontalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="1" column="4">
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>White label value (If ABC execution only)</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="5">
+               <widget class="QComboBox" name="comboBoxLabelValueFA"/>
               </item>
              </layout>
             </widget>

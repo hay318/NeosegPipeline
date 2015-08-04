@@ -183,6 +183,8 @@ void Pipeline::writeAtlasGeneration()
 
    m_atlasGeneration->setUseT1(m_parameters->getWeightsModalityIndex() == 0);
 
+   m_atlasGeneration->setABCWhiteLabelOutputIndexString(m_parameters->getABCWhiteImageIndex());
+
    m_atlasGeneration->update();
    m_importingModules += "import " + module_name + "\n"; 
    m_runningModules += module_name + ".run()\n"; 
