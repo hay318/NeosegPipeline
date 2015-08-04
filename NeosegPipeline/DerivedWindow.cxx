@@ -366,6 +366,7 @@ void DerivedWindow::setPipelineParameters(PipelineParameters* parameters)
    initializeXMLParameters();
    initializeDataParameters();
    initializeExecutables();
+   updateNumbersOfPriorsForABC();
 }
 
 void DerivedWindow::setPipeline(Pipeline* pipeline) 
