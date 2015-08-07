@@ -14,6 +14,7 @@ void ABCExecution::update(){
     implementCheckFileExistence();
     implementExecute();
     implementRun();
+    implementReassignImageIslands();
     writeScript();
 }
 
@@ -67,7 +68,11 @@ void ABCExecution::implementRun(){
     addRename(inputStringList, outputStringList);
 
     m_script+= m_indent + "args = [ABC, parameters_path]\n";
-    m_script+= m_indent + "execute(args)";
+    m_script+= m_indent + "execute(args)\n";
+
+
+
+
 }
 
 void ABCExecution::addRename(QString s1, QString s2){
@@ -103,7 +108,6 @@ void ABCExecution::writeXMLFile(){
     stream->writeEndDocument();
 
     file->close();
-
 }
 
 void ABCExecution::writeABCParameters(QXmlStreamWriter *stream){
@@ -118,12 +122,12 @@ void ABCExecution::writeABCParameters(QXmlStreamWriter *stream){
     stream->writeTextElement(QString("OUTPUT-FORMAT"), m_parameters->getABCOutputImageFormat());
 
     stream->writeStartElement("IMAGE");
-    stream->writeTextElement(QString("FILE"), QString(m_parameters->getT1()));
+    stream->writeTextElement(QString("FILE"), m_parameters->getT1());
     stream->writeTextElement(QString("ORIENTATION"), QString("file"));
     stream->writeEndElement();
 
     stream->writeStartElement("IMAGE");
-    stream->writeTextElement(QString("FILE"), QString(m_parameters->getT2()));
+    stream->writeTextElement(QString("FILE"), m_parameters->getT2());
     stream->writeTextElement(QString("ORIENTATION"), QString("file"));
     stream->writeEndElement();
 
@@ -153,4 +157,75 @@ void ABCExecution::writeABCParameters(QXmlStreamWriter *stream){
     stream->writeTextElement("ATLAS-LINEAR-MAP-TYPE", QString("rigid"));
     stream->writeTextElement("IMAGE-LINEAR-MAP-TYPE", QString("id"));
 
+}
+
+void ABCExecution::implementReassignImageIslands(){
+
+    PipelineParameters::ABCVectorReassignLabelsType abcreassign =  m_parameters->getABCReassignLabels();
+    QString inputfile = m_parameters->getT1();
+    
+    QString basefilename = inputfile.mid(0, inputfile.lastIndexOf(m_parameters->getAtlasFormat()) - 1) + QString("_labels");
+    inputfile = basefilename;
+    inputfile += QString(".") + m_parameters->getAtlasFormat();
+    
+    QString outputfile = "";
+    QStringList list;
+    for(int i = 0; i < (int)abcreassign.size(); i++){
+
+        PipelineParameters::ABCReassignLabels abcr = abcreassign[i];
+
+        QString XML_path = m_module_dir->filePath("parametersReassign" + QString::number(i) + ".xml");
+
+        list.append(XML_path);
+
+        QFile* file = new::QFile(XML_path);
+        file->open(QIODevice::WriteOnly);
+        QXmlStreamWriter* stream = new::QXmlStreamWriter(file);
+        stream->setAutoFormatting(true);
+
+        stream->writeStartDocument();
+
+        stream->writeStartElement("REASSIGN-WHITE-MATTER-PARAMETERS");
+
+        stream->writeTextElement(QString("INPUT"), inputfile);
+
+        stream->writeTextElement(QString("LABEL-VALUE"), QString::number(abcr.m_Label));
+
+        stream->writeTextElement(QString("THRESHOLD"), QString::number(abcr.m_Threshold));
+
+        stream->writeTextElement(QString("VOXEL-BY-VOXEL"), QString::number(abcr.m_VoxelByVoxel));
+
+        stream->writeStartElement(QString("PROBABILITY-MAPS-DIR"));
+
+        PipelineParameters::InputImageLabelMapType labelsmap = m_parameters->getImageLabelMap();
+        int numlabels = labelsmap.size();
+        if(labelsmap.find(0) != labelsmap.end()){
+            numlabels--;
+        }
+        QString atlasdir = m_parameters->getExistingAtlas() + QString("/");
+        QString atlasformat = QString(".") + m_parameters->getAtlasFormat();
+        for(int i = 0; i < numlabels; i++){
+            stream->writeTextElement(QString("PROBABILITY-MAP"), atlasdir + QString::number(i + 1) + atlasformat);
+        }
+
+        stream->writeEndElement();
+
+
+        outputfile = basefilename;
+        outputfile += "_reassign" + QString::number(i) + atlasformat;
+        stream->writeTextElement(QString("OUTPUT"), outputfile);
+
+
+        stream->writeEndElement();
+        stream->writeEndDocument();
+
+        file->close();
+
+        inputfile = outputfile;
+    }
+    QStringList::Iterator it;
+    for(it = list.begin(); it != list.end(); ++it){
+        m_script+= m_indent + "args = [ReassignWhiteMatter, '" + *it + "']\n";
+        m_script+= m_indent + "execute(args)\n";
+    }
 }

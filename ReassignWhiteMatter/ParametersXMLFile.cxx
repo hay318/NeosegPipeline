@@ -59,6 +59,10 @@ void ParametersXMLFileReader::EndElement(const char* name)
    {
       m_PObject->SetOutput(m_CurrentString);
    }
+   else if(itksys::SystemTools::Strucmp(name,"PROBABILITY-MAP") == 0)
+   {
+      m_PObject->AddProbabilityMap(m_CurrentString);
+   }
 }
 
 void ParametersXMLFileReader::CharacterDataHandler(const char* inData, int inLength)

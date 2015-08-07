@@ -244,6 +244,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="pushButtonRefreshPriors">
+                <property name="toolTip">
+                 <string>Refresh the number of labels found in the ATLAS 'seg' files</string>
+                </property>
                 <property name="text">
                  <string/>
                 </property>

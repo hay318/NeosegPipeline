@@ -15,6 +15,7 @@ public:
     ABCExecution(QString module);
 
     void writeXMLFile();
+    void implementReassignImageIslands();
     void writeABCParameters(QXmlStreamWriter *stream);
 
     void SetPipelineParameters(PipelineParameters* params){
