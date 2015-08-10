@@ -205,8 +205,8 @@ void ABCExecution::implementReassignImageIslands(){
         }
         QString atlasdir = m_parameters->getExistingAtlas() + QString("/");
         QString atlasformat = QString(".") + m_parameters->getAtlasFormat();
-        for(int i = 0; i < numlabels; i++){
-            stream->writeTextElement(QString("PROBABILITY-MAP"), atlasdir + QString::number(i + 1) + atlasformat);
+        for(int ii = 0; ii < numlabels; ii++){
+            stream->writeTextElement(QString("PROBABILITY-MAP"), atlasdir + QString::number(ii + 1) + atlasformat);
         }
 
         stream->writeEndElement();
