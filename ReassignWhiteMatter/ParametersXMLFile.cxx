@@ -3,6 +3,7 @@
 ParametersXMLFileReader::ParametersXMLFileReader()
 {
    m_PObject = 0;
+   m_CurrentString = "";
 }
 
 int
@@ -62,6 +63,12 @@ void ParametersXMLFileReader::EndElement(const char* name)
    else if(itksys::SystemTools::Strucmp(name,"PROBABILITY-MAP") == 0)
    {
       m_PObject->AddProbabilityMap(m_CurrentString);
+   }
+   else if(itksys::SystemTools::Strucmp(name,"VOXEL-BY-VOXEL") == 0){
+       m_PObject->SetVoxelByVoxel(atof(m_CurrentString.c_str()));
+   }
+   else if(itksys::SystemTools::Strucmp(name,"LABEL-VALUE") == 0){
+       m_PObject->SetLabelValue(atof(m_CurrentString.c_str()));
    }
 }
 

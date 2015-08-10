@@ -1016,16 +1016,16 @@ void DerivedWindow::initializeDataParameters()
   prefix_lineEdit->setText(m_parameters->getPrefix());
   suffix_lineEdit->setText(m_parameters->getSuffix());
 
-//  output_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/abcout"));
-//  T1_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_T1_Bias_regT2_regAtlas_corrected_EMS-stripped.nrrd"));
-//  T2_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_T2_Bias_regAtlas_corrected_EMS-stripped.nrrd"));
-//  mask_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_mask.nrrd"));
+  output_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/abcout"));
+  T1_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_T1_Bias_regT2_regAtlas_corrected_EMS-stripped.nrrd"));
+  T2_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_T2_Bias_regAtlas_corrected_EMS-stripped.nrrd"));
+  mask_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_mask.nrrd"));
 
-  output_lineEdit->setText(m_parameters->getOutput());
-  T1_lineEdit->setText(m_parameters->getT1());
-  T2_lineEdit->setText(m_parameters->getT2());
-  mask_lineEdit->setText(m_parameters->getMask());
-  DWI_lineEdit->setText(m_parameters->getDWI());
+//  output_lineEdit->setText(m_parameters->getOutput());
+//  T1_lineEdit->setText(m_parameters->getT1());
+//  T2_lineEdit->setText(m_parameters->getT2());
+//  mask_lineEdit->setText(m_parameters->getMask());
+//  DWI_lineEdit->setText(m_parameters->getDWI());
 }
 
 void DerivedWindow::initializeXMLParameters()

@@ -185,6 +185,7 @@ void ABCExecution::implementReassignImageIslands(){
 
         stream->writeStartDocument();
 
+        stream->writeDTD("<!DOCTYPE REASSIGN-WHITE-MATTER-PARAMETERS>");
         stream->writeStartElement("REASSIGN-WHITE-MATTER-PARAMETERS");
 
         stream->writeTextElement(QString("INPUT"), inputfile);
