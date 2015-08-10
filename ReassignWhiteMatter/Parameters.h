@@ -40,11 +40,27 @@ class Parameters: public itk::Object
      itkGetMacro(Output, std::string);
      itkSetMacro(Output, std::string);
 
+     void AddProbabilityMap(std::string pmap){
+         m_ProbabilityMaps.push_back(pmap);
+     }
+
+     itkGetMacro(ProbabilityMaps, std::vector< std::string >)
+
+     itkGetMacro(VoxelByVoxel, bool)
+     itkSetMacro(VoxelByVoxel, bool)
+
+     itkGetMacro(LabelValue, double)
+     itkSetMacro(LabelValue, double)
 
      // Checking Parameters
      virtual bool CheckValues();
 
 protected:
+
+     Parameters(){
+         m_VoxelByVoxel = true;
+         m_LabelValue = -1;
+     }
 
      std::string m_Input;
 
@@ -55,6 +71,11 @@ protected:
      std::string m_Csf;
 
      std::string m_Output;
+
+     bool m_VoxelByVoxel;
+     double m_LabelValue;
+
+     std::vector< std::string > m_ProbabilityMaps;
 };
 
 #endif

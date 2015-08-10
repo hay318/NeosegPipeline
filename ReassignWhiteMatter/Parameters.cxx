@@ -12,7 +12,7 @@ bool Parameters::CheckValues()
       return false;
    }
 
-   if ( m_White.empty() || m_Gray.empty() || m_Csf.empty() )
+   if ( (m_White.empty() || m_Gray.empty() || m_Csf.empty()) && m_ProbabilityMaps.size() == 0 )
    {
       return false;
    }
