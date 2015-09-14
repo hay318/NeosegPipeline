@@ -218,6 +218,7 @@ void Pipeline::writeExistingAtlasRegistration()
 }
 
 void Pipeline::writeABCExecution(){
+
     QString directory_name = "5.ABCExecution";
     QString directory_path = createModuleDirectory(directory_name);
 

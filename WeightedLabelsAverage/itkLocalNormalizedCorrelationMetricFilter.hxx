@@ -151,9 +151,17 @@ namespace itk
    void LocalNormalizedCorrelationMetricFilter <TInput, TOutput>
    ::ThreadedGenerateData (const OutputImageRegionType &outputRegionForThread, ThreadIdType itkNotUsed(threadId))
    {
+      
+      // Inputs
+
+      InputIteratorType           fixedit( m_fixedImage, outputRegionForThread );
+      InputIteratorType           movingit( m_movingImage, outputRegionForThread );
+      
+
+
       // Output
       OutputImagePointerType outputImagePtr = this->GetOutput( 0 );
-      IteratorType           it( outputImagePtr, outputRegionForThread );
+      IteratorType           outit( outputImagePtr, outputRegionForThread );
       OutputImageIndexType index;
 
       double metricValue=0;
@@ -161,11 +169,12 @@ namespace itk
       // Progress
       long progress = 0;
 
-      it.GoToBegin();  
-      while( !it.IsAtEnd() )
+      outit.GoToBegin();
+      fixedit.GoToBegin();
+      movingit.GoToBegin();
+      while( !outit.IsAtEnd() )
       {
-         index = it.GetIndex();
- 
+         index = outit.GetIndex();
          // Regions
          m_start[0]=index[0] - m_radiusVector[0];
          m_start[1]=index[1] - m_radiusVector[1];
@@ -180,10 +189,12 @@ namespace itk
            std::cout<<"Correl At index "<<index<<": fixed region="<<m_fixedImage->GetPixel(index)<<", moving region="<<m_movingImage->GetPixel(index)<<", metric="<<metricValue<<std::endl;
          }
          
-         it.Set(metricValue);
+         outit.Set(metricValue);
 
          ++progress ;
-         ++it;
+         ++outit;
+         ++fixedit;
+         ++movingit;
       }
    }
 

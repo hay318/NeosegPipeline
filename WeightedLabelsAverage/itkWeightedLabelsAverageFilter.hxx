@@ -189,7 +189,12 @@ namespace itk
 
          localMetricFilter->SetNumberOfThreads(1);
          localMetricFilter->SetInput(0, m_inputImage);
-         localMetricFilter->SetRadiusValueInMillimetersOn();
+         if(m_radiusValueInMillimeters){
+             localMetricFilter->SetRadiusValueInMillimetersOn();
+         }else{
+             localMetricFilter->SetRadiusValueInMillimetersOff();
+         }
+
          localMetricFilter->SetRadiusValue(m_RadiusValue);
          localMetricFilter->SetOutputParametersFromImage(m_inputImage);
 
@@ -201,11 +206,11 @@ namespace itk
          thresholdFilter->ThresholdOutside(0, 1);
          thresholdFilter->SetOutsideValue(0);
 
-         typedef ImageFileWriter < WeightsImageType >                                       FileWriterType; 
-         typedef typename FileWriterType::Pointer                                           FileWriterPointerType;
+//         typedef ImageFileWriter < WeightsImageType >                                       FileWriterType;
+//         typedef typename FileWriterType::Pointer                                           FileWriterPointerType;
 
-         FileWriterPointerType writer = FileWriterType::New(); 
-         std::string name;
+//         FileWriterPointerType writer = FileWriterType::New();
+//         std::string name;
 
          typedef SpreadWeights < WeightsImagePixelType, WeightsImagePixelType >                             SpreadWeightsFunctorType; 
          typedef UnaryFunctorImageFilter < WeightsImageType, WeightsImageType, SpreadWeightsFunctorType >   SpreadWeightsFilterType;

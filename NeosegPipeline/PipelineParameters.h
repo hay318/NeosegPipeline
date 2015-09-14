@@ -310,6 +310,7 @@ class PipelineParameters
    }
 
    struct ABCReassignLabels{
+       bool m_ReassignEnabled = false;
        double m_Label;
        int m_Index;
        int m_Threshold;

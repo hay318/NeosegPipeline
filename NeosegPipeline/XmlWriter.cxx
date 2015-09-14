@@ -1,5 +1,7 @@
 #include "XmlWriter.h"
 
+#include "ABCExecution.h"
+
 XmlWriter::XmlWriter()
 {
 
@@ -203,8 +205,6 @@ void XmlWriter::writeParametersConfiguration(QString file_path)
        stream->writeEndDocument();
    }else if(m_parameters->getTissueSegmentationType() == 1){
 
-       QString abcconf = m_parameters->getPrefix() + QString("ABC-execution.xml");
-
        stream->writeStartDocument();
        stream->writeDTD("<!DOCTYPE ABC-pipeline-parameters>");
 
@@ -215,9 +215,26 @@ void XmlWriter::writeParametersConfiguration(QString file_path)
        writeAntsParameters(stream, m_parameters->getAntsParametersAtlas());
 
        stream->writeStartElement("ABC-parameters");
-       stream->writeStartElement("Configuration");
-       stream->writeAttribute("file", abcconf);
-       stream->writeEndElement();
+
+       NeosegParameters* neosegParameters = m_parameters->getNeosegParameters();
+       writeElement(stream, "Reference-image", "name", neosegParameters->getReferenceImage());
+       writeElement(stream, "Filtering", "type", neosegParameters->getFilterMethod(), "iterations", QString::number(neosegParameters->getNumberOfIterations()), "time-step", QString::number(neosegParameters->getTimeStep()));
+       writeElement(stream, "Initial-distribution-estimator", "value", m_parameters->getABCInitialDistributorEstimatorType());
+       writeElement(stream, "Max-bias-degree", "value", QString::number(m_parameters->getABCMaximumDegreeBiasField()));
+
+       stream->writeStartElement("priors");
+       std::vector<double> coeffs = m_parameters->getABCPriorsCoefficients();
+       PipelineParameters::ABCVectorReassignLabelsType reassign = m_parameters->getABCReassignLabels();
+
+       for(unsigned i = 0; i < coeffs.size(); i++){
+           stream->writeStartElement(QString("prior"));
+           stream->writeAttribute("value", QString::number(coeffs[i]));
+           PipelineParameters::ABCReassignLabels abcreassign = reassign[i];
+           stream->writeAttribute("reassign", QString::number(abcreassign.m_Label));
+           stream->writeAttribute("reassign-threshold", QString::number(abcreassign.m_Threshold));
+           stream->writeAttribute("voxel-by-voxel", QString::number(abcreassign.m_VoxelByVoxel));
+           stream->writeAttribute("label", QString::number(abcreassign.m_Label));
+       }
        stream->writeEndElement();
 
        stream->writeEndElement();

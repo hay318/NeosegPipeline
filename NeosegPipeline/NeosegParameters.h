@@ -88,6 +88,11 @@ class NeosegParameters
    void setInitialParzenKernelWidth(double initialParzenKernelWidth);
    double getInitialParzenKernelWidth();
 
+   //Check ABC values paramters
+
+   bool checkInitialDistributionEstimator(QString item);
+   QStringList getInitialDistributionEstimatorValues();
+
    private:
 
    // Reference Image 
@@ -151,6 +156,8 @@ class NeosegParameters
    double m_initialParzenKernelWidth_lowerBound;
    double m_initialParzenKernelWidth_default;
    double m_initialParzenKernelWidth;
+
+   QStringList m_initialDistributionEstimatorValues;
 
 };
 

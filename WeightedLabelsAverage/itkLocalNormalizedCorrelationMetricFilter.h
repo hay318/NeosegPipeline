@@ -72,6 +72,7 @@ public:
 
 
   typedef ImageRegionIterator<TOutput>                             IteratorType;
+  typedef ImageRegionIterator<TInput>                             InputIteratorType;
 
   itkNewMacro( Self );
 
