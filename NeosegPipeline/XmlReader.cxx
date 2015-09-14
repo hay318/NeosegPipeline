@@ -83,7 +83,6 @@ void XmlReader::readABCParameters(QXmlStreamReader* stream, QString errors){
 
     while(!(stream->isEndElement()) || stream->name() != "ABC-parameters")
     {
-        std::cout<<stream->name().toString().toStdString()<<std::endl;
         bool ok;
 
         if(stream->isStartElement())
