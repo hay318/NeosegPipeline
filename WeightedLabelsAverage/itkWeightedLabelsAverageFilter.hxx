@@ -29,6 +29,7 @@ namespace itk
 
      m_ComputingWeights = true;
      m_RadiusValue = 1;
+     m_InputImageMask = 0;
    }
 
    template <class InputImageType, class OutputImageType>
@@ -189,6 +190,7 @@ namespace itk
 
          localMetricFilter->SetNumberOfThreads(1);
          localMetricFilter->SetInput(0, m_inputImage);
+         localMetricFilter->SetInputImageMask(m_InputImageMask);
          if(m_radiusValueInMillimeters){
              localMetricFilter->SetRadiusValueInMillimetersOn();
          }else{

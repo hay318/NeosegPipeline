@@ -16,6 +16,8 @@
 
 #include "itkLocalNormalizedCorrelationMetricFilter.h"
 
+#include "itkNearestNeighborInterpolateImageFunction.h"
+
 namespace itk
 {
 
@@ -31,6 +33,7 @@ namespace itk
      m_OutputSize.Fill( 0 );
 
      m_radiusValueInMillimeters = true;
+     m_InputImageMask = 0;
    }
 
 
@@ -156,6 +159,13 @@ namespace itk
 
       InputIteratorType           fixedit( m_fixedImage, outputRegionForThread );
       InputIteratorType           movingit( m_movingImage, outputRegionForThread );
+
+      InputIteratorType           maskit;
+
+      if(m_InputImageMask){
+          maskit = InputIteratorType( m_InputImageMask, outputRegionForThread );
+          maskit.GoToBegin();
+      }
       
 
 
@@ -175,26 +185,37 @@ namespace itk
       while( !outit.IsAtEnd() )
       {
          index = outit.GetIndex();
-         // Regions
-         m_start[0]=index[0] - m_radiusVector[0];
-         m_start[1]=index[1] - m_radiusVector[1];
-         m_start[2]=index[2] - m_radiusVector[2];
+         bool computemetric = !(m_InputImageMask && maskit.Get() == 0);
+         metricValue=0;
 
-         m_region.SetIndex(m_start);
+         if(computemetric){
+             // Regions
+             m_start[0]=index[0] - m_radiusVector[0];
+             m_start[1]=index[1] - m_radiusVector[1];
+             m_start[2]=index[2] - m_radiusVector[2];
 
-         metricValue = GetMetric(m_region);
+             m_region.SetIndex(m_start);
 
-         if (progress % 500000 == 0)
-         {
-           std::cout<<"Correl At index "<<index<<": fixed region="<<m_fixedImage->GetPixel(index)<<", moving region="<<m_movingImage->GetPixel(index)<<", metric="<<metricValue<<std::endl;
+             metricValue = GetMetric(m_region);
+
+             if (progress % 500000 == 0)
+             {
+               std::cout<<"Correl At index "<<index<<": fixed region="<<m_fixedImage->GetPixel(index)<<", moving region="<<m_movingImage->GetPixel(index)<<", metric="<<metricValue<<std::endl;
+             }
+
          }
-         
+
          outit.Set(metricValue);
+
 
          ++progress ;
          ++outit;
          ++fixedit;
          ++movingit;
+
+         if(m_InputImageMask){
+             ++maskit;
+         }
       }
    }
 

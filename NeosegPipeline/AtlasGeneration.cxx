@@ -189,12 +189,14 @@ void AtlasGeneration::generateWeightedAveragedLabels()
    m_script += m_indent + "if checkFileExistence(parameters_path)==False:\n";
    m_script += m_indent + m_indent + "logger.info('- Writing the XML file...')\n";
    m_script += m_indent + m_indent + "parameters = Element('WEIGHTED-AVERAGED-LABELS-PARAMETERS')\n";
-   std::cout<<m_neo.T1.toStdString()<<std::endl;
+
    if(m_UseT1){
        addSubElement("parameters", "Input", "INPUT", m_neo.T1);
    }else{
        addSubElement("parameters", "Input", "INPUT", m_neo.T2);
    }
+
+   addSubElement("parameters", "InputMask", "MASK", m_neo.mask);
 
    m_script += m_indent + m_indent + "atlasPopulation = SubElement(parameters, 'ATLAS-POPULATION')\n";
 

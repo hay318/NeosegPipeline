@@ -85,6 +85,9 @@ namespace itk
         return m_InputImageLabelIndexMap;
       }
 
+      itkSetMacro( InputImageMask, InputImagePointerType )
+      itkGetMacro( InputImageMask, InputImagePointerType )
+
    protected:
 
      WeightedLabelsAverageFilter();
@@ -98,6 +101,7 @@ private:
 
       //Input 
       InputImagePointerType                m_inputImage;
+      InputImagePointerType                m_InputImageMask;
 
       
       InputImageLabelIndexMapType m_InputImageLabelIndexMap;

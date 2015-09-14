@@ -30,6 +30,10 @@ class Parameters: public itk::Object
      itkGetMacro(Input, std::string);
      itkSetMacro(Input, std::string);
 
+     // Set & Get
+     itkGetMacro(InputMask, std::string)
+     itkSetMacro(InputMask, std::string)
+
      itkGetMacro(ComputingWeights, bool);
      itkSetMacro(ComputingWeights, bool);
 
@@ -65,9 +69,13 @@ protected:
           m_Csf = "";
 
           m_OutputDirectory = "";
+          m_InputMask = "";
+          m_Input = "";
      }
 
      std::string m_Input;
+
+     std::string m_InputMask;
 
      std::vector<Atlas> m_AtlasPopulation;
 

@@ -79,6 +79,16 @@ int main(int argc, char* argv[])
    input_reader->Update();
    WeightedLabelsAverageFilter->SetInput(input_reader->GetOutput());
 
+
+   std::string maskfile = parameters->GetInputMask();
+   if(maskfile.compare("") != 0){
+       ReaderType::Pointer input_mask_reader = ReaderType::New();
+       input_mask_reader->SetFileName(maskfile);
+       input_mask_reader->Update();
+       WeightedLabelsAverageFilter->SetInputImageMask(input_mask_reader->GetOutput());
+   }
+
+
    // Atlas Population
    std::vector<Atlas> atlasPopulation = parameters->GetAtlasPopulation();
    Atlas atlas;
