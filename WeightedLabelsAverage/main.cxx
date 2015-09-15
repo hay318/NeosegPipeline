@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 
    std::cout<<"Writing Outputs: "<<std::endl;
 
-   if(parameters->GetOutputDirectory().empty()){
+   if(parameters->GetOutputDirectory().empty()){//The output folder is set when there is an unknown number of priors.
       // Weighted Averaged White // 
      WriterType::Pointer writer_white = WriterType::New(); 
      writer_white->SetInput(WeightedLabelsAverageFilter->GetOutput(1)); 

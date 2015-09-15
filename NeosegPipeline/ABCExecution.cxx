@@ -63,7 +63,13 @@ void ABCExecution::implementRun(){
     outputStringList.push_back(atlasdir + QString("1.") + atlasExt);
     outputStringList.push_back(atlasdir + QString("2.") + atlasExt);
     outputStringList.push_back(atlasdir + QString("3.") + atlasExt);
-    outputStringList.push_back(atlasdir + QString("4.") + atlasExt);
+
+    if(m_parameters->getTissueSegmentationType() == 0){
+        outputStringList.push_back(atlasdir + QString("4.") + atlasExt);
+    }else if(m_parameters->getTissueSegmentationType() == 1){
+        int numberofpriors = m_parameters->getABCPriorsCoefficients().size();
+        outputStringList.push_back(atlasdir + QString::number(numberofpriors) + QString(".") + atlasExt);
+    }
 
     addRename(inputStringList, outputStringList);
 
