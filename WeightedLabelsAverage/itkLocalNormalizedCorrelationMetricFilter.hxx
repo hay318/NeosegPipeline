@@ -16,6 +16,8 @@
 
 #include "itkLocalNormalizedCorrelationMetricFilter.h"
 
+#include "itkNearestNeighborInterpolateImageFunction.h"
+
 namespace itk
 {
 
@@ -31,6 +33,7 @@ namespace itk
      m_OutputSize.Fill( 0 );
 
      m_radiusValueInMillimeters = true;
+     m_InputImageMask = 0;
    }
 
 
@@ -151,9 +154,24 @@ namespace itk
    void LocalNormalizedCorrelationMetricFilter <TInput, TOutput>
    ::ThreadedGenerateData (const OutputImageRegionType &outputRegionForThread, ThreadIdType itkNotUsed(threadId))
    {
+      
+      // Inputs
+
+      InputIteratorType           fixedit( m_fixedImage, outputRegionForThread );
+      InputIteratorType           movingit( m_movingImage, outputRegionForThread );
+
+      InputIteratorType           maskit;
+
+      if(m_InputImageMask){
+          maskit = InputIteratorType( m_InputImageMask, outputRegionForThread );
+          maskit.GoToBegin();
+      }
+      
+
+
       // Output
       OutputImagePointerType outputImagePtr = this->GetOutput( 0 );
-      IteratorType           it( outputImagePtr, outputRegionForThread );
+      IteratorType           outit( outputImagePtr, outputRegionForThread );
       OutputImageIndexType index;
 
       double metricValue=0;
@@ -161,29 +179,43 @@ namespace itk
       // Progress
       long progress = 0;
 
-      it.GoToBegin();  
-      while( !it.IsAtEnd() )
+      outit.GoToBegin();
+      fixedit.GoToBegin();
+      movingit.GoToBegin();
+      while( !outit.IsAtEnd() )
       {
-         index = it.GetIndex();
- 
-         // Regions
-         m_start[0]=index[0] - m_radiusVector[0];
-         m_start[1]=index[1] - m_radiusVector[1];
-         m_start[2]=index[2] - m_radiusVector[2];
+         index = outit.GetIndex();
+         bool computemetric = !(m_InputImageMask && maskit.Get() == 0);
+         metricValue=0;
 
-         m_region.SetIndex(m_start);
+         if(computemetric){
+             // Regions
+             m_start[0]=index[0] - m_radiusVector[0];
+             m_start[1]=index[1] - m_radiusVector[1];
+             m_start[2]=index[2] - m_radiusVector[2];
 
-         metricValue = GetMetric(m_region);
+             m_region.SetIndex(m_start);
 
-         if (progress % 500000 == 0)
-         {
-           std::cout<<"Correl At index "<<index<<": fixed region="<<m_fixedImage->GetPixel(index)<<", moving region="<<m_movingImage->GetPixel(index)<<", metric="<<metricValue<<std::endl;
+             metricValue = GetMetric(m_region);
+
+             if (progress % 500000 == 0)
+             {
+               std::cout<<"Correl At index "<<index<<": fixed region="<<m_fixedImage->GetPixel(index)<<", moving region="<<m_movingImage->GetPixel(index)<<", metric="<<metricValue<<std::endl;
+             }
+
          }
-         
-         it.Set(metricValue);
+
+         outit.Set(metricValue);
+
 
          ++progress ;
-         ++it;
+         ++outit;
+         ++fixedit;
+         ++movingit;
+
+         if(m_InputImageMask){
+             ++maskit;
+         }
       }
    }
 

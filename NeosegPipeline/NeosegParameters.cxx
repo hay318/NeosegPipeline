@@ -49,6 +49,8 @@ NeosegParameters::NeosegParameters()
    m_initialParzenKernelWidth_lowerBound = 0;
    m_initialParzenKernelWidth_default = 0.05;
    m_initialParzenKernelWidth = m_initialParzenKernelWidth_default;
+
+   m_initialDistributionEstimatorValues << "robust" << "standard";
 }
 
 
@@ -86,6 +88,14 @@ int NeosegParameters::getReferenceImageIndex()
 QStringList NeosegParameters::getReferenceImageValues()
 {
    return m_referenceImage_values; 
+}
+
+bool NeosegParameters::checkInitialDistributionEstimator(QString item){
+    return this->isIn(item, this->getInitialDistributionEstimatorValues());
+}
+
+QStringList NeosegParameters::getInitialDistributionEstimatorValues(){
+    return m_initialDistributionEstimatorValues;
 }
 
 

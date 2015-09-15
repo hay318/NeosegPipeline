@@ -60,6 +60,10 @@ QString XmlReader::readParametersConfigurationFile(QString file_path)
             {
                 readNeosegParameters(stream, errors);
             }
+            else if (stream->name() == "ABC-parameters")
+            {
+                readABCParameters(stream, errors);
+            }
             else if( stream->name() != "Parameters")
             {
                 errors += QString( "Unknown attribute: " ) + stream->name().toString() ;
@@ -69,6 +73,146 @@ QString XmlReader::readParametersConfigurationFile(QString file_path)
       }
       return errors;
    }
+}
+
+void XmlReader::readABCParameters(QXmlStreamReader* stream, QString errors){
+
+
+    std::vector<double> priors;
+    PipelineParameters::ABCVectorReassignLabelsType vectorReassign;
+
+    while(!(stream->isEndElement()) || stream->name() != "ABC-parameters")
+    {
+        bool ok;
+
+        if(stream->isStartElement())
+        {
+           QXmlStreamAttributes attributes = stream->attributes();
+
+           if (stream->name() == "Filtering")
+           {
+              QString type = (attributes.value("type")).toString();
+              if(m_neosegParameters->checkFilterMethod(type))
+              {
+                 m_neosegParameters->setFilterMethod(type);
+              }
+              else if(!type.isEmpty())
+              {
+                 errors += " - 'Filtering-type' is not valid, it must be one of the following : " + (m_neosegParameters->getFilterMethodValues()).join(", ") + "\n";
+              }
+
+              QString iterations_QString = (attributes.value("iterations")).toString();
+              int iterations = iterations_QString.toInt(&ok);
+              if(ok && m_neosegParameters->checkNumberOfIterations(iterations))
+              {
+                 m_neosegParameters->setNumberOfIterations(iterations);
+              }
+              else if(!iterations_QString.isEmpty())
+              {
+                 errors += " - 'Filtering-iterations' is not valid, it must be a positive integer\n";
+              }
+
+              QString timeStep_QString = (attributes.value("time-step")).toString();
+              double timeStep = timeStep_QString.toDouble(&ok);
+              if(ok && m_neosegParameters->checkTimeStep(timeStep))
+              {
+                 m_neosegParameters->setTimeStep(timeStep);
+              }
+              else if(!timeStep_QString.isEmpty())
+              {
+                 errors += " - 'Filtering-time-step' is not valid, it must be a positive number\n";
+              }
+           }
+           else if (stream->name()=="Reference-image")
+           {
+              QString referenceImage = (attributes.value("name")).toString();
+              if(m_neosegParameters->checkReferenceImage(referenceImage))
+              {
+                 m_neosegParameters->setReferenceImage(referenceImage);
+              }
+              else if(!referenceImage.isEmpty())
+              {
+                 errors += " - 'Reference-image' is not valid, it must be one of the following :" + (m_neosegParameters->getReferenceImageValues()).join(", ") + "\n";
+              }
+           }
+           else if(stream->name()=="Initial-distribution-estimator"){
+               QString estimator = (attributes.value("value")).toString();
+               if(m_neosegParameters->checkInitialDistributionEstimator(estimator)){
+                   m_parameters->setABCInitialDistributorEstimatorType(estimator);
+               }else{
+                   errors += " - 'Initial-distribution-estimator' is not valid, it must be one of the following :" + (m_neosegParameters->getInitialDistributionEstimatorValues()).join(", ") + "\n";
+               }
+           }
+           else if (stream->name()=="Max-bias-degree")
+           {
+              QString maxBiasDegree_QString = (attributes.value("value")).toString();
+              int maxBiasDegree = maxBiasDegree_QString.toInt(&ok);
+              if(ok)
+              {
+                 m_parameters->setABCMaximumDegreeBiasField(maxBiasDegree);
+              }
+              else if(!maxBiasDegree_QString.isEmpty())
+              {
+                 errors += " - 'Max-bias-degree' is not valid, it must be a positive integer\n";
+              }
+           }
+           else if(stream->name() == "prior" ){
+               QString valuestr = (attributes.value("value")).toString();
+               double val = valuestr.toDouble(&ok);
+               if(ok){
+                   priors.push_back(val);
+               }else{
+                   errors += " - 'Prior' is not valid, it must be a number\n";
+               }
+
+
+               PipelineParameters::ABCReassignLabelsType abcReassign;
+
+               valuestr = (attributes.value("reassign")).toString();
+               bool reasignenabled = valuestr.toInt(&ok);
+               if(ok){
+                   abcReassign.m_ReassignEnabled = reasignenabled;
+               }else{
+                   abcReassign.m_ReassignEnabled = false;
+                   errors += " - 'Reassign' parameter is not valid\n";
+               }
+
+               valuestr = (attributes.value("reassign-threshold")).toString();
+               int reasigthreshold = valuestr.toInt(&ok);
+
+               if(ok){
+                   abcReassign.m_Threshold = reasigthreshold;
+               }else{
+                   abcReassign.m_Threshold = 100;
+                   errors += " - 'Reassign' parameter is not valid\n";
+               }
+
+               valuestr = (attributes.value("voxel-by-voxel")).toString();
+               int voxelbyvoxel = valuestr.toInt(&ok);
+               if(ok){
+                   abcReassign.m_VoxelByVoxel = voxelbyvoxel;
+               }else{
+                   abcReassign.m_VoxelByVoxel = true;
+                   errors += " - 'Reassign' parameter is not valid\n";
+               }
+
+               valuestr = (attributes.value("voxel-by-voxel")).toString();
+               double label = valuestr.toDouble(&ok);
+               if(ok){
+                   abcReassign.m_Label = label;
+               }else{
+                   abcReassign.m_Label = -1;
+                   errors += " - 'Reassign' parameter is not valid\n";
+               }
+
+
+               vectorReassign.push_back(abcReassign);
+           }
+        }
+        stream->readNext();
+    }
+    m_parameters->setABCPriorsCoefficients(priors);
+    m_parameters->setABCReassignLabels(vectorReassign);
 }
 
 void XmlReader::readGeneralParameters(QXmlStreamReader* stream, QString errors)

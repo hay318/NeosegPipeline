@@ -99,15 +99,21 @@ void ABCExecution::writeXMLFile(){
     stream->writeStartDocument();
     stream->writeDTD("<!DOCTYPE SEGMENTATION-PARAMETERS>");
 
-    stream->writeStartElement("SEGMENTATION-PARAMETERS");
+    this->writeXML(stream);
 
-
-    writeABCParameters(stream);
-
-    stream->writeEndElement();
     stream->writeEndDocument();
 
     file->close();
+}
+
+void ABCExecution::writeXMLFile(QXmlStreamWriter* stream){
+    this->writeXML(stream);
+}
+
+void ABCExecution::writeXML(QXmlStreamWriter *stream){
+    stream->writeStartElement("SEGMENTATION-PARAMETERS");
+    writeABCParameters(stream);
+    stream->writeEndElement();
 }
 
 void ABCExecution::writeABCParameters(QXmlStreamWriter *stream){
@@ -173,56 +179,57 @@ void ABCExecution::implementReassignImageIslands(){
     for(int i = 0; i < (int)abcreassign.size(); i++){
 
         PipelineParameters::ABCReassignLabels abcr = abcreassign[i];
+        if(abcr.m_ReassignEnabled){
 
-        QString XML_path = m_module_dir->filePath("parametersReassign" + QString::number(i) + ".xml");
+            QString XML_path = m_module_dir->filePath("parametersReassign" + QString::number(abcr.m_Label) + ".xml");
+            list.append(XML_path);
 
-        list.append(XML_path);
+            QFile* file = new::QFile(XML_path);
+            file->open(QIODevice::WriteOnly);
+            QXmlStreamWriter* stream = new::QXmlStreamWriter(file);
+            stream->setAutoFormatting(true);
 
-        QFile* file = new::QFile(XML_path);
-        file->open(QIODevice::WriteOnly);
-        QXmlStreamWriter* stream = new::QXmlStreamWriter(file);
-        stream->setAutoFormatting(true);
+            stream->writeStartDocument();
 
-        stream->writeStartDocument();
+            stream->writeDTD("<!DOCTYPE REASSIGN-WHITE-MATTER-PARAMETERS>");
+            stream->writeStartElement("REASSIGN-WHITE-MATTER-PARAMETERS");
 
-        stream->writeDTD("<!DOCTYPE REASSIGN-WHITE-MATTER-PARAMETERS>");
-        stream->writeStartElement("REASSIGN-WHITE-MATTER-PARAMETERS");
+            stream->writeTextElement(QString("INPUT"), inputfile);
 
-        stream->writeTextElement(QString("INPUT"), inputfile);
+            stream->writeTextElement(QString("LABEL-VALUE"), QString::number(abcr.m_Label));
 
-        stream->writeTextElement(QString("LABEL-VALUE"), QString::number(abcr.m_Label));
+            stream->writeTextElement(QString("THRESHOLD"), QString::number(abcr.m_Threshold));
 
-        stream->writeTextElement(QString("THRESHOLD"), QString::number(abcr.m_Threshold));
+            stream->writeTextElement(QString("VOXEL-BY-VOXEL"), QString::number(abcr.m_VoxelByVoxel));
 
-        stream->writeTextElement(QString("VOXEL-BY-VOXEL"), QString::number(abcr.m_VoxelByVoxel));
+            stream->writeStartElement(QString("PROBABILITY-MAPS-DIR"));
 
-        stream->writeStartElement(QString("PROBABILITY-MAPS-DIR"));
+            PipelineParameters::InputImageLabelMapType labelsmap = m_parameters->getImageLabelMap();
+            int numlabels = labelsmap.size();
+            if(labelsmap.find(0) != labelsmap.end()){
+                numlabels--;
+            }
+            QString atlasdir = m_parameters->getExistingAtlas() + QString("/");
+            QString atlasformat = QString(".") + m_parameters->getAtlasFormat();
+            for(int ii = 0; ii < numlabels; ii++){
+                stream->writeTextElement(QString("PROBABILITY-MAP"), atlasdir + QString::number(ii + 1) + atlasformat);
+            }
 
-        PipelineParameters::InputImageLabelMapType labelsmap = m_parameters->getImageLabelMap();
-        int numlabels = labelsmap.size();
-        if(labelsmap.find(0) != labelsmap.end()){
-            numlabels--;
+            stream->writeEndElement();
+
+
+            outputfile = basefilename;
+            outputfile += "_reassign" + QString::number(i) + atlasformat;
+            stream->writeTextElement(QString("OUTPUT"), outputfile);
+
+
+            stream->writeEndElement();
+            stream->writeEndDocument();
+
+            file->close();
+
+            inputfile = outputfile;
         }
-        QString atlasdir = m_parameters->getExistingAtlas() + QString("/");
-        QString atlasformat = QString(".") + m_parameters->getAtlasFormat();
-        for(int ii = 0; ii < numlabels; ii++){
-            stream->writeTextElement(QString("PROBABILITY-MAP"), atlasdir + QString::number(ii + 1) + atlasformat);
-        }
-
-        stream->writeEndElement();
-
-
-        outputfile = basefilename;
-        outputfile += "_reassign" + QString::number(i) + atlasformat;
-        stream->writeTextElement(QString("OUTPUT"), outputfile);
-
-
-        stream->writeEndElement();
-        stream->writeEndDocument();
-
-        file->close();
-
-        inputfile = outputfile;
     }
     QStringList::Iterator it;
     for(it = list.begin(); it != list.end(); ++it){

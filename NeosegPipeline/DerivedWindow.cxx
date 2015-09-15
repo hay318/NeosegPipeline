@@ -1215,6 +1215,35 @@ void DerivedWindow::initializeXMLParameters()
    {
       atlasGeneration_tab->setDisabled( true ) ;
    }
+
+   abcParameters->maxDegree_spinBox->setValue(m_parameters->getABCMaximumDegreeBiasField());
+   QString estim = m_parameters->getABCInitialDistributorEstimatorType();
+   int index = abcParameters->initialDistributionEstimatorCombo->findText(estim);
+   if(index >= 0){
+       abcParameters->initialDistributionEstimatorCombo->setCurrentIndex(index);
+   }
+   updateNumbersOfPriorsForABC();
+
+   std::vector<double> coeffs = m_parameters->getABCPriorsCoefficients();
+   PipelineParameters::ABCVectorReassignLabelsType reassign =  m_parameters->getABCReassignLabels();
+
+   for(unsigned i = 0; i < m_VectorABCPriorCheckBoxes.size() && i < coeffs.size() && i < reassign.size(); i++){
+       PriorSpinBox* psb = m_VectorABCPriorCheckBoxes[i];
+       psb->dspin->setValue(coeffs[i]);
+
+
+       PipelineParameters::ABCReassignLabelsType rea = reassign[i];
+       if(rea.m_ReassignEnabled){
+           psb->checkboxIslands->setChecked(rea.m_ReassignEnabled);
+           psb->spinBoxIslands->setEnabled(rea.m_ReassignEnabled);
+           psb->checkBoxVoxelByVoxel->setEnabled(rea.m_ReassignEnabled);
+           psb->spinBoxIslands->setValue(rea.m_Threshold);
+           psb->checkBoxVoxelByVoxel->setChecked(rea.m_VoxelByVoxel);
+       }
+
+   }
+
+
 }
 
 void DerivedWindow::initializeExecutables()
@@ -1267,8 +1296,9 @@ void DerivedWindow::setData()
            PriorSpinBox* priorspin = m_VectorABCPriorCheckBoxes[i];
            coeffs.push_back(priorspin->dspin->value());
 
-           if(priorspin->checkboxIslands && priorspin->checkboxIslands->isChecked()){
+           if(priorspin->checkboxIslands){
                PipelineParameters::ABCReassignLabelsType reassign;
+               reassign.m_ReassignEnabled = priorspin->checkboxIslands->isChecked();
                reassign.m_Threshold = (int)priorspin->spinBoxIslands->value();
                reassign.m_VoxelByVoxel = priorspin->checkBoxVoxelByVoxel->isChecked();
                reassign.m_Label = priorspin->m_LabelValue;
@@ -1457,6 +1487,7 @@ void DerivedWindow::setExecutables()
 void DerivedWindow::saveParameters()
 {
    setParameters() ;
+   setData() ;
    QString parameters_path = QFileDialog::getSaveFileName(this, tr("Save file"), tr("parameters.xml"), "XML files (*.xml)") ;
    XmlWriter parameters ;
    parameters.setPipelineParameters( m_parameters ) ;

@@ -49,6 +49,10 @@ ParametersXMLFileReader
    {
       m_Image=m_CurrentString;
    }
+   else if(itksys::SystemTools::Strucmp(name,"MASK") == 0)
+   {
+      m_PObject->SetInputMask(m_CurrentString);
+   }
 
    else if(itksys::SystemTools::Strucmp(name,"SEG") == 0)
    {

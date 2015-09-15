@@ -15,6 +15,7 @@ public:
     ABCExecution(QString module);
 
     void writeXMLFile();
+    void writeXMLFile(QXmlStreamWriter* stream);
     void implementReassignImageIslands();
     void writeABCParameters(QXmlStreamWriter *stream);
 
@@ -33,6 +34,7 @@ private:
 
     void addRename(QString s1, QString s2);
     void addRename(QStringList l1, QStringList l2);
+    void writeXML(QXmlStreamWriter* stream);
 
 };
 
