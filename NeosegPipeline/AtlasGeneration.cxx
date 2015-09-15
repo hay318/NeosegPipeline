@@ -196,7 +196,7 @@ void AtlasGeneration::generateWeightedAveragedLabels()
        addSubElement("parameters", "Input", "INPUT", m_neo.T2);
    }
 
-   addSubElement("parameters", "InputMask", "MASK", m_neo.mask);
+   //addSubElement("parameters", "InputMask", "MASK", m_neo.mask);
 
    m_script += m_indent + m_indent + "atlasPopulation = SubElement(parameters, 'ATLAS-POPULATION')\n";
 
