@@ -1295,15 +1295,21 @@ void DerivedWindow::setData()
            PriorSpinBox* priorspin = m_VectorABCPriorCheckBoxes[i];
            coeffs.push_back(priorspin->dspin->value());
 
+           PipelineParameters::ABCReassignLabelsType reassign;
            if(priorspin->checkboxIslands){
-               PipelineParameters::ABCReassignLabelsType reassign;
                reassign.m_ReassignEnabled = priorspin->checkboxIslands->isChecked();
                reassign.m_Threshold = (int)priorspin->spinBoxIslands->value();
                reassign.m_VoxelByVoxel = priorspin->checkBoxVoxelByVoxel->isChecked();
                reassign.m_Label = priorspin->m_LabelValue;
                reassign.m_Index = priorspin->m_Index;
-               vectorReassign.push_back(reassign);
+           }else{
+               reassign.m_ReassignEnabled = false;
+               reassign.m_Threshold = 0;
+               reassign.m_VoxelByVoxel = false;
+               reassign.m_Label = priorspin->m_LabelValue;
+               reassign.m_Index = priorspin->m_Index;
            }
+           vectorReassign.push_back(reassign);
 
        }
        m_parameters->setNumberOfLabels(m_VectorABCPriorCheckBoxes.size() - 1);//Remove the rest label
