@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
    <title>Weighted Labels Average</title>
-   <description>A tool to generate a weighted average for each label : white matter, gray matter and CSF. For any suggestion or question, please contact cherel[at]unc.edu</description>
-   <contributor>Marie Cherel</contributor>
-   <version>1.2 | Compiled ${TODAY}</version>
+   <description>A tool to generate a weighted average for each label : white matter, gray matter and CSF. For any suggestion or question, please contact cherel[at]unc.edu, jprieto[at]med.unc.edu</description>
+   <contributor>Marie Cherel, Juan Carlos Prieto</contributor>
+   <version>1.3 | Compiled ${TODAY}</version>
    <parameters>
       <file>
 	 <name>parameters_file</name>
