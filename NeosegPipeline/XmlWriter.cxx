@@ -230,10 +230,17 @@ void XmlWriter::writeParametersConfiguration(QString file_path)
            stream->writeStartElement(QString("prior"));
            stream->writeAttribute("value", QString::number(coeffs[i]));
            PipelineParameters::ABCReassignLabels abcreassign = reassign[i];
-           stream->writeAttribute("reassign", QString::number(abcreassign.m_Label));
-           stream->writeAttribute("reassign-threshold", QString::number(abcreassign.m_Threshold));
-           stream->writeAttribute("voxel-by-voxel", QString::number(abcreassign.m_VoxelByVoxel));
-           stream->writeAttribute("label", QString::number(abcreassign.m_Label));
+           stream->writeAttribute("reassign", QString::number(abcreassign.m_ReassignEnabled));
+           if(abcreassign.m_ReassignEnabled){
+               stream->writeAttribute("reassign-threshold", QString::number(abcreassign.m_Threshold));
+               stream->writeAttribute("voxel-by-voxel", QString::number(abcreassign.m_VoxelByVoxel));
+               stream->writeAttribute("label", QString::number(abcreassign.m_Label));
+           }else{
+               stream->writeAttribute("reassign-threshold", QString::number(0));
+               stream->writeAttribute("voxel-by-voxel", QString::number(0));
+               stream->writeAttribute("label", QString::number(0));
+           }
+           stream->writeEndElement();
        }
        stream->writeEndElement();
 

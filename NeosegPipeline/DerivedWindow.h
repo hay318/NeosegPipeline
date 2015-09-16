@@ -249,7 +249,8 @@ private :
            if(labelvalue != -1){
                checkboxIslands = new QCheckBox();
                checkboxIslands->setText("Reassign islands.");
-               checkboxIslands->setToolTip(QString("Reassign isolated regions in the image using a threshold for the number of voxels in the region."));
+               checkboxIslands->setToolTip(QString("Reassign isolated regions in the volume using a threshold for the number of voxels in the region."));
+               checkboxIslands->setChecked(false);
                this->addWidget(checkboxIslands);
 
 
@@ -258,7 +259,7 @@ private :
                spinBoxIslands->setMinimum(0.0);
                spinBoxIslands->setMaximum(10000.0);
                spinBoxIslands->setValue(100.0);
-               spinBoxIslands->setToolTip(QString("Set the threshold for the number of voxels per island. If the number of voxels is inferior, the labels value will be reassigned to the highest probability of the voxel."));
+               spinBoxIslands->setToolTip(QString("Set the threshold for the number of voxels in the region (island). If the number of voxels in the island is inferior, all voxels are reassigned to the second highest probability."));
                spinBoxIslands->setEnabled(false);
                this->addWidget(spinBoxIslands);
 
@@ -266,7 +267,7 @@ private :
 
                checkBoxVoxelByVoxel = new QCheckBox();
                checkBoxVoxelByVoxel->setText("Voxel by voxel.");
-               checkBoxVoxelByVoxel->setToolTip(QString("Replace the labels in the island voxel by voxel or compute an average probability for each label over the whole island and replace all voxels with the same label value."));
+               checkBoxVoxelByVoxel->setToolTip(QString("Replace the labels in the island voxel by voxel or compute the average probability in the region. The next highest probability is assigned to the whole region."));
                checkBoxVoxelByVoxel->setChecked(true);
                checkBoxVoxelByVoxel->setEnabled(false);
                this->addWidget(checkBoxVoxelByVoxel);
