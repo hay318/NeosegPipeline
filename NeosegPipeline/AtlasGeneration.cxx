@@ -604,7 +604,8 @@ void AtlasGeneration::computeRestABC(){
    localf += m_indent + m_indent + m_indent + m_indent + "priorProbabilities += ','\n";
    localf += m_indent + m_indent + "#The 'rest' label prior map is generated using all the other labels. \n";
    localf += m_indent + m_indent + "outbase = '" + this->getOutput() + "/temp/priorProbabilities/'\n";
-   localf += m_indent + m_indent + "args = [ImageMath,templateT1,'-normalizeEMS','3','-EMSfile',priorProbabilities,'-type','float','-extension','.nrrd','-outbase',outbase]\n";
+   localf += m_indent + m_indent + "numEMS = str(len(allpriors))\n";
+   localf += m_indent + m_indent + "args = [ImageMath,templateT1,'-normalizeEMS',numEMS,'-EMSfile',priorProbabilities,'-type','float','-extension','.nrrd','-outbase',outbase]\n";
    localf += m_indent + m_indent + "execute(args)\n";
    localf += m_indent + m_indent + "dilatedMask = '" + this->getOutput() + "/temp/priorProbabilities/neo-mask-dilated_NP.nrrd" + "'\n";
    localf += m_indent + m_indent + "args = [ImageMath,mask,'-dilate','5,1','-outfile',dilatedMask]\n";
