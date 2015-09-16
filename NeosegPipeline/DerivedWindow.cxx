@@ -1233,7 +1233,7 @@ void DerivedWindow::initializeXMLParameters()
 
 
        PipelineParameters::ABCReassignLabelsType rea = reassign[i];
-       if(rea.m_ReassignEnabled){
+       if(psb->checkboxIslands){
            psb->checkboxIslands->setChecked(rea.m_ReassignEnabled);
            psb->spinBoxIslands->setEnabled(rea.m_ReassignEnabled);
            psb->checkBoxVoxelByVoxel->setEnabled(rea.m_ReassignEnabled);
@@ -1242,7 +1242,6 @@ void DerivedWindow::initializeXMLParameters()
        }
 
    }
-
 
 }
 
