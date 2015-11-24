@@ -275,6 +275,11 @@ void DerivedWindow::updateNumbersOfPriorsForABC()
             QMessageBox msgBox;
             msgBox.setText("A different number of labels has been detected in the Atlas population.");
             msgBox.exec();
+            cerr<<"Number of labels :";
+            for(int j = 0; j < (int)numberOfLabels.size(); j++){
+              cerr<< numberOfLabels[j] <<",";
+            }
+            cerr<<endl;
             break;
         }
     }

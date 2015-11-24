@@ -156,8 +156,10 @@ namespace itk
           }
           if( i != 0 && currentIndexOfLabel != indexOfLabel){//We check if this is valid, comparing the number of labels from the first atlas to the rest
               char buf[200];
-              sprintf(buf, "Different number of labels in ATLAS, files! %d", i);
-              throw buf;
+              sprintf(buf, "Different number of labels in one of the ATLAS. The ATLAS index is %d, it has %d labels while all the previous ATLAS have %d labels.", i, currentIndexOfLabel - 1, indexOfLabel - 1);
+              itk::ExceptionObject e;
+              e.SetDescription(std::string(buf));
+              throw e;
           }
       }
 

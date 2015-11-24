@@ -128,7 +128,13 @@ int main(int argc, char* argv[])
    }
 
    // Update 
-   WeightedLabelsAverageFilter->Update();
+   try{
+       WeightedLabelsAverageFilter->Update();
+   }catch(itk::ExceptionObject& e){
+       std::cerr<<e.GetDescription()<<std::endl;
+      return -1;
+   }
+
 
    WeightedLabelsAverageFilterType::InputImageLabelIndexMapType map = WeightedLabelsAverageFilter->GetInputImagePixelType();
 
