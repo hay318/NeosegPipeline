@@ -1,4 +1,5 @@
 #include "DerivedWindow.h"
+#include "CountNumberOfLabels.h"
 
 DerivedWindow::DerivedWindow() : Ui_Window()
 {
@@ -175,6 +176,9 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    connect( radioNeoseg, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
    connect( radioABC, SIGNAL(clicked()), this, SLOT(tissueSegmentationSoftwareSelection()) ) ;
 
+   connect(this->abcParameters->pushButtonRefreshPriors, SIGNAL(clicked()), this, SLOT(pushButtonRefreshPriors()));
+   connect(this->abcParameters->comboBoxOutputImageFormat, SIGNAL(currentIndexChanged(QString)), this, SLOT(comboBoxOutputImageFormat_currentIndexChanged(QString)));
+
    numberOfRegistrations_spinBox->setEnabled(true); 
    numberOfGB_spinBox->setEnabled(false); 
 
@@ -198,22 +202,17 @@ DerivedWindow::DerivedWindow() : Ui_Window()
    // We run the function "tissueSegmentationSoftwareSelection" once to initialize the display.
    radioABC->setChecked(true);
    tissueSegmentationSoftwareSelection() ;
-   updateNumbersOfPriorsForABC(1);
-   updateNumbersOfPriorsForABC(2);
-   updateNumbersOfPriorsForABC(3);
-   updateNumbersOfPriorsForABC(4);
-
-   this->abcParameters->lineEditNbPriors->setText(QString::number(4));
 }
 
 
-void DerivedWindow::updateNumbersOfPriorsForABC(int nbPriors)
+void DerivedWindow::addNumbersOfPriorsForABC(std::vector< double > labelsvalue)
 {
-    if( nbPriors >= (int)vectorABCPriorCheckBoxes.size() )
-    {
 
-        PriorSpinBox* psb = new PriorSpinBox(vectorABCPriorCheckBoxes.size() + 1);
-        vectorABCPriorCheckBoxes.push_back( psb ) ;
+
+    for(int i = 0; i < (int)labelsvalue.size(); i++ ){
+
+        PriorSpinBox* psb = new PriorSpinBox(m_VectorABCPriorCheckBoxes.size() + 1, labelsvalue[i]);
+        m_VectorABCPriorCheckBoxes.push_back( psb ) ;
 
 //            QHBoxLayout *postphlayout = new QHBoxLayout ;
 //            QCheckBox *reassignSmallIsland = new QCheckBox ;
@@ -225,11 +224,104 @@ void DerivedWindow::updateNumbersOfPriorsForABC(int nbPriors)
 
 
         abcParameters->nbPriorLayout->addLayout(psb);
-        this->repaint();
-    }else if(vectorABCPriorCheckBoxes.size() > 0){
-        delete vectorABCPriorCheckBoxes[vectorABCPriorCheckBoxes.size() - 1];
-        vectorABCPriorCheckBoxes.pop_back();
     }
+    this->repaint();
+}
+
+void DerivedWindow::removeNumbersOfPriorsForABC(int nbPriors){
+    int start = m_VectorABCPriorCheckBoxes.size() - 1;
+    int end = m_VectorABCPriorCheckBoxes.size() - nbPriors;
+    for(int i = start; i >= end && i >= 0; i--){
+        delete m_VectorABCPriorCheckBoxes[i];
+        m_VectorABCPriorCheckBoxes.pop_back();
+    }
+}
+
+void DerivedWindow::updateNumbersOfPriorsForABC()
+{
+    std::vector<int> numberOfLabels;
+
+    m_parameters->setSelectedAtlases(m_selectedAtlases);
+    m_parameters->initializeAtlasPopulation();
+    std::vector<Atlas> atlas = m_parameters->getAtlasPopulation();
+
+    CountNumberOfLabels* count = new CountNumberOfLabels();
+    try{
+        for(int i = 0; i < (int)atlas.size(); i++){
+            Atlas a = atlas[i];
+            std::string fname = a.seg.toStdString();
+            if(fname.compare("")!=0){
+                count->SetFilename(fname);
+                count->Update();
+                numberOfLabels.push_back(count->GetNumberOfLabels());
+                if(i == 0){//In this step we assume all the labels in the images have the same value for the same structure. That's why only the first map is ok in this step.
+                    //The type of labels for each image will be checked during the pipeline execution -> Check WeightedLabelsAverage implementation.
+                    m_parameters->setImageLabelMap(count->GetImageLabelMap());
+                }
+            }else{
+                numberOfLabels.push_back(4);//white, gray, csf, rest
+            }
+        }
+    }catch(itk::ExceptionObject exp){
+        std::cout<<exp.GetDescription()<<endl;
+    }
+
+    int first = 0;
+    if(numberOfLabels.size() > 0){
+        first = numberOfLabels[0];
+    }
+    for(int i = 1; i < (int)numberOfLabels.size(); i++){
+        if(numberOfLabels[i] != first){
+            QMessageBox msgBox;
+            msgBox.setText("A different number of labels has been detected in the Atlas population.");
+            msgBox.exec();
+            cerr<<"Number of labels :";
+            for(int j = 0; j < (int)numberOfLabels.size(); j++){
+              cerr<< numberOfLabels[j] <<",";
+            }
+            cerr<<endl;
+            break;
+        }
+    }
+    delete count;
+
+    PipelineParameters::InputImageLabelMapType labelmap = m_parameters->getImageLabelMap();
+    PipelineParameters::InputImageLabelMapIteratorType itmap;
+
+    int newlabels = first - m_VectorABCPriorCheckBoxes.size();//New labels to add or remove.
+    if(newlabels > 0){
+        std::vector< double > labelsvalue;
+
+        for(itmap = labelmap.begin(); itmap != labelmap.end(); ++itmap){
+            if(itmap->first != 0){
+                labelsvalue.push_back(itmap->first);
+            }
+        }
+        labelsvalue = std::vector< double >(labelsvalue.begin() + m_VectorABCPriorCheckBoxes.size(), labelsvalue.end());
+
+        if(m_VectorABCPriorCheckBoxes.size() == 0){
+            labelsvalue.push_back(-1);
+        }
+
+        addNumbersOfPriorsForABC(labelsvalue);
+    }else if(newlabels < 0){
+        removeNumbersOfPriorsForABC(newlabels);
+    }
+
+    this->comboBoxLabelValueFA->clear();
+
+    if(labelmap.size() > 0){
+        for(itmap  = labelmap.begin(); itmap != labelmap.end(); ++itmap){
+            if(itmap->first != 0){
+                this->comboBoxLabelValueFA->addItem(QString::number(itmap->first));
+            }
+        }
+    }else{
+        this->comboBoxLabelValueFA->addItem(QString("white"));
+    }
+
+
+    this->abcParameters->lineEditNbPriors->setText(QString::number(first));
 }
 
 void DerivedWindow::tissueSegmentationSoftwareSelection()
@@ -304,6 +396,7 @@ void DerivedWindow::setPipelineParameters(PipelineParameters* parameters)
    initializeXMLParameters();
    initializeDataParameters();
    initializeExecutables();
+   updateNumbersOfPriorsForABC();
 }
 
 void DerivedWindow::setPipeline(Pipeline* pipeline) 
@@ -575,6 +668,7 @@ void DerivedWindow::selectAtlasPopulationDirectory()
    atlasPopulationDirectory_lineEdit->setText(atlasPopulationDirectory);
    m_parameters->setAtlasPopulationDirectory( atlasPopulationDirectory_lineEdit->text() ) ;
    UpdateAtlasPopulationDirectoryDisplay() ;
+    updateNumbersOfPriorsForABC();
 }
 
 void DerivedWindow::enterAtlasPopulationDirectory()
@@ -926,6 +1020,12 @@ void DerivedWindow::initializeDataParameters()
 {
   prefix_lineEdit->setText(m_parameters->getPrefix());
   suffix_lineEdit->setText(m_parameters->getSuffix());
+
+//  output_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/abcout"));
+//  T1_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_T1_Bias_regT2_regAtlas_corrected_EMS-stripped.nrrd"));
+//  T2_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_T2_Bias_regAtlas_corrected_EMS-stripped.nrrd"));
+//  mask_lineEdit->setText(QString("/Users/prieto/NetBeansProjects/UNC/data/testNeoSeg/BUSS_2002_mask.nrrd"));
+
   output_lineEdit->setText(m_parameters->getOutput());
   T1_lineEdit->setText(m_parameters->getT1());
   T2_lineEdit->setText(m_parameters->getT2());
@@ -1120,6 +1220,34 @@ void DerivedWindow::initializeXMLParameters()
    {
       atlasGeneration_tab->setDisabled( true ) ;
    }
+
+   abcParameters->maxDegree_spinBox->setValue(m_parameters->getABCMaximumDegreeBiasField());
+   QString estim = m_parameters->getABCInitialDistributorEstimatorType();
+   int index = abcParameters->initialDistributionEstimatorCombo->findText(estim);
+   if(index >= 0){
+       abcParameters->initialDistributionEstimatorCombo->setCurrentIndex(index);
+   }
+   updateNumbersOfPriorsForABC();
+
+   std::vector<double> coeffs = m_parameters->getABCPriorsCoefficients();
+   PipelineParameters::ABCVectorReassignLabelsType reassign =  m_parameters->getABCReassignLabels();
+
+   for(unsigned i = 0; i < m_VectorABCPriorCheckBoxes.size() && i < coeffs.size() && i < reassign.size(); i++){
+       PriorSpinBox* psb = m_VectorABCPriorCheckBoxes[i];
+       psb->dspin->setValue(coeffs[i]);
+
+
+       PipelineParameters::ABCReassignLabelsType rea = reassign[i];
+       if(psb->checkboxIslands){
+           psb->checkboxIslands->setChecked(rea.m_ReassignEnabled);
+           psb->spinBoxIslands->setEnabled(rea.m_ReassignEnabled);
+           psb->checkBoxVoxelByVoxel->setEnabled(rea.m_ReassignEnabled);
+           psb->spinBoxIslands->setValue(rea.m_Threshold);
+           psb->checkBoxVoxelByVoxel->setChecked(rea.m_VoxelByVoxel);
+       }
+
+   }
+
 }
 
 void DerivedWindow::initializeExecutables()
@@ -1167,14 +1295,35 @@ void DerivedWindow::setData()
    }else{
        m_parameters->setTissueSegmentationType(1);
        std::vector<double> coeffs;
-       for(unsigned i = 0; i < vectorABCPriorCheckBoxes.size(); i++){
-           PriorSpinBox* priorspin = vectorABCPriorCheckBoxes[i];
+       PipelineParameters::ABCVectorReassignLabelsType  vectorReassign;
+       for(unsigned i = 0; i < m_VectorABCPriorCheckBoxes.size(); i++){
+           PriorSpinBox* priorspin = m_VectorABCPriorCheckBoxes[i];
            coeffs.push_back(priorspin->dspin->value());
+
+           PipelineParameters::ABCReassignLabelsType reassign;
+           if(priorspin->checkboxIslands){
+               reassign.m_ReassignEnabled = priorspin->checkboxIslands->isChecked();
+               reassign.m_Threshold = (int)priorspin->spinBoxIslands->value();
+               reassign.m_VoxelByVoxel = priorspin->checkBoxVoxelByVoxel->isChecked();
+               reassign.m_Label = priorspin->m_LabelValue;
+               reassign.m_Index = priorspin->m_Index;
+           }else{
+               reassign.m_ReassignEnabled = false;
+               reassign.m_Threshold = 0;
+               reassign.m_VoxelByVoxel = false;
+               reassign.m_Label = priorspin->m_LabelValue;
+               reassign.m_Index = priorspin->m_Index;
+           }
+           vectorReassign.push_back(reassign);
+
        }
+       m_parameters->setNumberOfLabels(m_VectorABCPriorCheckBoxes.size() - 1);//Remove the rest label
        m_parameters->setABCPriorsCoefficients(coeffs);
+       m_parameters->setABCReassignLabels(vectorReassign);
        m_parameters->setABCInitialDistributorEstimatorType(this->abcParameters->initialDistributionEstimatorCombo->currentText());
        m_parameters->setABCMaximumDegreeBiasField(this->abcParameters->maxDegree_spinBox->value());
        m_parameters->setABCOutputImageFormat(this->abcParameters->comboBoxOutputImageFormat->currentText());
+
    }
 
 
@@ -1308,6 +1457,15 @@ void DerivedWindow::setParameters()
 
    m_parameters->setComputing3LabelsSeg(neosegParameters->computing3LabelsSeg_checkBox->isChecked());
    m_parametersSet = true;
+
+   if(this->comboBoxLabelValueFA->currentText().compare(QString("white")) == 0){
+       m_parameters->setABCWhiteImageIndex(QString("white"));
+   }else{
+       double combovalue = this->comboBoxLabelValueFA->currentText().toDouble();
+       int index = m_parameters->getImageLabelMap()[combovalue];
+       m_parameters->setABCWhiteImageIndex(QString::number(index));
+   }
+
 }
 
 void DerivedWindow::setExecutables()
@@ -1339,6 +1497,7 @@ void DerivedWindow::setExecutables()
 void DerivedWindow::saveParameters()
 {
    setParameters() ;
+   setData() ;
    QString parameters_path = QFileDialog::getSaveFileName(this, tr("Save file"), tr("parameters.xml"), "XML files (*.xml)") ;
    XmlWriter parameters ;
    parameters.setPipelineParameters( m_parameters ) ;
@@ -1723,7 +1882,12 @@ void DerivedWindow::closeEvent(QCloseEvent *event)
    }
 }
 
-void DerivedWindow::on_comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1)
+void DerivedWindow::comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1)
 {
     m_parameters->setABCOutputImageFormat(arg1);
+}
+
+void DerivedWindow::pushButtonRefreshPriors()
+{
+    updateNumbersOfPriorsForABC();
 }

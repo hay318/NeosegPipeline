@@ -251,7 +251,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabs">
       <property name="currentIndex">
-       <number>5</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="data_tab">
        <attribute name="title">
@@ -284,10 +284,18 @@
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QLineEdit" name="T1_lineEdit"/>
+               <widget class="QLineEdit" name="T1_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QLineEdit" name="T2_lineEdit"/>
+               <widget class="QLineEdit" name="T2_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
               </item>
               <item row="1" column="0">
                <widget class="QPushButton" name="T2_button">
@@ -304,7 +312,11 @@
                </widget>
               </item>
               <item row="2" column="1">
-               <widget class="QLineEdit" name="mask_lineEdit"/>
+               <widget class="QLineEdit" name="mask_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -338,7 +350,11 @@
                   <number>0</number>
                  </property>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="DWI_lineEdit"/>
+                  <widget class="QLineEdit" name="DWI_lineEdit">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
                  </item>
                  <item row="0" column="0">
                   <widget class="QPushButton" name="DWI_button">
@@ -435,7 +451,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="output_lineEdit"/>
+               <widget class="QLineEdit" name="output_lineEdit">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -2172,6 +2192,29 @@ p, li { white-space: pre-wrap; }
                 </property>
                </spacer>
               </item>
+              <item row="1" column="3">
+               <spacer name="horizontalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="1" column="4">
+               <widget class="QLabel" name="label_4">
+                <property name="text">
+                 <string>Select a label value (If ABC execution only)</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="5">
+               <widget class="QComboBox" name="comboBoxLabelValueFA"/>
+              </item>
              </layout>
             </widget>
            </item>
@@ -2538,19 +2581,6 @@ p, li { white-space: pre-wrap; }
            </item>
           </layout>
          </widget>
-        </item>
-        <item row="5" column="0">
-         <spacer name="verticalSpacer_5">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </widget>

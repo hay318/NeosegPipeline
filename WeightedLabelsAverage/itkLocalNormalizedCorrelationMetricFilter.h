@@ -14,16 +14,14 @@
 #ifndef __itkLocalNormalizedCorrelationMetricFilter_h
 #define __itkLocalNormalizedCorrelationMetricFilter_h
 
-//#include <itkObject.h>
+
 #include "itkImageToImageFilter.h"
 
 // Metric
-#include "itkNearestNeighborInterpolateImageFunction.h"
 #include "itkTranslationTransform.h"
 #include "itkNormalizedCorrelationImageToImageMetric.h"
-#include <itkVector.h>
 
-#include <cmath>
+#include <itkVector.h>
 
 
 namespace itk
@@ -72,6 +70,7 @@ public:
 
 
   typedef ImageRegionIterator<TOutput>                             IteratorType;
+  typedef ImageRegionIterator<TInput>                             InputIteratorType;
 
   itkNewMacro( Self );
 
@@ -108,6 +107,9 @@ public:
   void GenerateInputRequestedRegion();
   double GetMetric (InputImageRegionType &region);
 
+  itkSetMacro( InputImageMask, InputImagePointerType )
+  itkGetMacro( InputImageMask, InputImagePointerType )
+
 private:
 
   bool                              m_radiusValueInMillimeters;
@@ -115,6 +117,7 @@ private:
   VectorType                        m_radiusVector; 
   InputImagePointerType             m_fixedImage;
   InputImagePointerType             m_movingImage;
+  InputImagePointerType             m_InputImageMask;
   InputImageIndexType               m_start; 
   InputImageSizeType                m_patchSize;
   InputImageRegionType              m_region;

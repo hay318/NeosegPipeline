@@ -64,7 +64,23 @@ class AtlasGeneration : public Script
 
    void cleanUp();
 
-   private:
+   void setUseT1(bool uset1){
+       m_UseT1 = uset1;
+   }
+
+   void setABCPipelineModeOn(){
+      m_ABCPipelineModeOn = true;
+   }
+
+   //Specific functions that generate the ABC scripts
+   void generatePriorsProbability();
+   void computeRestABC();
+
+   void setABCWhiteLabelOutputIndexString(QString index){
+       m_ABCWhiteLabelOutputIndexString = index;
+   }
+
+private:
 
    // Input 
    std::vector<Atlas>   m_atlasPopulation;
@@ -77,7 +93,10 @@ class AtlasGeneration : public Script
    double               m_FASigmaScale; 
    double               m_FAWeight; 
    double               m_FASmoothingSize; 
-   double               m_neightborhoodRadius; 
+   double               m_neightborhoodRadius;
+   bool                 m_UseT1;
+   bool                 m_ABCPipelineModeOn;
+   QString              m_ABCWhiteLabelOutputIndexString;
 
    // Directories
    QDir*                m_priorProbabilities_dir; 

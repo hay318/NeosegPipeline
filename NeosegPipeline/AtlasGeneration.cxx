@@ -8,6 +8,9 @@ AtlasGeneration::AtlasGeneration(QString module) : Script(module)
    m_rest.name="rest";
    m_templateT1.name="templateT1";
    m_templateT2.name="templateT2";
+   m_UseT1 = true;
+   m_ABCPipelineModeOn = false;
+   m_ABCWhiteLabelOutputIndexString = "";
 }
 
 void AtlasGeneration::setAtlasPopulation(std::vector<Atlas> atlasPopulation)
@@ -160,19 +163,25 @@ void AtlasGeneration::generateTemplate(TemplateImage& templateImage)
 
 void AtlasGeneration::generateWeightedAveragedLabels()
 {
-   QStringList argumentsList;
+//   QStringList argumentsList;
 
-   m_white.output = m_white.name + "_average";
-   m_gray.output = m_gray.name + "_average";
-   m_csf.output = m_csf.name + "_average";
+   QString whiteAverage = "";
+   QString grayAverage = "";
+   QString csfAverage = "";
 
-   QString whiteAverage = m_white.dir->filePath(m_white.name + "-average" + m_suffix + ".nrrd");
-   QString grayAverage = m_gray.dir->filePath(m_gray.name + "-average" + m_suffix + ".nrrd");
-   QString csfAverage = m_csf.dir->filePath(m_csf.name + "-average" + m_suffix + ".nrrd");
+   if(!m_ABCPipelineModeOn){
+       m_white.output = m_white.name + "_average";
+       m_gray.output = m_gray.name + "_average";
+       m_csf.output = m_csf.name + "_average";
 
-   m_script += m_indent + "" + m_white.output + " = '" + whiteAverage + "'\n";
-   m_script += m_indent + "" + m_gray.output + " = '" + grayAverage + "'\n";
-   m_script += m_indent + "" + m_csf.output + " = '" + csfAverage + "'\n";
+       whiteAverage = m_white.dir->filePath(m_white.name + "-average" + m_suffix + ".nrrd");
+       grayAverage = m_gray.dir->filePath(m_gray.name + "-average" + m_suffix + ".nrrd");
+       csfAverage = m_csf.dir->filePath(m_csf.name + "-average" + m_suffix + ".nrrd");
+
+       m_script += m_indent + "" + m_white.output + " = '" + whiteAverage + "'\n";
+       m_script += m_indent + "" + m_gray.output + " = '" + grayAverage + "'\n";
+       m_script += m_indent + "" + m_csf.output + " = '" + csfAverage + "'\n";
+   }
 
    QString m_XML_path = m_priorProbabilities_dir->filePath("parameters.xml");
    m_script += m_indent + "parameters_path = \"" + m_XML_path + "\"\n";
@@ -180,7 +189,15 @@ void AtlasGeneration::generateWeightedAveragedLabels()
    m_script += m_indent + "if checkFileExistence(parameters_path)==False:\n";
    m_script += m_indent + m_indent + "logger.info('- Writing the XML file...')\n";
    m_script += m_indent + m_indent + "parameters = Element('WEIGHTED-AVERAGED-LABELS-PARAMETERS')\n";
-   addSubElement("parameters", "Input", "INPUT", m_neo.T1);
+
+   if(m_UseT1){
+       addSubElement("parameters", "Input", "INPUT", m_neo.T1);
+   }else{
+       addSubElement("parameters", "Input", "INPUT", m_neo.T2);
+   }
+
+   //addSubElement("parameters", "InputMask", "MASK", m_neo.mask);
+
    m_script += m_indent + m_indent + "atlasPopulation = SubElement(parameters, 'ATLAS-POPULATION')\n";
 
    std::vector<Atlas>::iterator it;
@@ -193,17 +210,26 @@ void AtlasGeneration::generateWeightedAveragedLabels()
       if(atlas.probabilistic)
       {
          m_script += m_indent + m_indent + "atlas = SubElement(atlasPopulation, 'PROBABILISTIC-ATLAS')\n";
-         addSubElement("atlas", "image", "IMAGE", (*it).T2); 
-         addSubElement("atlas", "seg", "WHITE", (*it).white);
-         addSubElement("atlas", "seg", "GRAY", (*it).gray);
-         addSubElement("atlas", "seg", "CSF", (*it).csf);
+         if(m_UseT1){
+             addSubElement("atlas", "image", "IMAGE", atlas.T1);
+         }else{
+             addSubElement("atlas", "image", "IMAGE", atlas.T2);
+         }
+
+         addSubElement("atlas", "seg", "WHITE", atlas.white);
+         addSubElement("atlas", "seg", "GRAY", atlas.gray);
+         addSubElement("atlas", "seg", "CSF", atlas.csf);
       }
 
       else
       {
          m_script += m_indent + m_indent + "atlas = SubElement(atlasPopulation, 'ATLAS')\n";
-         addSubElement("atlas", "image", "IMAGE", (*it).T2); 
-         addSubElement("atlas", "seg", "SEG", (*it).seg);
+         if(m_UseT1){
+             addSubElement("atlas", "image", "IMAGE", atlas.T1);
+         }else{
+             addSubElement("atlas", "image", "IMAGE", atlas.T2);
+         }
+         addSubElement("atlas", "seg", "SEG", atlas.seg);
       }
    }
    
@@ -212,10 +238,14 @@ void AtlasGeneration::generateWeightedAveragedLabels()
    addSubElement("weights", "neightborhoodRadius", "NEIGHTBORHOOD-RADIUS", QString::number(m_neightborhoodRadius));
    addSubElement("weights", "neightborhoodRadiusUnit", "NEIGHTBORHOOD-RADIUS-UNIT", m_neightborhoodRadiusUnit);
 
-   m_script += m_indent + m_indent + "outputs = SubElement(parameters, 'OUTPUTS')\n";
-   addSubElement("outputs", "white", "WHITE-AVERAGE", whiteAverage);
-   addSubElement("outputs", "gray", "GRAY-AVERAGE", grayAverage);
-   addSubElement("outputs", "csf", "CSF-AVERAGE", csfAverage);
+   if(m_ABCPipelineModeOn){
+      addSubElement("parameters", "outputs", "OUTPUT", this->getOutput() + "/temp/priorProbabilities/");
+   }else{
+      m_script += m_indent + m_indent + "outputs = SubElement(parameters, 'OUTPUTS')\n";
+      addSubElement("outputs", "white", "WHITE-AVERAGE", whiteAverage);
+      addSubElement("outputs", "gray", "GRAY-AVERAGE", grayAverage);
+      addSubElement("outputs", "csf", "CSF-AVERAGE", csfAverage);
+   }
 
    m_script += m_indent + m_indent + "XML = xml.dom.minidom.parseString(ElementTree.tostring(parameters))\n";
    m_script += m_indent + m_indent + "pretty_xml_as_string = XML.toprettyxml()\n";
@@ -229,15 +259,19 @@ void AtlasGeneration::generateWeightedAveragedLabels()
 
 
    m_log = "- Computing weighted labels averages";
-   m_outputs.insert(m_white.output, whiteAverage);
-   m_outputs.insert(m_gray.output, grayAverage);
-   m_outputs.insert(m_csf.output, csfAverage);
+   if(!m_ABCPipelineModeOn){
+      m_outputs.insert(m_white.output, whiteAverage);
+      m_outputs.insert(m_gray.output, grayAverage);
+      m_outputs.insert(m_csf.output, csfAverage);
+   }
    m_argumentsList << "WeightedLabelsAverage" << "'--parameters'" << "parameters_path";
    execute(); 
    m_unnecessaryFiles << m_XML_path;
-   m_unnecessaryFiles << whiteAverage; 
-   m_unnecessaryFiles << grayAverage; 
-   m_unnecessaryFiles << csfAverage; 
+   if(!m_ABCPipelineModeOn){
+      m_unnecessaryFiles << whiteAverage; 
+      m_unnecessaryFiles << grayAverage; 
+      m_unnecessaryFiles << csfAverage; 
+   }
 }
 
 void AtlasGeneration::extractWMFromFA()
@@ -307,7 +341,13 @@ void AtlasGeneration::extractWMFromFA()
 
    QString whitePlusFA = m_white.dir->filePath(m_prefix + "white" + "-plusFA" + m_suffix + ".nrrd");
    m_outputs.insert(m_white.output, whitePlusFA);
-   m_argumentsList << "ImageMath" << m_white.input << "'-add'" << "weightedFA" << "'-type'" << "'float'" << "'-outfile'" << m_white.output;
+   if(m_ABCPipelineModeOn){
+       QString filename = "'" + this->getOutput() + "/temp/priorProbabilities/" + m_ABCWhiteLabelOutputIndexString + ".nrrd'";
+       m_argumentsList << "ImageMath" << filename << "'-add'" << "weightedFA" << "'-type'" << "'float'" << "'-outfile'" << filename;
+   }else{
+       m_argumentsList << "ImageMath" << m_white.input << "'-add'" << "weightedFA" << "'-type'" << "'float'" << "'-outfile'" << m_white.output;
+   }
+
    m_log = "- Adding the FA to the white average...";
    execute();
    m_unnecessaryFiles << whitePlusFA;
@@ -474,38 +514,114 @@ void AtlasGeneration::implementRun()
       extractWMFromFA();
    }
 
-   m_script += m_indent + "# Compute White Probability #\n";
-   m_script += m_indent + "logger.info('Computing white probability :')\n";
-   generatePriorProbability(m_white);
+   if(m_ABCPipelineModeOn){
+       m_script += m_indent + "# Compute Priors Probability #\n";
+       m_script += m_indent + "logger.info('Computing priors probability :')\n";
+       generatePriorsProbability();
 
-   m_script += m_indent + "# Compute Gray Probability #\n";
-   m_script += m_indent + "logger.info('Computing gray probability :')\n";
-   generatePriorProbability(m_gray);
+       QString arrayname = "allpriors";
+       QString execfunct = arrayname + " = generatePriorsProbability('" + this->getOutput() + "/temp/priorProbabilities/', '.nrrd')\n";
+       m_script += m_indent + execfunct;
 
-   m_script += m_indent + "# Compute CSF Probability #\n";
-   m_script += m_indent + "logger.info('Computing csf probability :')\n";
-   generatePriorProbability(m_csf);
 
-   m_script += m_indent + "# Compute Rest Probability #\n";
-   m_script += m_indent + "logger.info('Computing rest probability :')\n";
-   computeRest(); 
+       computeRestABC();//This implements the function to compute the rest map
 
-   m_script += m_indent + "# Copy White Probability #\n";
-   m_script += m_indent + "logger.info('Copying final white probability...')\n";
-   copyFinalPriorProbability(m_white);
+       execfunct = "computeRestABC(" + arrayname + ")\n"; //This executes the function in the python script with the previous arrayname as parameter
+       m_script += m_indent + execfunct;
+   }else{
 
-   m_script += m_indent + "# Copy Gray Probability #\n";
-   m_script += m_indent + "logger.info('Copying final gray probability...')\n";
-   copyFinalPriorProbability(m_gray);
+       m_script += m_indent + "# Compute White Probability #\n";
+       m_script += m_indent + "logger.info('Computing white probability :')\n";
+       generatePriorProbability(m_white);
 
-   m_script += m_indent + "# Copy CSF Probability #\n";
-   m_script += m_indent + "logger.info('Copying final csf probability...')\n";
-   copyFinalPriorProbability(m_csf);
+       m_script += m_indent + "# Compute Gray Probability #\n";
+       m_script += m_indent + "logger.info('Computing gray probability :')\n";
+       generatePriorProbability(m_gray);
 
-   m_script += m_indent + "# Copy Rest Probability #\n";
-   m_script += m_indent + "logger.info('Copying final rest probability...')\n";
-   copyFinalPriorProbability(m_rest);
+       m_script += m_indent + "# Compute CSF Probability #\n";
+       m_script += m_indent + "logger.info('Computing csf probability :')\n";
+       generatePriorProbability(m_csf);
 
+       m_script += m_indent + "# Compute Rest Probability #\n";
+       m_script += m_indent + "logger.info('Computing rest probability :')\n";
+       computeRest();
+
+       m_script += m_indent + "# Copy White Probability #\n";
+       m_script += m_indent + "logger.info('Copying final white probability...')\n";
+       copyFinalPriorProbability(m_white);
+
+       m_script += m_indent + "# Copy Gray Probability #\n";
+       m_script += m_indent + "logger.info('Copying final gray probability...')\n";
+       copyFinalPriorProbability(m_gray);
+
+       m_script += m_indent + "# Copy CSF Probability #\n";
+       m_script += m_indent + "logger.info('Copying final csf probability...')\n";
+       copyFinalPriorProbability(m_csf);
+
+       m_script += m_indent + "# Copy Rest Probability #\n";
+       m_script += m_indent + "logger.info('Copying final rest probability...')\n";
+       copyFinalPriorProbability(m_rest);
+   }
+
+}
+
+void AtlasGeneration::generatePriorsProbability(){
+
+   QString localf = "";
+
+   localf += m_indent + "def generatePriorsProbability(indir, ext):\n";
+   localf += m_indent + m_indent + "outindex = 1\n";
+   localf += m_indent + m_indent + "generatePriorsProbabilityReturn = list()\n";
+   localf += m_indent + m_indent + "average = os.path.join(indir, str(outindex) + ext)\n";
+   localf += m_indent + m_indent + "while os.path.isfile(average):\n";
+   localf += m_indent + m_indent + m_indent + "probability = os.path.join(indir, str(outindex) + '.probability' + ext)\n";
+   localf += m_indent + m_indent + m_indent + "maskedProbability = os.path.join(indir, str(outindex) + '.maskedProbability' + ext)\n";
+   localf += m_indent + m_indent + m_indent + "rescaledProbability = os.path.join(indir, str(outindex) + '.rescaledProbability' + ext)\n";
+   localf += m_indent + m_indent + m_indent + "args = [ImageMath, average,'-smooth','-gauss','-size','1','-type','float','-outfile', probability]\n";
+   localf += m_indent + m_indent + m_indent + "execute(args)\n";
+   localf += m_indent + m_indent + m_indent + "args = [ImageMath, probability,'-mask',mask,'-type','float','-outfile', maskedProbability]\n";
+   localf += m_indent + m_indent + m_indent + "execute(args)\n";
+   localf += m_indent + m_indent + m_indent + "args = [ImageMath, maskedProbability,'-constOper','2,255','-outfile', rescaledProbability]\n";
+   localf += m_indent + m_indent + m_indent + "execute(args)\n";
+   localf += m_indent + m_indent + m_indent + "generatePriorsProbabilityReturn.append(rescaledProbability)\n";
+   localf += m_indent + m_indent + m_indent + "outindex += 1\n";
+   localf += m_indent + m_indent + m_indent + "average = os.path.join(indir, str(outindex) + ext)\n";
+   localf += m_indent + m_indent + "return generatePriorsProbabilityReturn\n";
+
+   m_script+= localf;
+   
+}
+
+void AtlasGeneration::computeRestABC(){
+
+   QString localf = "";
+
+   localf += m_indent + "def computeRestABC(allpriors):\n";
+   localf += m_indent + m_indent + "priorProbabilities = ''\n";
+   localf += m_indent + m_indent + "for i in range(0, len(allpriors)):\n";
+   localf += m_indent + m_indent + m_indent + "priorProbabilities += allpriors[i]\n";
+   localf += m_indent + m_indent + m_indent + "if(i < len(allpriors) - 1):\n";
+   localf += m_indent + m_indent + m_indent + m_indent + "priorProbabilities += ','\n";
+   localf += m_indent + m_indent + "#The 'rest' label prior map is generated using all the other labels. \n";
+   localf += m_indent + m_indent + "outbase = '" + this->getOutput() + "/temp/priorProbabilities/'\n";
+   localf += m_indent + m_indent + "numEMS = str(len(allpriors))\n";
+   localf += m_indent + m_indent + "args = [ImageMath,templateT1,'-normalizeEMS',numEMS,'-EMSfile',priorProbabilities,'-type','float','-extension','.nrrd','-outbase',outbase]\n";
+   localf += m_indent + m_indent + "execute(args)\n";
+   localf += m_indent + m_indent + "dilatedMask = '" + this->getOutput() + "/temp/priorProbabilities/neo-mask-dilated_NP.nrrd" + "'\n";
+   localf += m_indent + m_indent + "args = [ImageMath,mask,'-dilate','5,1','-outfile',dilatedMask]\n";
+   localf += m_indent + m_indent + "execute(args)\n";
+   localf += m_indent + m_indent + "#Generate the masked probability\n";
+   localf += m_indent + m_indent + "for i in range(1, len(allpriors) + 1):\n";
+   localf += m_indent + m_indent + m_indent + "infile = outbase + str(i) + '_normalized.nrrd'\n";
+   localf += m_indent + m_indent + m_indent + "outfile = '" + this->getOutput() + "/' + str(i) + '.nrrd'\n";
+   localf += m_indent + m_indent + m_indent + "args = [ResampleScalarVectorDWIVolume, infile , outfile]\n";
+   localf += m_indent + m_indent + m_indent + "execute(args)\n";
+   localf += m_indent + m_indent + "restindex = str( len(allpriors) + 1 )\n";
+   localf += m_indent + m_indent + "restfinal = '" + this->getOutput() + "/' + restindex + '.nrrd'\n";
+   localf += m_indent + m_indent + "args = [ImageMath, outbase + restindex + '_normalized.nrrd','-mask', dilatedMask,'-outfile', restfinal]\n";
+   localf += m_indent + m_indent + "execute(args)\n";
+
+    m_script+= localf;
 }
 
 void AtlasGeneration::update()

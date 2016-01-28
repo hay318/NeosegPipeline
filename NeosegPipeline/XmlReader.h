@@ -22,6 +22,7 @@ class XmlReader
    void readGeneralParameters(QXmlStreamReader* stream, QString errors);
    void readAntsParameters(QXmlStreamReader* stream, QString errors, AntsParameters* antsParameters);
    void readNeosegParameters(QXmlStreamReader* stream, QString errors);
+   void readABCParameters(QXmlStreamReader* stream, QString errors);
 
    QString readExecutablesConfigurationFile(QString file_path);
    QString readDataConfigurationFile( QString file_path ) ;

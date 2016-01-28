@@ -126,6 +126,8 @@ PipelineParameters::PipelineParameters()
    m_neosegParameters = new NeosegParameters(); 
    m_executablePaths = new ExecutablePaths(); 
    m_libraryPaths = new LibraryPaths(); 
+
+   m_ImageLabelMap.clear();
 }
 
 // Checking Functions

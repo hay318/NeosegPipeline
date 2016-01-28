@@ -187,10 +187,14 @@ class DerivedWindow : public QMainWindow , public Ui_Window
    void closeEvent(QCloseEvent *event);
 
    //ABC dynamic UI
-   void updateNumbersOfPriorsForABC(int nbPriors) ;
+   void addNumbersOfPriorsForABC(std::vector<double> labelsvalue) ;
+   //ABC dynamic UI
+   void removeNumbersOfPriorsForABC(int nbPriors) ;
+   //ABC dynamic UI
+   void updateNumbersOfPriorsForABC() ;
+   void comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1);
 
-private slots:
-   void on_comboBoxOutputImageFormat_currentIndexChanged(const QString &arg1);
+   void pushButtonRefreshPriors();
 
 private :
    
@@ -223,28 +227,74 @@ private :
    //ABC dynamic UI
    class PriorSpinBox : public QHBoxLayout{
    public:
-       PriorSpinBox(int n){
+       PriorSpinBox(int n, double labelvalue){
 
            labelsp = new QLabel();
-           labelsp->setText( QString("Prior %1 coefficient:").arg(n) ) ;
-           this->addWidget(labelsp );
+           if(labelvalue != -1){
+               labelsp->setText( QString("Prior %1 coefficient for label = " + QString::number(labelvalue) + ":").arg(n) ) ;
+           }else{
+               labelsp->setText( QString("Prior %1 coefficient for label = rest:").arg(n) ) ;
+           }
+           m_LabelValue = labelvalue;
+           m_Index = n - 1;
 
+           this->addWidget(labelsp );
 
            dspin = new QDoubleSpinBox();
            dspin->setSingleStep(0.1);
            dspin->setMinimum(0);
            dspin->setValue(1);
            this->addWidget(dspin);
+
+           if(labelvalue != -1){
+               checkboxIslands = new QCheckBox();
+               checkboxIslands->setText("Reassign islands.");
+               checkboxIslands->setToolTip(QString("Reassign isolated regions in the volume using a threshold for the number of voxels in the region."));
+               checkboxIslands->setChecked(false);
+               this->addWidget(checkboxIslands);
+
+
+               spinBoxIslands = new QDoubleSpinBox();
+               spinBoxIslands->setSingleStep(1.0);
+               spinBoxIslands->setMinimum(0.0);
+               spinBoxIslands->setMaximum(10000.0);
+               spinBoxIslands->setValue(100.0);
+               spinBoxIslands->setToolTip(QString("Set the threshold for the number of voxels in the region (island). If the number of voxels in the island is inferior, all voxels are reassigned to the second highest probability."));
+               spinBoxIslands->setEnabled(false);
+               this->addWidget(spinBoxIslands);
+
+               connect(checkboxIslands, SIGNAL(clicked(bool)), spinBoxIslands, SLOT(setEnabled(bool)));
+
+               checkBoxVoxelByVoxel = new QCheckBox();
+               checkBoxVoxelByVoxel->setText("Voxel by voxel.");
+               checkBoxVoxelByVoxel->setToolTip(QString("Replace the labels in the island voxel by voxel or compute the average probability in the region. The next highest probability is assigned to the whole region."));
+               checkBoxVoxelByVoxel->setChecked(true);
+               checkBoxVoxelByVoxel->setEnabled(false);
+               this->addWidget(checkBoxVoxelByVoxel);
+
+               connect(checkboxIslands, SIGNAL(clicked(bool)), checkBoxVoxelByVoxel, SLOT(setEnabled(bool)));
+           }else{
+               checkboxIslands = 0;
+               spinBoxIslands = 0;
+               checkBoxVoxelByVoxel = 0;
+           }
        }
 
        ~PriorSpinBox(){
            delete labelsp;
            delete dspin;
+           delete checkboxIslands;
+           delete spinBoxIslands;
        }
        QLabel *labelsp;
        QDoubleSpinBox *dspin;
+       QCheckBox* checkboxIslands;
+       QDoubleSpinBox* spinBoxIslands;
+       QCheckBox* checkBoxVoxelByVoxel;
+       double m_LabelValue;
+       int m_Index;
    };
-   std::vector<PriorSpinBox*> vectorABCPriorCheckBoxes ;
+   std::vector<PriorSpinBox*> m_VectorABCPriorCheckBoxes ;
 
    bool m_parametersSet;
    bool m_executablesSet;

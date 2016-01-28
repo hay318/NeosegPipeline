@@ -49,6 +49,10 @@ ParametersXMLFileReader
    {
       m_Image=m_CurrentString;
    }
+   else if(itksys::SystemTools::Strucmp(name,"MASK") == 0)
+   {
+      m_PObject->SetInputMask(m_CurrentString);
+   }
 
    else if(itksys::SystemTools::Strucmp(name,"SEG") == 0)
    {
@@ -127,6 +131,11 @@ ParametersXMLFileReader
    else if(itksys::SystemTools::Strucmp(name,"CSF-AVERAGE") == 0)
    {
       m_PObject->SetCsf(m_CurrentString);
+   }
+
+   else if(itksys::SystemTools::Strucmp(name,"OUTPUT") == 0)
+   {
+      m_PObject->SetOutputDirectory(m_CurrentString);
    }
 }
 
