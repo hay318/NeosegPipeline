@@ -64,9 +64,9 @@ void ABCExecution::implementRun(){
     outputStringList.push_back(atlasdir + QString("2.") + atlasExt);
     outputStringList.push_back(atlasdir + QString("3.") + atlasExt);
 
-    if(m_parameters->getTissueSegmentationType() == 0){
+    if(m_parameters->getTissueSegmentationType() == TISSUE_SEG_TYPE_NEOSEG){
         outputStringList.push_back(atlasdir + QString("4.") + atlasExt);
-    }else if(m_parameters->getTissueSegmentationType() == 1){
+    }else if(m_parameters->getTissueSegmentationType() == TISSUE_SEG_TYPE_ABC){
         int numberofpriors = m_parameters->getABCPriorsCoefficients().size();
         outputStringList.push_back(atlasdir + QString::number(numberofpriors) + QString(".") + atlasExt);
     }
@@ -131,7 +131,7 @@ void ABCExecution::writeABCParameters(QXmlStreamWriter *stream){
     stream->writeTextElement(QString("ATLAS-ORIENTATION"), QString("file"));
     stream->writeTextElement(QString("ATLAS-FORMAT"), m_parameters->getAtlasFormat());
     stream->writeTextElement(QString("OUTPUT-DIRECTORY"), m_module_path);
-    stream->writeTextElement(QString("OUTPUT-FORMAT"), m_parameters->getABCOutputImageFormat());
+    stream->writeTextElement(QString("OUTPUT-FORMAT"), m_parameters->getAtlasFormat());
 
     stream->writeStartElement("IMAGE");
     stream->writeTextElement(QString("FILE"), m_parameters->getT1());
@@ -166,7 +166,7 @@ void ABCExecution::writeABCParameters(QXmlStreamWriter *stream){
     stream->writeTextElement("DO-ATLAS-WARP", QString("0"));
     stream->writeTextElement("ATLAS-WARP-FLUID-ITERATIONS", QString("0"));
     stream->writeTextElement("ATLAS-WARP-FLUID-MAX-STEP", QString("0"));
-    stream->writeTextElement("ATLAS-LINEAR-MAP-TYPE", QString("rigid"));
+    stream->writeTextElement("ATLAS-LINEAR-MAP-TYPE", QString("id"));
     stream->writeTextElement("IMAGE-LINEAR-MAP-TYPE", QString("id"));
 
 }

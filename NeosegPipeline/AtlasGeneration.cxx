@@ -380,7 +380,7 @@ void AtlasGeneration::generatePriorProbability(PriorProbability& priorProbabilit
    execute();
    m_unnecessaryFiles << maskedProbability;
 
-   // Rescaling P`1robability
+   // Rescaling Probability
    priorProbability.input = priorProbability.output;
    priorProbability.output = priorProbability.name + "_rescaledProbability";
    QString rescaledProbability = priorProbability.dir->filePath(priorProbability.name + "-rescaledProbability" + m_suffix + ".nrrd");
@@ -569,6 +569,7 @@ void AtlasGeneration::generatePriorsProbability(){
 
    QString localf = "";
 
+
    localf += m_indent + "def generatePriorsProbability(indir, ext):\n";
    localf += m_indent + m_indent + "outindex = 1\n";
    localf += m_indent + m_indent + "generatePriorsProbabilityReturn = list()\n";
@@ -577,7 +578,7 @@ void AtlasGeneration::generatePriorsProbability(){
    localf += m_indent + m_indent + m_indent + "probability = os.path.join(indir, str(outindex) + '.probability' + ext)\n";
    localf += m_indent + m_indent + m_indent + "maskedProbability = os.path.join(indir, str(outindex) + '.maskedProbability' + ext)\n";
    localf += m_indent + m_indent + m_indent + "rescaledProbability = os.path.join(indir, str(outindex) + '.rescaledProbability' + ext)\n";
-   localf += m_indent + m_indent + m_indent + "args = [ImageMath, average,'-smooth','-gauss','-size','1','-type','float','-outfile', probability]\n";
+   localf += m_indent + m_indent + m_indent + "args = [ImageMath, average,'-smooth','-" + m_smoothing  + "','-size','" + QString::number(m_smoothingSize) + "','-type','float','-outfile', probability]\n";
    localf += m_indent + m_indent + m_indent + "execute(args)\n";
    localf += m_indent + m_indent + m_indent + "args = [ImageMath, probability,'-mask',mask,'-type','float','-outfile', maskedProbability]\n";
    localf += m_indent + m_indent + m_indent + "execute(args)\n";

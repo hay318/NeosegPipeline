@@ -189,7 +189,7 @@ void XmlWriter::writeParametersConfiguration(QString file_path)
    QXmlStreamWriter* stream = new::QXmlStreamWriter(file);
    stream->setAutoFormatting(true);
 
-   if(m_parameters->getTissueSegmentationType() == 0){
+   if(m_parameters->getTissueSegmentationType() == TISSUE_SEG_TYPE_NEOSEG){
        stream->writeStartDocument();
        stream->writeDTD("<!DOCTYPE Neoseg-pipeline-parameters>");
 
@@ -203,7 +203,7 @@ void XmlWriter::writeParametersConfiguration(QString file_path)
 
        stream->writeEndElement();
        stream->writeEndDocument();
-   }else if(m_parameters->getTissueSegmentationType() == 1){
+   }else if(m_parameters->getTissueSegmentationType() == TISSUE_SEG_TYPE_ABC){
 
        stream->writeStartDocument();
        stream->writeDTD("<!DOCTYPE ABC-pipeline-parameters>");

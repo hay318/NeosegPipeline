@@ -151,6 +151,53 @@ namespace itk
    }
 
    template <class TInput, class TOutput>
+   double 
+   LocalNormalizedCorrelationMetricFilter <TInput, TOutput> 
+   ::GetMetricNoITK (InputImageRegionType &region)
+   {
+     // for speed do not use ITK NCC as we do not need transform and interpolation
+     // for speed do not compute region at image edge, i.e. NCC region has to be fully in image
+
+     //check lower bound, give equal weight
+     if ((m_start[0] < 0) || (m_start[1] < 0) || (m_start[2] < 0)) {
+       return 1.0;
+     }
+     //check upper bound, give equal weight
+     m_end[0] = m_start[0]+m_patchSize[0];
+     m_end[1] = m_start[1]+m_patchSize[1];
+     m_end[2] = m_start[2]+m_patchSize[2];
+     if ((m_end[0] >= (unsigned int) m_OutputSize[0]) || 
+	 (m_end[1] >= (unsigned int) m_OutputSize[1]) || 
+	 (m_end[2] >= (unsigned int) m_OutputSize[2])) {
+       return 1.0;
+     }
+      InputIteratorType ti( m_fixedImage, region );
+      InputIteratorType mi( m_movingImage, region );
+      double sff = 0;
+      double smm = 0;
+      double sfm = 0;
+      double measure = 0;
+
+      while( !ti.IsAtEnd() ) {
+
+	double fixedValue  = ti.Get();
+	double movingValue = mi.Get();
+	sff += fixedValue  * fixedValue;
+	smm += movingValue * movingValue;
+	sfm += fixedValue  * movingValue;
+
+	++ti;
+	++mi;
+      }
+      double denom = -1.0 * std::sqrt(sff * smm);
+      if(  denom != 0.0 ) {
+	measure = sfm / denom;
+      }
+      return measure * (-1);
+   }
+   
+
+   template <class TInput, class TOutput>
    void LocalNormalizedCorrelationMetricFilter <TInput, TOutput>
    ::ThreadedGenerateData (const OutputImageRegionType &outputRegionForThread, ThreadIdType itkNotUsed(threadId))
    {
@@ -177,11 +224,13 @@ namespace itk
       double metricValue=0;
 
       // Progress
-      long progress = 0;
+      //long progress = 0;
 
       outit.GoToBegin();
       fixedit.GoToBegin();
       movingit.GoToBegin();
+      //std::cout <<"Computing NCC" << std::endl;
+
       while( !outit.IsAtEnd() )
       {
          index = outit.GetIndex();
@@ -196,19 +245,22 @@ namespace itk
 
              m_region.SetIndex(m_start);
 
-             metricValue = GetMetric(m_region);
+	     
+             metricValue = GetMetricNoITK(m_region);
 
-             if (progress % 500000 == 0)
-             {
-               std::cout<<"Correl At index "<<index<<": fixed region="<<m_fixedImage->GetPixel(index)<<", moving region="<<m_movingImage->GetPixel(index)<<", metric="<<metricValue<<std::endl;
-             }
+             //double metricValue2 = GetMetric(m_region);
+	     //if (metricValue != 0)  std::cout<<metricValue<<"," << metricValue2<<std::endl;
+             //if (progress % 500000 == 0)
+             //{
+             //  std::cout<<"Correl At index "<<index<<": fixed region="<<m_fixedImage->GetPixel(index)<<", moving region="<<m_movingImage->GetPixel(index)<<", metric="<<metricValue<<std::endl;
+             //}
 
          }
 
          outit.Set(metricValue);
 
 
-         ++progress ;
+         //++progress ;
          ++outit;
          ++fixedit;
          ++movingit;
@@ -217,6 +269,7 @@ namespace itk
              ++maskit;
          }
       }
+
    }
 
 

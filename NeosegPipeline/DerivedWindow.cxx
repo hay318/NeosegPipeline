@@ -1291,9 +1291,9 @@ void DerivedWindow::setData()
       createOutput(output_lineEdit->text()); 
    }
    if(this->radioNeoseg->isChecked()){
-       m_parameters->setTissueSegmentationType(0);
+       m_parameters->setTissueSegmentationType(TISSUE_SEG_TYPE_NEOSEG);
    }else{
-       m_parameters->setTissueSegmentationType(1);
+       m_parameters->setTissueSegmentationType(TISSUE_SEG_TYPE_ABC);
        std::vector<double> coeffs;
        PipelineParameters::ABCVectorReassignLabelsType  vectorReassign;
        for(unsigned i = 0; i < m_VectorABCPriorCheckBoxes.size(); i++){

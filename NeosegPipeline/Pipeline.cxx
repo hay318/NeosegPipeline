@@ -177,7 +177,7 @@ void Pipeline::writeAtlasGeneration()
    m_atlasGeneration->setOverwriting(m_parameters->getOverwriting()); 
    m_atlasGeneration->setStoppingIfError(m_parameters->getStoppingIfError());
 
-   if(m_parameters->getTissueSegmentationType() == 1){
+   if(m_parameters->getTissueSegmentationType() == TISSUE_SEG_TYPE_ABC){
        m_atlasGeneration->setABCPipelineModeOn();
    }
 
@@ -464,7 +464,7 @@ void Pipeline::writePipeline()
    {
       writeExistingAtlasRegistration(); 
    }
-   if(m_parameters->getTissueSegmentationType() == 0){
+   if(m_parameters->getTissueSegmentationType() == TISSUE_SEG_TYPE_NEOSEG){
        writeNeosegExecution();
    }else{
        writeABCExecution();

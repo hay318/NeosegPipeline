@@ -106,7 +106,7 @@ public:
   void GenerateOutputInformation();
   void GenerateInputRequestedRegion();
   double GetMetric (InputImageRegionType &region);
-
+  double GetMetricNoITK (InputImageRegionType &region);
   itkSetMacro( InputImageMask, InputImagePointerType )
   itkGetMacro( InputImageMask, InputImagePointerType )
 
@@ -119,6 +119,7 @@ private:
   InputImagePointerType             m_movingImage;
   InputImagePointerType             m_InputImageMask;
   InputImageIndexType               m_start; 
+  InputImageIndexType               m_end; 
   InputImageSizeType                m_patchSize;
   InputImageRegionType              m_region;
   MetricPointerType                 m_metric;

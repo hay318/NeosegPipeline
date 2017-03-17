@@ -21,6 +21,8 @@
 #include "MinMax.h"
 #include "Origin.h"
 
+const int TISSUE_SEG_TYPE_NEOSEG = 0;
+const int TISSUE_SEG_TYPE_ABC = 1;
 
 class PipelineParameters
 {

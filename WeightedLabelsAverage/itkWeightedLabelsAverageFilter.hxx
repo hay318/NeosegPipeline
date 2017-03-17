@@ -224,9 +224,11 @@ namespace itk
 
          for(unsigned int i=0; i<m_AtlasPopulation.size(); i++)
          {
+	   std::cout << "Computing Atlas Weights: " << i << "/" << m_AtlasPopulation.size() << std::endl;
             localMetricFilter->SetInput(1, m_AtlasPopulation[i].image);
             localMetricFilter->Update();
 
+	    
             thresholdFilter->SetInput(localMetricFilter->GetOutput());
             thresholdFilter->Update();
 
@@ -313,12 +315,13 @@ namespace itk
                
                else
                {
+
                   label = (atlas.labels)->GetPixel( index );
                   if(labels.find(label) == labels.end()){
                       labels[label] = 0;
                   }
                   labels[label] += weight;
-
+		 
                }
             }
 
@@ -335,11 +338,6 @@ namespace itk
               }
             }
          }
-
-         // if ( progress % 500000 == 0 )
-         // {
-         //     std::cout<<"Avg At index:"<<index<<" - "<<std::endl;
-         // } 
 
          ++it;
          ++progress;

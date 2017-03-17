@@ -68,6 +68,8 @@ int main(int argc, char* argv[])
    }
 
 
+   std::cout<<"Reading Inputs "<<std::endl;
+
    std::string inputFilename = parameters->GetInput();
    std::string inputExtension = inputFilename.substr(inputFilename.find_last_of("."));
    if(inputExtension.compare(".gz") == 0){
@@ -82,6 +84,7 @@ int main(int argc, char* argv[])
 
    std::string maskfile = parameters->GetInputMask();
    if(maskfile.compare("") != 0){
+     std::cout<<"Reading Input Mask "<<std::endl;
        ReaderType::Pointer input_mask_reader = ReaderType::New();
        input_mask_reader->SetFileName(maskfile);
        input_mask_reader->Update();
@@ -126,6 +129,7 @@ int main(int argc, char* argv[])
            WeightedLabelsAverageFilter->AddAtlas(image_reader->GetOutput(), seg_reader->GetOutput());
        }
    }
+   std::cout<<"Reading Inputs Done "<<std::endl;
 
    // Update 
    try{

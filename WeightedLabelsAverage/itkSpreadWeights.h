@@ -24,7 +24,10 @@ namespace itk
  
             inline OutputPixelType operator()(const InputPixelType & x) const
             { 
-               OutputPixelType result = (erf((x-0.95)*60)+1)/2;
+               OutputPixelType result = 0.5+(erf((x-0.95)*40)+1)/4;
+	       // 0.9 => -2 /-1
+	       // 1.0 => +2 / 1
+	       // half weight at 0.95 +/- 0.0125
                return result;
             }
       };

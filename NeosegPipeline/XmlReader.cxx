@@ -213,6 +213,7 @@ void XmlReader::readABCParameters(QXmlStreamReader* stream, QString errors){
     }
     m_parameters->setABCPriorsCoefficients(priors);
     m_parameters->setABCReassignLabels(vectorReassign);
+    m_parameters->setTissueSegmentationType(TISSUE_SEG_TYPE_ABC); 
 }
 
 void XmlReader::readGeneralParameters(QXmlStreamReader* stream, QString errors)
